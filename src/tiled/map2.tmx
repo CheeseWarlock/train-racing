@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="22" height="20" tilewidth="28" tileheight="28" backgroundcolor="#50a028">
+ <tileset firstgid="1" name="Tracks" tilewidth="28" tileheight="28">
+  <image source="../../../../../Documents/Aptana Studio 3 Workspace/Crafty/img/ul.png" width="168" height="392"/>
+ </tileset>
+ <layer name="Tracks" width="22" height="20">
+  <data encoding="base64" compression="zlib">
+   eJzlksEOgCAIhrGLXupSl+zQqd7/EctNl/sH6pitQ2xsCggfCNG7Ym4dMx065Z0Kd6zJqcRRyou+lvdJLNTslRd9Bz09bsT3vmfnmeR5SIwSC2fnbBKjZ2KNwFirVeP9Ojb05cGf9pbrN+zPEu2ukHeKsfl8HRNTurfE1P5V2j9kseA/FSwtwr1ZK2zavBo+FJyLlu/vcgEC+gbF
+  </data>
+ </layer>
+ <layer name="Stations" width="22" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFowA30Adig4F2BBpQoZF+LQrNpVT/KBi6YDDmk1HAwAAAurQBWw==
+  </data>
+ </layer>
+ <layer name="Trains" width="22" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgeQGygHTAKRgEFgGegHTAKRsEwBAC1EAAj
+  </data>
+ </layer>
+ <layer name="Props" width="22" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYEAAPwbswBePHD595AJfPHagy8lR2W5cAGa/NZKYDQ42DPjiEMcFYGphdjgCsROaebjcRW/gSEBeFo1Piju1gViHATWs8QFs4QICrkDshsQ3BGIjJL4iECth0UfIrd5A7INHXh2INfDID1ScUQOA4gQ5TaPHMykAV7xhA8ZAbMKAP0344WCjA2LKDCc0Prp5pLgdm1tw6ScmbSDrRc6H2MqokQ4AfzsOtQ==
+  </data>
+ </layer>
+</map>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="22" height="20" tilewidth="28" tileheight="28">
+ <tileset firstgid="1" name="ul" tilewidth="28" tileheight="28">
+  <image source="../../../../../Documents/Aptana Studio 3 Workspace/Crafty/img/ul.png" width="168" height="308"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="22" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFwwlwQjEtzKWHmZwMlPkBl15ONJocc/HZR033cjJQbi4+c2iVRkbBKBhsAACNuQD0
+  </data>
+ </layer>
+</map>
