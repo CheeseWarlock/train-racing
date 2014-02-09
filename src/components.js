@@ -28,7 +28,7 @@ Crafty.c('Actor', {
 Crafty.c('Train', {
 	init: function() {
 		this.requires('Actor, Keyboard');
-		this.speed = 1.75;
+		this.speed = Constants.FULL_SPEED;
 		this.playerOne = false;
 		this.angle = 0;
 		this.userCurve = false;
@@ -36,8 +36,6 @@ Crafty.c('Train', {
 		this.isCurving = false;
 		this.progress = 0;
 		this.followers = []; // following train cars
-		this.passengers = 0;
-		this.delivered = 0;
 	},
 	
 	checkCollision: function() {
@@ -143,6 +141,8 @@ Crafty.c('PlayerTrain', {
 	init: function() {
 		this.requires('Train');
 		this.lastDir = 'n';
+		this.passengers = 0;
+		this.delivered = 0;
 		this.lightLayer = Crafty.e('2D, Canvas, LightLayer').attr({z: 11});
 		this.bind('EnterFrame', function() {
 			var nextDirection = Util.getTargetDirection(this.currentTrack, this.lastDir);
@@ -160,48 +160,48 @@ Crafty.c('PlayerTrain', {
 	
 	_addSpriteComponent: function(dir) {
 		this.addComponent('spr_' + (this.playerOne?'r':'b') + 'train' + (this.curveTo && this.progress > 28 * Math.PI / 8 ? this.curveTo : this.lastDir));
-		// redraw workaround
-		this.attr({x: this.x + 1});
-		this.attr({x: this.x - 1});
 		this.lightLayer.addComponent('spr_' + (this.playerOne?'r':'b') + 'train' + (this.curveTo && this.progress > 28 * Math.PI / 8 ? this.curveTo : this.lastDir) + 'light');
 	},
 	
 	_removeSpriteComponent: function() {
 		var baseSpriteName = 'spr_' + (this.playerOne?'r':'b') + 'train';
-		this.removeComponent(baseSpriteName + 'n', false).removeComponent(baseSpriteName + 'e', false);
-		this.removeComponent(baseSpriteName + 'w', false).removeComponent(baseSpriteName + 's', false);
-		this.attr({x: this.x + 1});
-		this.attr({x: this.x - 1});
-		this.lightLayer.removeComponent(baseSpriteName + 'nlight', false).removeComponent(baseSpriteName + 'elight', false);
-		this.lightLayer.removeComponent(baseSpriteName + 'wlight', false).removeComponent(baseSpriteName + 'slight', false);
-		this.lightLayer.attr({x: this.lightLayer.x + 1});
-		this.lightLayer.attr({x: this.lightLayer.x - 1});
+		for (var i in Constants.DIR_PREFIXES) {
+			this.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i], false);
+			this.lightLayer.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i] + 'light', false);
+		}
+	},
+	
+	_setBraking: function(braking) {
+		if (braking) {
+			if (!this.arrow) {
+				this.arrow = Crafty.e('DirectionArrow').attr({x: this.x, y: this.y-30}).attr({target: this});
+			}
+		} else {
+			if (this.arrow) {
+				this.arrow.destroy();
+				this.arrow = null;
+			}
+		}
+		this.userCurve = braking;
+		var playerOne = this.playerOne;
+		Crafty("Train").each(function() {
+			if (this.playerOne == playerOne) {
+				this.speed = (braking? Constants.REDUCED_SPEED : Constants.FULL_SPEED);
+			}
+		});
 	},
 	
 	bindKeyboardTurn: function(keyCode) {
 		if (keyCode == null) {
 			this.bind("EnterFrame", function() {
 
-				if (this.speed == 0.875) {
+				if (this.speed == Constants.REDUCED_SPEED) {
 					if (Math.random() > 0.925) {
-						this.userCurve = false;
-						this.speed = 1.75;
-						this.followers[0].speed = 1.75;
-						this.followers[1].speed = 1.75;
-						if (this.arrow) {
-							this.arrow.destroy();
-							this.arrow = null;
-						}
+						this._setBraking(false);
 					}
 				} else {
 					if (Math.random() > 0.94) {
-						this.userCurve = true;
-						this.speed = 0.875;
-						this.followers[0].speed = 0.875;
-						this.followers[1].speed = 0.875;
-						if (!this.arrow) {
-							this.arrow = Crafty.e('DirectionArrow').attr({x: this.x, y: this.y-30}).attr({target: this});
-						}
+						this._setBraking(true);
 					}
 				}
 			});
@@ -209,13 +209,7 @@ Crafty.c('PlayerTrain', {
 			this.bind("KeyDown", function(e) {
 				return function(e) {
 					if (e.keyCode == keyCode) {
-						this.userCurve = true;
-						this.speed = 0.875;
-						this.followers[0].speed = 0.875;
-						this.followers[1].speed = 0.875;
-						if (!this.arrow) {
-							this.arrow = Crafty.e('DirectionArrow').attr({x: this.x, y: this.y-30}).attr({target: this});
-						}
+						this._setBraking(true);
 					}
 				};
 			}(keyCode));
@@ -224,14 +218,7 @@ Crafty.c('PlayerTrain', {
 		this.bind("KeyUp", function(e) {
 			return function(e) {
 				if (e.keyCode == keyCode) {
-					this.userCurve = false;
-					this.speed = 1.75;
-					this.followers[0].speed = 1.75;
-					this.followers[1].speed = 1.75;
-					if (this.arrow) {
-						this.arrow.destroy();
-						this.arrow = null;
-					}
+					this._setBraking(false);
 				}
 			};
 		}(keyCode));
@@ -249,8 +236,7 @@ Crafty.c('PlayerTrain', {
 		this._arriveAtStation();
 		this.canCurve = this.userCurve;
 		this.isCurving = (this._hasCurveOption() && this._hasStraightOption() ? this.userCurve : this._hasCurveOption());
-		if (this._hasCurveOption() && this._hasStraightOption()) {			
-			console.log('pushing ' + this.isCurving);
+		if (this._hasCurveOption() && this._hasStraightOption()) {
 			this.followers[0].curves.push(this.isCurving);
 			this.followers[1].curves.push(this.isCurving);
 		}
@@ -302,7 +288,7 @@ Crafty.c('FollowTrain', {
  */
 Crafty.c('TrackSection', {
 	init: function() {
-		this.requires('Actor, Mouse');
+		this.requires('Actor');
 	},
 	
 	isStraight: function(dir) {

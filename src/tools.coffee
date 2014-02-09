@@ -196,6 +196,7 @@ window.Util =
     
      
 window.Constants =
+  DIR_PREFIXES: ['n','e','w','s']
   MINUTE_DELAY: 99
   COLLISION_SIZE: 484
   TRAIN_SPEED: 1.75
@@ -213,6 +214,9 @@ window.Constants =
     'Some passengers were jostled, many more were late for work.',
     'Remember, you\'re supposed to AVOID each other.',
     'What kind of urban planner designed this place, anyway?!']]
+  MAX_PASSENGERS: 100
+  FULL_SPEED: 1.75
+  REDUCED_SPEED: 0.875
   
 window.GameState =
   running: false  

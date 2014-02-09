@@ -309,12 +309,16 @@
   };
 
   window.Constants = {
+    DIR_PREFIXES: ['n', 'e', 'w', 's'],
     MINUTE_DELAY: 99,
     COLLISION_SIZE: 484,
     TRAIN_SPEED: 1.75,
     TILE_HALF: 14,
     CURVE_QUARTER: 28 * Math.PI / 4,
-    ENDING_DIALOGS: [['Oh no!', 'The trains collided!', 'You caused an accident!', 'What a disaster!', 'That wasn\'t supposed to happen!'], ['If anyone asks, you weren\'t having a competition.', 'You know, this is really everyone\'s fault.', 'You know, this is really everyone\'s fault. Even the passengers.', 'Some passengers were jostled, many more were late for work.', 'Remember, you\'re supposed to AVOID each other.', 'What kind of urban planner designed this place, anyway?!']]
+    ENDING_DIALOGS: [['Oh no!', 'The trains collided!', 'You caused an accident!', 'What a disaster!', 'That wasn\'t supposed to happen!'], ['If anyone asks, you weren\'t having a competition.', 'You know, this is really everyone\'s fault.', 'You know, this is really everyone\'s fault. Even the passengers.', 'Some passengers were jostled, many more were late for work.', 'Remember, you\'re supposed to AVOID each other.', 'What kind of urban planner designed this place, anyway?!']],
+    MAX_PASSENGERS: 100,
+    FULL_SPEED: 1.75,
+    REDUCED_SPEED: 0.875
   };
 
   window.GameState = {
