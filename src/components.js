@@ -35,22 +35,22 @@ Crafty.c('Train', {
 		this.canCurve = true;
 		this.isCurving = false;
 		this.progress = 0;
-		this.followers = []; // following train cars
 	},
 	
 	checkCollision: function() {
 		// Not using Crafty's collision detection because bounding circles are what's needed
 		// Inefficient (compares every combination twice), but everything is fast for small n
 		var other = this;
-		var min = 10000;
+		var collisionFound = false;
 		
 		Crafty("Train").each(function() {
 			if (this.playerOne != other.playerOne) {
 				if (Math.sqrt(((other.x - this.x) * (other.x - this.x))) + Math.sqrt(((other.y - this.y) * (other.y - this.y))) < 22) {
-					Util.gameOver(true);
+					collisionFound = true;
 				}
 			}
 		});
+		return collisionFound;
 	},
 	
 	findTrack: function() {
@@ -143,6 +143,7 @@ Crafty.c('PlayerTrain', {
 		this.lastDir = 'n';
 		this.passengers = 0;
 		this.delivered = 0;
+		this.followers = []; // following train cars
 		this.lightLayer = Crafty.e('2D, Canvas, LightLayer').attr({z: 11});
 		this.bind('EnterFrame', function() {
 			var nextDirection = Util.getTargetDirection(this.currentTrack, this.lastDir);
@@ -227,7 +228,45 @@ Crafty.c('PlayerTrain', {
 	
 	_arriveAtStation: function() {
 		if (this.currentTrack.station) {
-			this.currentTrack.station.exchangePassengers(this);
+			var station = this.currentTrack.station;
+			this._dropoff(station);
+			this._pickup(station);
+		}
+	},
+	
+	_dropoff: function(station) {
+		var deliveries = (this.playerOne? station.dropoffP1 : station.dropoffP2);
+		this.passengers -= deliveries;
+		this.delivered += deliveries;
+		this.playerOne? station.dropoffP1 = 0 : station.dropoffP2 = 0;
+	},
+	
+	_pickup: function(station) {
+		var room = 100 - this.passengers;
+		var overflow = station.population - room; // number that will be left waiting
+		
+		var pickup = (overflow > 0? 100 - this.passengers: station.population);
+		this.passengers += pickup;
+		
+		this._assignDestinations(pickup, station, this.playerOne);
+		
+		station.population = (overflow > 0? overflow: 0);
+		Crafty("Station").each(function() {
+			this.updateSprites();
+		});
+		Crafty("PlayerScore").each(function() {
+			this.update();
+		});
+	},
+	
+	_assignDestinations: function(passengers, boardedAtStation, onPlayerOne) {
+		var targetCount = Crafty("Station").length;
+		while (passengers > 0) {
+			var target = Crafty(Crafty("Station")[Math.floor(Math.random() * targetCount)]);
+			if (target != boardedAtStation) {
+				onPlayerOne? target.dropoffP1++: target.dropoffP2++;
+				passengers--;
+			}
 		}
 	},
 	
@@ -268,13 +307,8 @@ Crafty.c('FollowTrain', {
 		this.attr({x: this.x - 1});
 	},
 	
-	_arriveAtStation: function() {
-
-	},
-	
 	_updateCurrentTrack: function(dir) {
 		this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
-		this._arriveAtStation();
 		this.canCurve = this.userCurve;
 		if (this._hasCurveOption() && this._hasStraightOption()) {
 			this.userCurve = (this.curves.shift() || false);
@@ -314,13 +348,22 @@ Crafty.c('Station', {
 		this.dropoffP1 = 0;
 		this.dropoffP2 = 0;
 		this.popular = false;
-		this.popularCooldown = 500;
-		this.requires('Actor, Mouse');
+		this.requires('Actor');
 		this.bind('EnterFrame', function() {
 			if (GameState.running) {
 				this.populate();
 			}
 		});	
+	},
+	
+	setPopular: function(popular) {
+		var letter = this.letter;
+		this.popular = !this.popular;
+		var popular = this.popular;
+		Crafty('spr_' + (this.popular?'':'p') + 'stop' + this.letter).each(function() {
+			this.removeComponent('spr_' + (popular?'':'p') + 'stop' + letter, false);
+			this.addComponent('spr_' + (popular?'p':'') + 'stop' + letter);
+		});
 	},
 	
 	setup: function(x, y, dir) {
@@ -356,62 +399,11 @@ Crafty.c('Station', {
 			this.population += 1;
 			this.updateSprites();
 		}
-		if (this.popularCooldown > 0) this.popularCooldown--;
-		if (Math.random() > (this.popular?0.96:0.9991) && this.popularCooldown == 0 && false) {
-			var letter = this.letter;
-			this.popular = !this.popular;
-			var popular = this.popular;
-			this.popularCooldown = (this.popular?700:1400);
-			Crafty('spr_' + (this.popular?'':'p') + 'stop' + this.letter).each(function() {
-				this.removeComponent('spr_' + (popular?'':'p') + 'stop' + letter, false);
-				this.addComponent('spr_' + (popular?'p':'') + 'stop' + letter);
-			});
-		}
 	},
 	
 	attachToTrack: function(x, y) {
 		Util.trackAt(x, y).associateStation(this);
 		return this;
-	},
-	
-	// There be magic numbers ahead
-	exchangePassengers: function(train) {
-		train.passengers -= (train.playerOne? this.dropoffP1 : this.dropoffP2);
-		train.delivered += (train.playerOne? this.dropoffP1 : this.dropoffP2);
-		train.playerOne? this.dropoffP1 = 0 : this.dropoffP2 = 0;
-		
-		var room = 100 - train.passengers;
-		var overflow = this.population - room; // number that will be left waiting
-		
-		var pickup = (overflow > 0? 100 - train.passengers: this.population);
-		train.passengers += pickup;
-		var currentStation = this;
-		var targetCount = Crafty("Station").length;
-		var playerOne = train.playerOne;
-		
-		while (pickup > 0) {
-			var target = Crafty(Crafty("Station")[Math.floor(Math.random() * targetCount)]);
-			if (target != currentStation) {
-				playerOne? target.dropoffP1++: target.dropoffP2++;
-				pickup--;
-			}
-		}
-		this.population = (overflow > 0? overflow: 0);
-		Crafty("Station").each(function() {
-			this.updateSprites();
-		});
-		Crafty("PlayerScore").each(function() {
-			if (this.train) {
-				var x = [];
-				var p = this.playerOne;
-				Crafty("Station").each(function() {
-					var t = (p?this.dropoffP1: this.dropoffP2);
-					if (t > 1) x.push([t,this.letter,this.popular]);
-				});
-				x.sort(function(a,b){return b[0]-a[0];});
-				this.bar.update(this.train.passengers, x);
-			}
-		});
 	},
 	
 	updateSprites: function() {
@@ -499,12 +491,25 @@ Crafty.c('PlayerScore', {
 	setup: function() {
 		this.bar = Crafty.e('BarController').attr({x: this.x + 10, y: this.y}).attr({playerOne: this.playerOne}).setup().update();
 		this.attr({z: 0});
+	},
+	
+	update: function() {
+		if (this.train) {
+			var x = [];
+			var p = this.playerOne;
+			Crafty("Station").each(function() {
+				var t = (p?this.dropoffP1: this.dropoffP2);
+				if (t > 1) x.push([t,this.letter,this.popular]);
+			});
+			x.sort(function(a,b){return b[0]-a[0];});
+			this.bar.update(this.train.passengers, x);
+		}
 	}
 });
 
 Crafty.c('DirectionArrow', {
 	init: function() {
-		this.requires('Actor, spr_arrowsign, Mouse')
+		this.requires('Actor, spr_arrowsign')
 		    .attr({z: 1000})
 		    .bind('EnterFrame', function() {
 			if (GameState.running) {
@@ -564,7 +569,9 @@ Crafty.c('TrainController', {
 					this._moveAlongTrack(this.speed);
 				});
 				Crafty('Train').each(function() {
-					this.checkCollision();
+					if (this.checkCollision()) {
+						Util.gameOver(true);
+					}
 				});
 			}
 		});
