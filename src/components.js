@@ -526,11 +526,14 @@ Crafty.c('Dialog', {
 		    .css({backgroundColor: '#2B281D', textAlign: 'center', border: '4px solid #FFFDE8'})
 		    .textFont({size: '30px', family: 'Aller'})
 		    .textColor('#FFFDE8');
+		this.attr({x: 0, y: 112, w: 268, h: 130});
 	}
 });
 
 Crafty.c('ClockController', {
 	init: function() {
+		this.pauseAvailable = true;
+		this.paused = false;
 		this.requires('Dialog').attr({x: 234, y: 500, w: 140, h: 40}).textColor('#84FFEC').css({border: '4px solid #606060'});
 		GameClock.newDay();
 		this.text(GameClock.hour + (GameClock.minute > 9? ":":":0")+ GameClock.minute);
@@ -555,6 +558,22 @@ Crafty.c('ClockController', {
 		setTimeout(function() {
 			GameState.running = true;
 		}, 1000);
+		
+		this.bind("KeyDown", function(e) {
+			if (e.keyCode == Crafty.keys.SPACE) {
+				if (this.pauseAvailable) {
+					Crafty.e('PauseText');
+					this.pauseAvailable = false;
+					GameState.running = false;
+					this.paused = true;
+				} else if (this.paused) {
+					Crafty('PauseText').teardown();
+					Crafty('PauseText').destroy();
+					GameState.running = true;
+					this.paused = false;
+				}
+			}
+		});
 	}
 });
 
@@ -597,6 +616,30 @@ Crafty.c('EndingText', {
 			}
 		});
 		Crafty.e('2D, DOM, spr_space').attr({x:this.x + 260, y:this.y + 152});
+	}
+});
+
+Crafty.c('PauseText', {
+	init: function() {
+		this.requires('Dialog');
+		this.text('<br/><br/>Only once a shift!');
+		this.css({
+			padding: 20, 
+			margin: '0px 150px', 
+			width: 600,
+			height: 200,
+			boxShadow: '-8px 8px 0px rgba(0,0,0,0.4)'
+		});
+		this.coffee = Crafty.e('2D, DOM, spr_coffee').attr({
+			x:this.x + 240,
+			y:this.y + 20
+		});
+		this.space = Crafty.e('2D, DOM, spr_space').attr({x:this.x + 260, y:this.y + 152});
+	},
+	
+	teardown: function() {
+		this.coffee.destroy();
+		this.space.destroy();
 	}
 });
 

@@ -148,6 +148,9 @@
         spr_selectline: [0, 1],
         spr_selectstn2: [1, 1]
       });
+      Crafty.sprite(134, 68, 'img/coffee.png', {
+        spr_coffee: [0, 0]
+      });
       Crafty.sprite(28, 28, 'img/ullight.png', {
         spr_rtrainlight: [2, 0],
         spr_rtrainsidelight: [3, 0],
