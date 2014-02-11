@@ -14,11 +14,6 @@ window.Util =
       when 's' then Math.PI / 2
       when 'w' then Math.PI
       else Math.PI * 3/2
-      
-  isStraight:
-    (track) ->
-      if (track.dir.length == 2) then ('e' in track.dir && 'w' in track.dir) || ('n' in track.dir && 's' in track.dir)
-      else false
   
   trackAt:
     (x, y) ->

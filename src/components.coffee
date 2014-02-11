@@ -39,7 +39,6 @@ Crafty.c "Train",
     return
 
   checkCollision: ->
-    
     # Not using Crafty's collision detection because bounding circles are what's needed
     # Inefficient (compares every combination twice), but everything is fast for small n
     other = this
@@ -47,11 +46,9 @@ Crafty.c "Train",
     Crafty("Train").each ->
       collisionFound = true  if Math.sqrt(((other.x - @x) * (other.x - @x))) + Math.sqrt(((other.y - @y) * (other.y - @y))) < 22  unless @playerOne is other.playerOne
       return
-
     collisionFound
 
   findTrack: ->
-    currentTrack = undefined
     currentTrack = Util.trackAt(@at().x, @at().y)
     @currentTrack = currentTrack
     @angle = Util.endAngle(currentTrack.dir[1])
@@ -107,7 +104,6 @@ Crafty.c "Train",
     return
 
   _moveCurved: ->
-    
     # Curved
     @curveTo = Util.getTargetDirection(@currentTrack, @lastDir)
     angularDiff = 1 / 28 * @remainingDist * ((if ([
@@ -141,7 +137,6 @@ PlayerTrain: a train controlled by a player.
 Crafty.c "PlayerTrain",
   init: ->
     @requires "Train"
-    @lastDir = "n"
     @passengers = 0
     @delivered = 0
     @followers = [] # following train cars
@@ -157,7 +152,6 @@ Crafty.c "PlayerTrain",
         @followers[0].attr "z", 2
         @followers[1].attr "z", 3
       return
-
     return
 
   _addSpriteComponent: (dir) ->
@@ -188,19 +182,10 @@ Crafty.c "PlayerTrain",
     Crafty("Train").each ->
       @speed = ((if braking then Constants.REDUCED_SPEED else Constants.FULL_SPEED))  if @playerOne is playerOne
       return
-
     return
 
   bindKeyboardTurn: (keyCode) ->
-    unless keyCode?
-      @bind "EnterFrame", ->
-        if @speed is Constants.REDUCED_SPEED
-          @_setBraking false  if Math.random() > 0.925
-        else
-          @_setBraking true  if Math.random() > 0.94
-        return
-
-    else
+    if keyCode?
       @bind "KeyDown", do (e=keyCode) ->
         (e) ->
           @_setBraking true  if e.keyCode is keyCode
@@ -208,12 +193,21 @@ Crafty.c "PlayerTrain",
         (e) ->
           @_setBraking false  if e.keyCode is keyCode
       this
+    else
+      @bind "EnterFrame", ->
+        if @speed is Constants.REDUCED_SPEED
+          @_setBraking false  if Math.random() > 0.925
+        else
+          @_setBraking true  if Math.random() > 0.94
+        return
 
   _arriveAtStation: ->
     if @currentTrack.station
       station = @currentTrack.station
       @_dropoff station
-      @_pickup station
+      passengersGained = @_pickup station
+      @_assignDestinations passengersGained, station, @playerOne
+      @_updateStationSprites
     return
 
   _dropoff: (station) ->
@@ -227,18 +221,9 @@ Crafty.c "PlayerTrain",
     room = 100 - @passengers
     overflow = station.population - room # number that will be left waiting
     pickup = ((if overflow > 0 then 100 - @passengers else station.population))
-    @passengers += pickup
-    @_assignDestinations pickup, station, @playerOne
     station.population = ((if overflow > 0 then overflow else 0))
-    Crafty("Station").each ->
-      @updateSprites()
-      return
-
-    Crafty("PlayerScore").each ->
-      @update()
-      return
-
-    return
+    @passengers += pickup
+    return pickup
 
   _assignDestinations: (passengers, boardedAtStation, onPlayerOne) ->
     targetCount = Crafty("Station").length
@@ -248,7 +233,13 @@ Crafty.c "PlayerTrain",
         (if onPlayerOne then target.dropoffP1++ else target.dropoffP2++)
         passengers--
     return
-
+    
+  _updateStationSprites: () ->
+    Crafty("Station").each ->
+      @updateSprites()
+    Crafty("PlayerScore").each ->
+      @update()
+    
   _updateCurrentTrack: (dir) ->
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
     @_arriveAtStation()
@@ -269,18 +260,15 @@ Crafty.c "FollowTrain",
 
   _addSpriteComponent: ->
     dir = ((if @curveTo and @progress > 28 * Math.PI / 8 then @curveTo else @lastDir))
-    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
-    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else "")) + "light"
-    @attr x: @x + 1
-    @attr x: @x - 1
+    spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
+    @addComponent spriteName
+    @lightLayer.addComponent spriteName + "light"
     return
 
   _removeSpriteComponent: ->
     baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
     @removeComponent(baseSpriteName, false).removeComponent baseSpriteName + "side", false
     @lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent baseSpriteName + "sidelight", false
-    @attr x: @x + 1
-    @attr x: @x - 1
     return
 
   _updateCurrentTrack: (dir) ->
@@ -298,10 +286,7 @@ Crafty.c "TrackSection",
   init: ->
     @requires "Actor"
     return
-
-  isStraight: (dir) ->
-    @dir.indexOf("s") > -1 and @dir.indexOf("n") > -1 and (dir is "n" or dir is "s") or @dir.indexOf("e") > -1 and @dir.indexOf("w") > -1 and (dir is "e" or dir is "w")
-
+    
   associateStation: (station) ->
     @station = station
     return
@@ -320,7 +305,6 @@ Crafty.c "Station",
     @bind "EnterFrame", ->
       @populate()  if GameState.running
       return
-
     return
 
   setPopular: (popular) ->
@@ -331,7 +315,6 @@ Crafty.c "Station",
       @removeComponent "spr_" + ((if popular then "" else "p")) + "stop" + letter, false
       @addComponent "spr_" + ((if popular then "p" else "")) + "stop" + letter
       return
-
     return
 
   setup: (x, y, dir) ->
@@ -706,21 +689,17 @@ Crafty.c "BarController",
       x: @x
       y: @y
       z: 15
-
     @l.attr
       x: @x
       y: @y
       z: 15
-
     @b.attr
       x: @x + 4
       w: ((if fullness > 4 then fullness * 2 - 8 else 0))
       z: 15
-
     @r.attr
       x: ((if fullness > 2 and ticks.length then @x - 4 + fullness * 2 else @x + 4))
       z: 15
-
     for i of @ticks
       @ticks[i].destroy()
     @ticks = []
