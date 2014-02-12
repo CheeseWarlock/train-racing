@@ -166,11 +166,11 @@ Crafty.scene('SelectMap', () ->
   curry = 140
   for idx of window.MapList
     Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-    Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry + 18,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1])
+    Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1])
     Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
     curry+=48
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry + 18,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load From External...")
+  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load From External...")
   Crafty.e('2D, Canvas, spr_selectarrow').attr({x: 200, y: 140})
   
   Crafty.e('2D, Canvas, Color').color('#2B281D')

@@ -231,7 +231,7 @@
         this._dropoff(station);
         passengersGained = this._pickup(station);
         this._assignDestinations(passengersGained, station, this.playerOne);
-        this._updateStationSprites;
+        this._updateStationSprites();
       }
     },
     _dropoff: function(station) {
@@ -1126,7 +1126,7 @@
       });
       Crafty.e('2D, Canvas, Text, aaa').attr({
         x: 280,
-        y: curry + 18,
+        y: curry,
         w: 200
       }).textFont({
         size: '17px',
@@ -1144,7 +1144,7 @@
     });
     Crafty.e('2D, Canvas, Text, aaa').attr({
       x: 280,
-      y: curry + 18,
+      y: curry,
       w: 200
     }).textFont({
       size: '17px',

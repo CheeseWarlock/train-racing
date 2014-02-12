@@ -207,7 +207,7 @@ Crafty.c "PlayerTrain",
       @_dropoff station
       passengersGained = @_pickup station
       @_assignDestinations passengersGained, station, @playerOne
-      @_updateStationSprites
+      @_updateStationSprites()
     return
 
   _dropoff: (station) ->
