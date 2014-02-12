@@ -576,11 +576,16 @@
       this.paused = false;
       this.requires("Dialog").attr({
         x: 234,
-        y: 500,
+        y: 492,
         w: 140,
-        h: 40
-      }).textColor("#84FFEC").css({
-        border: "4px solid #606060"
+        h: 44
+      }).textColor("#84FFEC").textFont({
+        size: "43px",
+        family: "Minisystem"
+      }).css({
+        letterSpacing: "-2px",
+        border: "4px solid #606060",
+        textShadow: "0px 0px 2px #84FFEC"
       });
       GameClock.newDay();
       this.text(GameClock.hour + (GameClock.minute > 9 ? ":" : ":0") + GameClock.minute);

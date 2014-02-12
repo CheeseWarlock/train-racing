@@ -7,6 +7,14 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: Minisystem;
+    src: url('assets/minisystem.otf');
+    font-weight:400;
+    font-weight: bold;
+    font-style: normal;
+}
+
 body {
 	font-family: Aller, sans-serif;
 	margin: 0px;
