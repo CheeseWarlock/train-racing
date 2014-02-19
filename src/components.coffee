@@ -39,9 +39,9 @@ Crafty.c "Train",
     @playerOne = false
     @angle = 0
     @curveCommandEnabled = false
-    @isCurving = false
     @progress = 0
     @targetDirection
+    @sourceDirection
     return
 
   checkCollision: ->
@@ -59,15 +59,16 @@ Crafty.c "Train",
     @currentTrack = currentTrack
     @angle = Util.endAngle(currentTrack.dir[1])
     this
+    
+  isCurving: ->
+    @sourceDirection != @targetDirection
 
   _finishSection: (dir) ->
     @angle = Util.endAngle(dir)
     @x = @currentTrack.x + Util.dirx(dir) * 14
     @y = @currentTrack.y + Util.diry(dir) * 14
-    if (@isCurving)
-      @sourceDirection = @targetDirection
+    @sourceDirection = @targetDirection
     @_updateCurrentTrack dir
-    @targetDirection = Util.getTargetDirection(@currentTrack, @sourceDirection)
     return
 
   _hasStraightOption: ->
@@ -82,7 +83,7 @@ Crafty.c "Train",
     @_removeSpriteComponent()
     @_addSpriteComponent()
     while @remainingDist > 0 and remainingTries-- > 0
-      if @isCurving
+      if @isCurving()
         @_moveCurved()
       else
         @_moveStraight()
@@ -94,8 +95,6 @@ Crafty.c "Train",
     return
 
   _moveStraight: ->
-    @isCurving = false
-    
     # Straight
     @progress = Util.dirx(@sourceDirection) * (@x - @currentTrack.x) + Util.diry(@sourceDirection) * (@y - @currentTrack.y)
     if @progress < Constants.TILE_HALF - @remainingDist
@@ -162,8 +161,8 @@ Crafty.c "PlayerTrain",
     return
 
   _addSpriteComponent: (dir) ->
-    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
-    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection)) + "light"
+    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
+    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection)) + "light"
     return
 
   _removeSpriteComponent: ->
@@ -252,10 +251,10 @@ Crafty.c "PlayerTrain",
     @_arriveAtStation()
     straight = @_hasStraightOption()
     curve = @_hasCurveOption()
-    @isCurving = ((if straight and curve then @curveCommandEnabled else curve))
+    @targetDirection = ((if (straight and curve and @curveCommandEnabled) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
-      @followers[0].curves.push @isCurving
-      @followers[1].curves.push @isCurving
+      @followers[0].curves.push @isCurving()
+      @followers[1].curves.push @isCurving()
     return
 
 Crafty.c "FollowTrain",
@@ -266,7 +265,7 @@ Crafty.c "FollowTrain",
     return
 
   _addSpriteComponent: ->
-    dir = ((if @isCurving and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
+    dir = ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
     spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
     @addComponent spriteName
     @lightLayer.addComponent spriteName + "light"
@@ -280,7 +279,9 @@ Crafty.c "FollowTrain",
 
   _updateCurrentTrack: (dir) ->
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
-    @isCurving = ((if @_hasCurveOption() and @_hasStraightOption() then (@curves.shift() or false) else @_hasCurveOption()))
+    curve = @_hasCurveOption()
+    straight = @_hasStraightOption()
+    @targetDirection = ((if (curve and straight and (@curves.shift() or false)) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection)  else @sourceDirection))
     return
 
 

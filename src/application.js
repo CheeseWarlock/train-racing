@@ -51,9 +51,9 @@ Grid: for entities that might want to snap to a grid.
       this.playerOne = false;
       this.angle = 0;
       this.curveCommandEnabled = false;
-      this.isCurving = false;
       this.progress = 0;
       this.targetDirection;
+      this.sourceDirection;
     },
     checkCollision: function() {
       var collisionFound, other;
@@ -73,15 +73,15 @@ Grid: for entities that might want to snap to a grid.
       this.angle = Util.endAngle(currentTrack.dir[1]);
       return this;
     },
+    isCurving: function() {
+      return this.sourceDirection !== this.targetDirection;
+    },
     _finishSection: function(dir) {
       this.angle = Util.endAngle(dir);
       this.x = this.currentTrack.x + Util.dirx(dir) * 14;
       this.y = this.currentTrack.y + Util.diry(dir) * 14;
-      if (this.isCurving) {
-        this.sourceDirection = this.targetDirection;
-      }
+      this.sourceDirection = this.targetDirection;
       this._updateCurrentTrack(dir);
-      this.targetDirection = Util.getTargetDirection(this.currentTrack, this.sourceDirection);
     },
     _hasStraightOption: function() {
       return this.currentTrack.dir.indexOf(this.sourceDirection) > -1;
@@ -96,7 +96,7 @@ Grid: for entities that might want to snap to a grid.
       this._removeSpriteComponent();
       this._addSpriteComponent();
       while (this.remainingDist > 0 && remainingTries-- > 0) {
-        if (this.isCurving) {
+        if (this.isCurving()) {
           this._moveCurved();
         } else {
           this._moveStraight();
@@ -110,7 +110,6 @@ Grid: for entities that might want to snap to a grid.
       }
     },
     _moveStraight: function() {
-      this.isCurving = false;
       this.progress = Util.dirx(this.sourceDirection) * (this.x - this.currentTrack.x) + Util.diry(this.sourceDirection) * (this.y - this.currentTrack.y);
       if (this.progress < Constants.TILE_HALF - this.remainingDist) {
         this.move(this.sourceDirection, this.remainingDist);
@@ -167,8 +166,8 @@ Grid: for entities that might want to snap to a grid.
       }
     },
     _addSpriteComponent: function(dir) {
-      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection));
-      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection) + "light");
+      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection));
+      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection) + "light");
     },
     _removeSpriteComponent: function() {
       var baseSpriteName, i;
@@ -293,10 +292,10 @@ Grid: for entities that might want to snap to a grid.
       this._arriveAtStation();
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
-      this.isCurving = (straight && curve ? this.curveCommandEnabled : curve);
+      this.targetDirection = ((straight && curve && this.curveCommandEnabled) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
-        this.followers[0].curves.push(this.isCurving);
-        this.followers[1].curves.push(this.isCurving);
+        this.followers[0].curves.push(this.isCurving());
+        this.followers[1].curves.push(this.isCurving());
       }
     }
   });
@@ -311,7 +310,7 @@ Grid: for entities that might want to snap to a grid.
     },
     _addSpriteComponent: function() {
       var dir, spriteName;
-      dir = (this.isCurving && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection);
+      dir = (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection);
       spriteName = "spr_" + (this.playerOne ? "r" : "b") + "train" + (dir === "n" || dir === "s" ? "side" : "");
       this.addComponent(spriteName);
       this.lightLayer.addComponent(spriteName + "light");
@@ -323,8 +322,11 @@ Grid: for entities that might want to snap to a grid.
       this.lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent(baseSpriteName + "sidelight", false);
     },
     _updateCurrentTrack: function(dir) {
+      var curve, straight;
       this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
-      this.isCurving = (this._hasCurveOption() && this._hasStraightOption() ? this.curves.shift() || false : this._hasCurveOption());
+      curve = this._hasCurveOption();
+      straight = this._hasStraightOption();
+      this.targetDirection = ((curve && straight && (this.curves.shift() || false)) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
     }
   });
 
