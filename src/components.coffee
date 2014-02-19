@@ -38,9 +38,10 @@ Crafty.c "Train",
     @speed = Constants.FULL_SPEED
     @playerOne = false
     @angle = 0
-    @userCurve = false
+    @curveCommandEnabled = false
     @isCurving = false
     @progress = 0
+    @targetDirection
     return
 
   checkCollision: ->
@@ -63,15 +64,17 @@ Crafty.c "Train",
     @angle = Util.endAngle(dir)
     @x = @currentTrack.x + Util.dirx(dir) * 14
     @y = @currentTrack.y + Util.diry(dir) * 14
-    @lastDir = @nextDir
+    if (@isCurving)
+      @sourceDirection = @targetDirection
     @_updateCurrentTrack dir
+    @targetDirection = Util.getTargetDirection(@currentTrack, @sourceDirection)
     return
 
   _hasStraightOption: ->
-    @currentTrack.dir.indexOf(@lastDir) > -1
+    @currentTrack.dir.indexOf(@sourceDirection) > -1
 
   _hasCurveOption: ->
-    @currentTrack.dir.length is 3 and (@currentTrack.dir.indexOf(Util.opposite(@lastDir)) > 0) or @currentTrack.dir.length is 2 and @currentTrack.dir.indexOf(@lastDir) is -1
+    @currentTrack.dir.length is 3 and (@currentTrack.dir.indexOf(Util.opposite(@sourceDirection)) > 0) or @currentTrack.dir.length is 2 and @currentTrack.dir.indexOf(@sourceDirection) is -1
 
   _moveAlongTrack: (dist) ->
     @remainingDist = dist
@@ -91,32 +94,31 @@ Crafty.c "Train",
     return
 
   _moveStraight: ->
-    @curveTo = null
+    @isCurving = false
     
     # Straight
-    @progress = Util.dirx(@lastDir) * (@x - @currentTrack.x) + Util.diry(@lastDir) * (@y - @currentTrack.y)
+    @progress = Util.dirx(@sourceDirection) * (@x - @currentTrack.x) + Util.diry(@sourceDirection) * (@y - @currentTrack.y)
     if @progress < Constants.TILE_HALF - @remainingDist
       
       # Move full distance
-      @move @lastDir, @remainingDist
+      @move @sourceDirection, @remainingDist
       @remainingDist = 0
     else
       
       # Snap and recalc
-      @_finishSection @lastDir
+      @_finishSection @sourceDirection
       @remainingDist -= (Constants.TILE_HALF - @progress)
       @progress = 0
     return
 
   _moveCurved: ->
     # Curved
-    @curveTo = Util.getTargetDirection(@currentTrack, @lastDir)
     angularDiff = 1 / 28 * @remainingDist * ((if ([
       "en"
       "nw"
       "ws"
       "se"
-    ].indexOf(@lastDir + @curveTo) > -1) then -1 else 1))
+    ].indexOf(@sourceDirection + @targetDirection) > -1) then -1 else 1))
     if @progress < Constants.CURVE_QUARTER - @remainingDist
       
       # Move full distance
@@ -129,10 +131,9 @@ Crafty.c "Train",
     else
       
       # Snap and recalc
-      @_finishSection @curveTo
+      @_finishSection @targetDirection
       @remainingDist -= (Constants.CURVE_QUARTER - @progress)
       @progress = 0
-    @nextDir = @curveTo
     return
 
 
@@ -149,22 +150,20 @@ Crafty.c "PlayerTrain",
     @_beginMovement
     return
     
-  _beginMovement: () ->
-    @bind "EnterFrame", ->
-      nextDirection = Util.getTargetDirection(@currentTrack, @lastDir)
-      if nextDirection is "s"
-        @attr "z", 3
-        @followers[0].attr "z", 2
-        @followers[1].attr "z", 1
-      else if nextDirection is "n"
-        @attr "z", 1
-        @followers[0].attr "z", 2
-        @followers[1].attr "z", 3
-      return
+  _setOverlap: () ->
+    if @targetDirection is "s"
+      @attr "z", 3
+      @followers[0].attr "z", 2
+      @followers[1].attr "z", 1
+    else if @targetDirection is "n"
+      @attr "z", 1
+      @followers[0].attr "z", 2
+      @followers[1].attr "z", 3
+    return
 
   _addSpriteComponent: (dir) ->
-    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @curveTo and @progress > 28 * Math.PI / 8 then @curveTo else @lastDir))
-    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @curveTo and @progress > 28 * Math.PI / 8 then @curveTo else @lastDir)) + "light"
+    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
+    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection)) + "light"
     return
 
   _removeSpriteComponent: ->
@@ -185,7 +184,7 @@ Crafty.c "PlayerTrain",
       if @arrow
         @arrow.destroy()
         @arrow = null
-    @userCurve = braking
+    @curveCommandEnabled = braking
     playerOne = @playerOne
     Crafty("Train").each ->
       @speed = ((if braking then Constants.REDUCED_SPEED else Constants.FULL_SPEED))  if @playerOne is playerOne
@@ -253,7 +252,7 @@ Crafty.c "PlayerTrain",
     @_arriveAtStation()
     straight = @_hasStraightOption()
     curve = @_hasCurveOption()
-    @isCurving = ((if straight and curve then @userCurve else curve))
+    @isCurving = ((if straight and curve then @curveCommandEnabled else curve))
     if straight and curve
       @followers[0].curves.push @isCurving
       @followers[1].curves.push @isCurving
@@ -267,7 +266,7 @@ Crafty.c "FollowTrain",
     return
 
   _addSpriteComponent: ->
-    dir = ((if @curveTo and @progress > 28 * Math.PI / 8 then @curveTo else @lastDir))
+    dir = ((if @isCurving and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
     spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
     @addComponent spriteName
     @lightLayer.addComponent spriteName + "light"

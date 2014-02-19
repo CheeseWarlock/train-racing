@@ -89,16 +89,16 @@ window.Util =
   createTrain: (x, y, playerOne, dir) ->
     letter = (if playerOne then 'r' else 'b')
     
-    train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('lastDir', dir)
-    .attr('nextDir', dir).addComponent('spr_' + letter + 'train' + dir)
+    train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
+    .attr('targetDirection', dir).addComponent('spr_' + letter + 'train' + dir)
     .findTrack().bindKeyboardTurn((if playerOne then Crafty.keys.Q else (if window.singlePlayerMode then null else Crafty.keys.P)))
     
-    follow = Crafty.e('FollowTrain').at(x-Util.dirx(dir), y-Util.diry(dir)).attr('playerOne', playerOne).attr('lastDir', dir)
-    .attr('nextDir', dir)
+    follow = Crafty.e('FollowTrain').at(x-Util.dirx(dir), y-Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir)
+    .attr('targetDirection', dir)
     .findTrack().attr('front', train)
     
-    end = Crafty.e('FollowTrain').at(x-2*Util.dirx(dir), y-2*Util.diry(dir)).attr('playerOne', playerOne).attr('lastDir', dir)
-    .attr('nextDir', dir).attr('finale', true)
+    end = Crafty.e('FollowTrain').at(x-2*Util.dirx(dir), y-2*Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir)
+    .attr('targetDirection', dir).attr('finale', true)
     .findTrack().attr('front', follow)
     
     train.followers = [follow, end]

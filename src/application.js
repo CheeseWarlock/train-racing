@@ -50,9 +50,10 @@ Grid: for entities that might want to snap to a grid.
       this.speed = Constants.FULL_SPEED;
       this.playerOne = false;
       this.angle = 0;
-      this.userCurve = false;
+      this.curveCommandEnabled = false;
       this.isCurving = false;
       this.progress = 0;
+      this.targetDirection;
     },
     checkCollision: function() {
       var collisionFound, other;
@@ -76,14 +77,17 @@ Grid: for entities that might want to snap to a grid.
       this.angle = Util.endAngle(dir);
       this.x = this.currentTrack.x + Util.dirx(dir) * 14;
       this.y = this.currentTrack.y + Util.diry(dir) * 14;
-      this.lastDir = this.nextDir;
+      if (this.isCurving) {
+        this.sourceDirection = this.targetDirection;
+      }
       this._updateCurrentTrack(dir);
+      this.targetDirection = Util.getTargetDirection(this.currentTrack, this.sourceDirection);
     },
     _hasStraightOption: function() {
-      return this.currentTrack.dir.indexOf(this.lastDir) > -1;
+      return this.currentTrack.dir.indexOf(this.sourceDirection) > -1;
     },
     _hasCurveOption: function() {
-      return this.currentTrack.dir.length === 3 && (this.currentTrack.dir.indexOf(Util.opposite(this.lastDir)) > 0) || this.currentTrack.dir.length === 2 && this.currentTrack.dir.indexOf(this.lastDir) === -1;
+      return this.currentTrack.dir.length === 3 && (this.currentTrack.dir.indexOf(Util.opposite(this.sourceDirection)) > 0) || this.currentTrack.dir.length === 2 && this.currentTrack.dir.indexOf(this.sourceDirection) === -1;
     },
     _moveAlongTrack: function(dist) {
       var remainingTries;
@@ -106,21 +110,20 @@ Grid: for entities that might want to snap to a grid.
       }
     },
     _moveStraight: function() {
-      this.curveTo = null;
-      this.progress = Util.dirx(this.lastDir) * (this.x - this.currentTrack.x) + Util.diry(this.lastDir) * (this.y - this.currentTrack.y);
+      this.isCurving = false;
+      this.progress = Util.dirx(this.sourceDirection) * (this.x - this.currentTrack.x) + Util.diry(this.sourceDirection) * (this.y - this.currentTrack.y);
       if (this.progress < Constants.TILE_HALF - this.remainingDist) {
-        this.move(this.lastDir, this.remainingDist);
+        this.move(this.sourceDirection, this.remainingDist);
         this.remainingDist = 0;
       } else {
-        this._finishSection(this.lastDir);
+        this._finishSection(this.sourceDirection);
         this.remainingDist -= Constants.TILE_HALF - this.progress;
         this.progress = 0;
       }
     },
     _moveCurved: function() {
       var angularDiff;
-      this.curveTo = Util.getTargetDirection(this.currentTrack, this.lastDir);
-      angularDiff = 1 / 28 * this.remainingDist * (["en", "nw", "ws", "se"].indexOf(this.lastDir + this.curveTo) > -1 ? -1 : 1);
+      angularDiff = 1 / 28 * this.remainingDist * (["en", "nw", "ws", "se"].indexOf(this.sourceDirection + this.targetDirection) > -1 ? -1 : 1);
       if (this.progress < Constants.CURVE_QUARTER - this.remainingDist) {
         this.angle += angularDiff;
         this.x += Math.cos(this.angle) * this.remainingDist;
@@ -129,11 +132,10 @@ Grid: for entities that might want to snap to a grid.
         this.angle += angularDiff;
         this.remainingDist = 0;
       } else {
-        this._finishSection(this.curveTo);
+        this._finishSection(this.targetDirection);
         this.remainingDist -= Constants.CURVE_QUARTER - this.progress;
         this.progress = 0;
       }
-      this.nextDir = this.curveTo;
     }
   });
 
@@ -153,24 +155,20 @@ Grid: for entities that might want to snap to a grid.
       });
       this._beginMovement;
     },
-    _beginMovement: function() {
-      return this.bind("EnterFrame", function() {
-        var nextDirection;
-        nextDirection = Util.getTargetDirection(this.currentTrack, this.lastDir);
-        if (nextDirection === "s") {
-          this.attr("z", 3);
-          this.followers[0].attr("z", 2);
-          this.followers[1].attr("z", 1);
-        } else if (nextDirection === "n") {
-          this.attr("z", 1);
-          this.followers[0].attr("z", 2);
-          this.followers[1].attr("z", 3);
-        }
-      });
+    _setOverlap: function() {
+      if (this.targetDirection === "s") {
+        this.attr("z", 3);
+        this.followers[0].attr("z", 2);
+        this.followers[1].attr("z", 1);
+      } else if (this.targetDirection === "n") {
+        this.attr("z", 1);
+        this.followers[0].attr("z", 2);
+        this.followers[1].attr("z", 3);
+      }
     },
     _addSpriteComponent: function(dir) {
-      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.curveTo && this.progress > 28 * Math.PI / 8 ? this.curveTo : this.lastDir));
-      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.curveTo && this.progress > 28 * Math.PI / 8 ? this.curveTo : this.lastDir) + "light");
+      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection));
+      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection) + "light");
     },
     _removeSpriteComponent: function() {
       var baseSpriteName, i;
@@ -197,7 +195,7 @@ Grid: for entities that might want to snap to a grid.
           this.arrow = null;
         }
       }
-      this.userCurve = braking;
+      this.curveCommandEnabled = braking;
       playerOne = this.playerOne;
       Crafty("Train").each(function() {
         if (this.playerOne === playerOne) {
@@ -295,7 +293,7 @@ Grid: for entities that might want to snap to a grid.
       this._arriveAtStation();
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
-      this.isCurving = (straight && curve ? this.userCurve : curve);
+      this.isCurving = (straight && curve ? this.curveCommandEnabled : curve);
       if (straight && curve) {
         this.followers[0].curves.push(this.isCurving);
         this.followers[1].curves.push(this.isCurving);
@@ -313,7 +311,7 @@ Grid: for entities that might want to snap to a grid.
     },
     _addSpriteComponent: function() {
       var dir, spriteName;
-      dir = (this.curveTo && this.progress > 28 * Math.PI / 8 ? this.curveTo : this.lastDir);
+      dir = (this.isCurving && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection);
       spriteName = "spr_" + (this.playerOne ? "r" : "b") + "train" + (dir === "n" || dir === "s" ? "side" : "");
       this.addComponent(spriteName);
       this.lightLayer.addComponent(spriteName + "light");
@@ -1410,9 +1408,9 @@ Grid: for entities that might want to snap to a grid.
     createTrain: function(x, y, playerOne, dir) {
       var end, follow, letter, train;
       letter = (playerOne ? 'r' : 'b');
-      train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('lastDir', dir).attr('nextDir', dir).addComponent('spr_' + letter + 'train' + dir).findTrack().bindKeyboardTurn((playerOne ? Crafty.keys.Q : (window.singlePlayerMode ? null : Crafty.keys.P)));
-      follow = Crafty.e('FollowTrain').at(x - Util.dirx(dir), y - Util.diry(dir)).attr('playerOne', playerOne).attr('lastDir', dir).attr('nextDir', dir).findTrack().attr('front', train);
-      end = Crafty.e('FollowTrain').at(x - 2 * Util.dirx(dir), y - 2 * Util.diry(dir)).attr('playerOne', playerOne).attr('lastDir', dir).attr('nextDir', dir).attr('finale', true).findTrack().attr('front', follow);
+      train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).addComponent('spr_' + letter + 'train' + dir).findTrack().bindKeyboardTurn((playerOne ? Crafty.keys.Q : (window.singlePlayerMode ? null : Crafty.keys.P)));
+      follow = Crafty.e('FollowTrain').at(x - Util.dirx(dir), y - Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', train);
+      end = Crafty.e('FollowTrain').at(x - 2 * Util.dirx(dir), y - 2 * Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).attr('finale', true).findTrack().attr('front', follow);
       train.followers = [follow, end];
       follow._moveAlongTrack(6);
       end._moveAlongTrack(12);
