@@ -1,3 +1,6 @@
+###
+Grid: for entities that might want to snap to a grid.
+###
 Crafty.c "Grid",
   init: ->
     @attr
@@ -17,6 +20,9 @@ Crafty.c "Grid",
 
       this
 
+###
+Actor: shorthand for 2D entities using a grid.
+###
 Crafty.c "Actor",
   init: ->
     @requires "2D, Canvas, Grid"
@@ -33,7 +39,6 @@ Crafty.c "Train",
     @playerOne = false
     @angle = 0
     @userCurve = false
-    @canCurve = true
     @isCurving = false
     @progress = 0
     return
@@ -141,6 +146,10 @@ Crafty.c "PlayerTrain",
     @delivered = 0
     @followers = [] # following train cars
     @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 11)
+    @_beginMovement
+    return
+    
+  _beginMovement: () ->
     @bind "EnterFrame", ->
       nextDirection = Util.getTargetDirection(@currentTrack, @lastDir)
       if nextDirection is "s"
@@ -152,7 +161,6 @@ Crafty.c "PlayerTrain",
         @followers[0].attr "z", 2
         @followers[1].attr "z", 3
       return
-    return
 
   _addSpriteComponent: (dir) ->
     @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @curveTo and @progress > 28 * Math.PI / 8 then @curveTo else @lastDir))
@@ -243,9 +251,10 @@ Crafty.c "PlayerTrain",
   _updateCurrentTrack: (dir) ->
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
     @_arriveAtStation()
-    @canCurve = @userCurve
-    @isCurving = ((if @_hasCurveOption() and @_hasStraightOption() then @userCurve else @_hasCurveOption()))
-    if @_hasCurveOption() and @_hasStraightOption()
+    straight = @_hasStraightOption()
+    curve = @_hasCurveOption()
+    @isCurving = ((if straight and curve then @userCurve else curve))
+    if straight and curve
       @followers[0].curves.push @isCurving
       @followers[1].curves.push @isCurving
     return
@@ -253,7 +262,6 @@ Crafty.c "PlayerTrain",
 Crafty.c "FollowTrain",
   init: ->
     @requires "Actor, Train"
-    @canCurve = false
     @curves = []
     @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 11)
     return
@@ -273,9 +281,7 @@ Crafty.c "FollowTrain",
 
   _updateCurrentTrack: (dir) ->
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
-    @canCurve = @userCurve
-    @userCurve = (@curves.shift() or false)  if @_hasCurveOption() and @_hasStraightOption()
-    @isCurving = ((if @_hasCurveOption() and @_hasStraightOption() then @userCurve else @_hasCurveOption()))
+    @isCurving = ((if @_hasCurveOption() and @_hasStraightOption() then (@curves.shift() or false) else @_hasCurveOption()))
     return
 
 

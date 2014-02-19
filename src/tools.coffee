@@ -95,11 +95,11 @@ window.Util =
     
     follow = Crafty.e('FollowTrain').at(x-Util.dirx(dir), y-Util.diry(dir)).attr('playerOne', playerOne).attr('lastDir', dir)
     .attr('nextDir', dir)
-    .findTrack().attr('front', train).attr('canCurve', false)
+    .findTrack().attr('front', train)
     
     end = Crafty.e('FollowTrain').at(x-2*Util.dirx(dir), y-2*Util.diry(dir)).attr('playerOne', playerOne).attr('lastDir', dir)
     .attr('nextDir', dir).attr('finale', true)
-    .findTrack().attr('front', follow).attr('canCurve', false)
+    .findTrack().attr('front', follow)
     
     train.followers = [follow, end]
     follow._moveAlongTrack(6)
