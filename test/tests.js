@@ -1,3 +1,15 @@
+QUnit.extend( window, {
+
+	approx: function(actual, expected, maxDifference, message) {
+		var passes = (actual === expected) || Math.abs(actual - expected) <= maxDifference;
+		QUnit.push(passes, actual, expected, message);
+	},
+
+	notApprox: function(actual, expected, minDifference, message) {
+		QUnit.push(Math.abs(actual - expected) > minDifference, actual, expected, message);
+	}
+});
+
 Crafty.init(100, 100, 'dummy-stage');
 Crafty.background('#2B281D');
 
@@ -32,7 +44,13 @@ test("Basic train test", function() {
 test("Fast train test", function() {
   var train = Crafty.e("PlayerTrain").at(0,0).attr('sourceDirection', 's')
     .attr('targetDirection', 's').findTrack();
-  train._moveAlongTrack(35);
-  equal(train.y, 28, "Train moving properly");
+  train._moveAlongTrack(15);
+    approx(train.x, 0, 0.1, "Train starts curve properly in x");
+    notEqual(train.x, 0, "Train curves properly in x");
+    approx(train.y, 14, 1, "Train starts curve properly in y");
+  train._moveAlongTrack(20.5);
+  approx(train.x, 14, 1, "Train follows curve properly in x");
+  notEqual(train.y, 28, "Train is still curving in y");
+  approx(train.y, 28, 0.1, "Train follows curve properly in y");
 });
 
