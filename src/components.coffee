@@ -241,8 +241,10 @@ Crafty.c "PlayerTrain",
     curve = @_hasCurveOption()
     @targetDirection = ((if (straight and curve and @curveCommandEnabled) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
-      @followers[0].curves.push @isCurving()
-      @followers[1].curves.push @isCurving()
+      isCurving = @isCurving()
+      for f in followers
+        f.push isCurving
+
     return
 
 Crafty.c "FollowTrain",

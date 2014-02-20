@@ -275,15 +275,18 @@ Grid: for entities that might want to snap to a grid.
       });
     },
     _updateCurrentTrack: function(dir) {
-      var curve, straight;
+      var curve, f, isCurving, straight, _i, _len;
       this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
       this._arriveAtStation();
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
       this.targetDirection = ((straight && curve && this.curveCommandEnabled) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
-        this.followers[0].curves.push(this.isCurving());
-        this.followers[1].curves.push(this.isCurving());
+        isCurving = this.isCurving();
+        for (_i = 0, _len = followers.length; _i < _len; _i++) {
+          f = followers[_i];
+          f.push(isCurving);
+        }
       }
     }
   });
