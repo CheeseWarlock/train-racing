@@ -145,21 +145,9 @@ Crafty.c "PlayerTrain",
     @passengers = 0
     @delivered = 0
     @followers = [] # following train cars
-    @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 11)
-    @_beginMovement
+    @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
     return
     
-  _setOverlap: () ->
-    if @targetDirection is "s"
-      @attr "z", 3
-      @followers[0].attr "z", 2
-      @followers[1].attr "z", 1
-    else if @targetDirection is "n"
-      @attr "z", 1
-      @followers[0].attr "z", 2
-      @followers[1].attr "z", 3
-    return
-
   _addSpriteComponent: (dir) ->
     @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
     @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection)) + "light"
@@ -261,7 +249,7 @@ Crafty.c "FollowTrain",
   init: ->
     @requires "Actor, Train"
     @curves = []
-    @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 11)
+    @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
     return
 
   _addSpriteComponent: ->
@@ -453,7 +441,7 @@ Crafty.c "PlayerScore",
       x: @x + 10
       y: @y
     ).attr(playerOne: @playerOne).setup().update()
-    @attr z: 0
+    @attr z: 800
     return
 
   update: ->
@@ -574,6 +562,7 @@ Crafty.c "TrainController",
           return
 
         Crafty("Train").each ->
+          @attr("z", Math.floor(@y))
           Util.gameOver true  if @checkCollision()
           return
 
@@ -665,7 +654,7 @@ Crafty.c "FailureText",
 
 Crafty.c "BarController",
   init: ->
-    @requires("2D, Canvas").attr z: 15
+    @requires("2D, Canvas").attr z: 800
     return
 
   setup: ->
@@ -677,23 +666,23 @@ Crafty.c "BarController",
     Crafty.e("2D, Canvas, spr_barback").attr
       x: @x
       y: @y
-      z: 15
+      z: 801
 
     @l = Crafty.e("2D, Canvas, spr_" + c + "barl").attr(
       x: @x
       y: @y
-      z: 15
+      z: 801
     )
     @b = Crafty.e("2D, Canvas, spr_" + c + "bar").attr(
       w: 0
       x: @x + 4
       y: @y
-      z: 15
+      z: 801
     )
     @r = Crafty.e("2D, Canvas, spr_" + c + "barr").attr(
       x: @x + 4
       y: @y
-      z: 15
+      z: 801
     )
     this
 
@@ -701,18 +690,18 @@ Crafty.c "BarController",
     @attr
       x: @x
       y: @y
-      z: 15
+      z: 801
     @l.attr
       x: @x
       y: @y
-      z: 15
+      z: 801
     @b.attr
       x: @x + 4
       w: ((if fullness > 4 then fullness * 2 - 8 else 0))
-      z: 15
+      z: 801
     @r.attr
       x: ((if fullness > 2 and ticks.length then @x - 4 + fullness * 2 else @x + 4))
-      z: 15
+      z: 801
     for i of @ticks
       @ticks[i].destroy()
     @ticks = []
@@ -728,7 +717,7 @@ Crafty.c "BarController",
         @stops.push Crafty.e("2D, Canvas, spr_" + ((if ticks[i][2] then "p" else "")) + "stop" + ticks[i][1]).attr(
           x: attempt
           y: @y - 22
-          z: 15
+          z: 801
         )
         previous = attempt
       if i < ticks.length - 1
@@ -736,7 +725,7 @@ Crafty.c "BarController",
         @ticks.push Crafty.e("2D, Canvas, spr_" + ((if @playerOne then "r" else "b")) + "bart").attr(
           x: @x + d
           y: @y
-          z: 15
+          z: 801
         )
     this
 

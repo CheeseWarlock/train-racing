@@ -150,20 +150,8 @@ Grid: for entities that might want to snap to a grid.
       this.delivered = 0;
       this.followers = [];
       this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
-        z: 11
+        z: 1000
       });
-      this._beginMovement;
-    },
-    _setOverlap: function() {
-      if (this.targetDirection === "s") {
-        this.attr("z", 3);
-        this.followers[0].attr("z", 2);
-        this.followers[1].attr("z", 1);
-      } else if (this.targetDirection === "n") {
-        this.attr("z", 1);
-        this.followers[0].attr("z", 2);
-        this.followers[1].attr("z", 3);
-      }
     },
     _addSpriteComponent: function(dir) {
       this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection));
@@ -305,7 +293,7 @@ Grid: for entities that might want to snap to a grid.
       this.requires("Actor, Train");
       this.curves = [];
       this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
-        z: 11
+        z: 1000
       });
     },
     _addSpriteComponent: function() {
@@ -524,7 +512,7 @@ Grid: for entities that might want to snap to a grid.
         playerOne: this.playerOne
       }).setup().update();
       this.attr({
-        z: 0
+        z: 800
       });
     },
     update: function() {
@@ -651,6 +639,7 @@ Grid: for entities that might want to snap to a grid.
             this._moveAlongTrack(this.speed);
           });
           Crafty("Train").each(function() {
+            this.attr("z", Math.floor(this.y));
             if (this.checkCollision()) {
               Util.gameOver(true);
             }
@@ -752,7 +741,7 @@ Grid: for entities that might want to snap to a grid.
   Crafty.c("BarController", {
     init: function() {
       this.requires("2D, Canvas").attr({
-        z: 15
+        z: 800
       });
     },
     setup: function() {
@@ -765,23 +754,23 @@ Grid: for entities that might want to snap to a grid.
       Crafty.e("2D, Canvas, spr_barback").attr({
         x: this.x,
         y: this.y,
-        z: 15
+        z: 801
       });
       this.l = Crafty.e("2D, Canvas, spr_" + c + "barl").attr({
         x: this.x,
         y: this.y,
-        z: 15
+        z: 801
       });
       this.b = Crafty.e("2D, Canvas, spr_" + c + "bar").attr({
         w: 0,
         x: this.x + 4,
         y: this.y,
-        z: 15
+        z: 801
       });
       this.r = Crafty.e("2D, Canvas, spr_" + c + "barr").attr({
         x: this.x + 4,
         y: this.y,
-        z: 15
+        z: 801
       });
       return this;
     },
@@ -790,21 +779,21 @@ Grid: for entities that might want to snap to a grid.
       this.attr({
         x: this.x,
         y: this.y,
-        z: 15
+        z: 801
       });
       this.l.attr({
         x: this.x,
         y: this.y,
-        z: 15
+        z: 801
       });
       this.b.attr({
         x: this.x + 4,
         w: (fullness > 4 ? fullness * 2 - 8 : 0),
-        z: 15
+        z: 801
       });
       this.r.attr({
         x: (fullness > 2 && ticks.length ? this.x - 4 + fullness * 2 : this.x + 4),
-        z: 15
+        z: 801
       });
       for (i in this.ticks) {
         this.ticks[i].destroy();
@@ -825,7 +814,7 @@ Grid: for entities that might want to snap to a grid.
           this.stops.push(Crafty.e("2D, Canvas, spr_" + (ticks[i][2] ? "p" : "") + "stop" + ticks[i][1]).attr({
             x: attempt,
             y: this.y - 22,
-            z: 15
+            z: 801
           }));
           previous = attempt;
         }
@@ -834,7 +823,7 @@ Grid: for entities that might want to snap to a grid.
           this.ticks.push(Crafty.e("2D, Canvas, spr_" + (this.playerOne ? "r" : "b") + "bart").attr({
             x: this.x + d,
             y: this.y,
-            z: 15
+            z: 801
           }));
         }
       }
@@ -1266,7 +1255,7 @@ Grid: for entities that might want to snap to a grid.
       w: 616,
       h: 84,
       y: 476,
-      z: 14
+      z: 800
     });
     Crafty.e('ClockController');
     Crafty.e('TrainController');
@@ -1274,7 +1263,7 @@ Grid: for entities that might want to snap to a grid.
     return Crafty.e('2D, Canvas, Color, AmbientLayer').attr({
       x: 0,
       y: 0,
-      z: 10,
+      z: 600,
       h: 1000,
       w: 1000
     }).color('rgba(3,29,51,0.5)');
@@ -1368,7 +1357,7 @@ Grid: for entities that might want to snap to a grid.
         Crafty.e('2D, Canvas, spr_stop' + ['a', 'b', 'c', 'd', 'e', 'f'][i]).attr({
           x: this.x + (this.facing === 'e' || this.facing === 'w' ? 6 : 20),
           y: this.y - 20,
-          z: 99
+          z: 999
         });
         return this.letter = ['a', 'b', 'c', 'd', 'e', 'f'][i++];
       });
@@ -1486,7 +1475,7 @@ Grid: for entities that might want to snap to a grid.
               Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({
                 x: tile.x,
                 y: tile.y,
-                z: 11
+                z: 801
               });
             }
             switch (tilecode) {
@@ -1552,7 +1541,7 @@ Grid: for entities that might want to snap to a grid.
               Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({
                 x: tile.x,
                 y: tile.y,
-                z: 11
+                z: 801
               });
             }
           }

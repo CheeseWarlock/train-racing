@@ -259,11 +259,11 @@ Crafty.scene('SelectMap', () ->
 Crafty.scene('PlayGame', () ->
   Crafty.background('rgb(80, 160, 40)')
   Crafty.e("2D, Canvas, TiledMapBuilder").setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled)
-  Crafty.e('2D, Canvas, spr_brushed').attr({w: 616, h: 84, y: 476, z: 14})
+  Crafty.e('2D, Canvas, spr_brushed').attr({w: 616, h: 84, y: 476, z: 800})
   Crafty.e('ClockController')
   Crafty.e('TrainController')
   Util.assignStations()
-  Crafty.e('2D, Canvas, Color, AmbientLayer').attr({x:0,y:0,z:10,h:1000,w:1000}).color('rgba(3,29,51,0.5)')
+  Crafty.e('2D, Canvas, Color, AmbientLayer').attr({x:0,y:0,z:600,h:1000,w:1000}).color('rgba(3,29,51,0.5)')
   
 )
 
