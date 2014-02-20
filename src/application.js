@@ -121,12 +121,13 @@ Grid: for entities that might want to snap to a grid.
       }
     },
     _moveCurved: function() {
-      var angularDiff;
-      angularDiff = 1 / 28 * this.remainingDist * (["en", "nw", "ws", "se"].indexOf(this.sourceDirection + this.targetDirection) > -1 ? -1 : 1);
+      var angularDiff, counterClockwise, _ref;
+      counterClockwise = ((_ref = this.sourceDirection + this.targetDirection) === "en" || _ref === "nw" || _ref === "ws" || _ref === "se" ? -1 : 1);
+      angularDiff = 1 / 28 * this.remainingDist * counterClockwise;
       if (this.progress < Constants.CURVE_QUARTER - this.remainingDist) {
         this.angle += angularDiff;
-        this.x += Math.cos(this.angle) * this.remainingDist;
-        this.y += Math.sin(this.angle) * this.remainingDist;
+        this.x += Math.cos(this.angle) * (Math.sin(angularDiff) * 28) * counterClockwise;
+        this.y += Math.sin(this.angle) * (Math.sin(angularDiff) * 28) * counterClockwise;
         this.progress += this.remainingDist;
         this.angle += angularDiff;
         this.remainingDist = 0;
@@ -275,7 +276,7 @@ Grid: for entities that might want to snap to a grid.
       });
     },
     _updateCurrentTrack: function(dir) {
-      var curve, f, isCurving, straight, _i, _len;
+      var curve, f, isCurving, straight, _i, _len, _ref;
       this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
       this._arriveAtStation();
       straight = this._hasStraightOption();
@@ -283,9 +284,10 @@ Grid: for entities that might want to snap to a grid.
       this.targetDirection = ((straight && curve && this.curveCommandEnabled) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
         isCurving = this.isCurving();
-        for (_i = 0, _len = followers.length; _i < _len; _i++) {
-          f = followers[_i];
-          f.push(isCurving);
+        _ref = this.followers;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          f = _ref[_i];
+          f.curves.push(isCurving);
         }
       }
     }

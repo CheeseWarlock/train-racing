@@ -112,18 +112,14 @@ Crafty.c "Train",
 
   _moveCurved: ->
     # Curved
-    angularDiff = 1 / 28 * @remainingDist * ((if ([
-      "en"
-      "nw"
-      "ws"
-      "se"
-    ].indexOf(@sourceDirection + @targetDirection) > -1) then -1 else 1))
+    counterClockwise = ((if (@sourceDirection + @targetDirection) in ["en","nw","ws","se"] then -1 else 1))
+    angularDiff = 1 / 28 * @remainingDist * counterClockwise
     if @progress < Constants.CURVE_QUARTER - @remainingDist
       
       # Move full distance
       @angle += angularDiff
-      @x += Math.cos(@angle) * @remainingDist
-      @y += Math.sin(@angle) * @remainingDist
+      @x += Math.cos(@angle) * (Math.sin(angularDiff) * 28) * counterClockwise
+      @y += Math.sin(@angle) * (Math.sin(angularDiff) * 28) * counterClockwise
       @progress += @remainingDist
       @angle += angularDiff
       @remainingDist = 0
@@ -242,8 +238,8 @@ Crafty.c "PlayerTrain",
     @targetDirection = ((if (straight and curve and @curveCommandEnabled) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
       isCurving = @isCurving()
-      for f in followers
-        f.push isCurving
+      for f in @followers
+        f.curves.push isCurving
 
     return
 

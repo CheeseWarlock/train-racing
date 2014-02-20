@@ -19,9 +19,6 @@ test("Track setup", function() {
 });
 
 test("Basic train test", function() {
-  Crafty("TrackSection").each(function() {
-  	console.log('this.at().x + ", " + this.at().y');
-  });
   var train = Crafty.e("PlayerTrain").at(0,0).attr('sourceDirection', 's')
     .attr('targetDirection', 's').findTrack();
   train._moveAlongTrack(14);
