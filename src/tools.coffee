@@ -103,8 +103,8 @@ window.Util =
     
     train.followers = [follow, end]
 
-    follow._moveAlongTrack(6)
-    end._moveAlongTrack(12)
+    follow.moveAlongTrack(6)
+    end.moveAlongTrack(12)
     
     train
     
@@ -194,8 +194,7 @@ window.Util =
 window.Constants =
   DIR_PREFIXES: ['n','e','w','s']
   MINUTE_DELAY: 99
-  COLLISION_SIZE: 484
-  TRAIN_SPEED: 1.75
+  COLLISION_SIZE: 22
   TILE_HALF: 14
   CURVE_QUARTER: 28 * Math.PI / 4
   ENDING_DIALOGS:
@@ -213,6 +212,7 @@ window.Constants =
   MAX_PASSENGERS: 100
   FULL_SPEED: 1.75
   REDUCED_SPEED: 0.875
+  TILE_JUMP_LIMIT: 5
   
 window.GameState =
   running: false  

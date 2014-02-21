@@ -60,7 +60,7 @@ Grid: for entities that might want to snap to a grid.
       other = this;
       collisionFound = false;
       Crafty("Train").each(function() {
-        if (this.playerOne !== other.playerOne ? Math.sqrt((other.x - this.x) * (other.x - this.x)) + Math.sqrt((other.y - this.y) * (other.y - this.y)) < 22 : void 0) {
+        if (this.playerOne !== other.playerOne ? Math.sqrt((other.x - this.x) * (other.x - this.x)) + Math.sqrt((other.y - this.y) * (other.y - this.y)) < Constants.COLLISION_SIZE : void 0) {
           collisionFound = true;
         }
       });
@@ -78,8 +78,8 @@ Grid: for entities that might want to snap to a grid.
     },
     _finishSection: function(dir) {
       this.angle = Util.endAngle(dir);
-      this.x = this.currentTrack.x + Util.dirx(dir) * 14;
-      this.y = this.currentTrack.y + Util.diry(dir) * 14;
+      this.x = this.currentTrack.x + Util.dirx(dir) * Constants.TILE_HALF;
+      this.y = this.currentTrack.y + Util.diry(dir) * Constants.TILE_HALF;
       this.sourceDirection = this.targetDirection;
       this._updateCurrentTrack(dir);
     },
@@ -89,10 +89,10 @@ Grid: for entities that might want to snap to a grid.
     _hasCurveOption: function() {
       return this.currentTrack.dir.length === 3 && (this.currentTrack.dir.indexOf(Util.opposite(this.sourceDirection)) > 0) || this.currentTrack.dir.length === 2 && this.currentTrack.dir.indexOf(this.sourceDirection) === -1;
     },
-    _moveAlongTrack: function(dist) {
+    moveAlongTrack: function(dist) {
       var remainingTries;
       this.remainingDist = dist;
-      remainingTries = 5;
+      remainingTries = Constants.TILE_JUMP_LIMIT;
       this._removeSpriteComponent();
       this._addSpriteComponent();
       while (this.remainingDist > 0 && remainingTries-- > 0) {
@@ -123,11 +123,11 @@ Grid: for entities that might want to snap to a grid.
     _moveCurved: function() {
       var angularDiff, counterClockwise, _ref;
       counterClockwise = ((_ref = this.sourceDirection + this.targetDirection) === "en" || _ref === "nw" || _ref === "ws" || _ref === "se" ? -1 : 1);
-      angularDiff = 1 / 28 * this.remainingDist * counterClockwise;
+      angularDiff = 1 / (Constants.TILE_HALF * 2) * this.remainingDist * counterClockwise;
       if (this.progress < Constants.CURVE_QUARTER - this.remainingDist) {
         this.angle += angularDiff;
-        this.x += Math.cos(this.angle) * (Math.sin(angularDiff) * 28) * counterClockwise;
-        this.y += Math.sin(this.angle) * (Math.sin(angularDiff) * 28) * counterClockwise;
+        this.x += Math.cos(this.angle) * (Math.sin(angularDiff) * (Constants.TILE_HALF * 2)) * counterClockwise;
+        this.y += Math.sin(this.angle) * (Math.sin(angularDiff) * (Constants.TILE_HALF * 2)) * counterClockwise;
         this.progress += this.remainingDist;
         this.angle += angularDiff;
         this.remainingDist = 0;
@@ -155,8 +155,8 @@ Grid: for entities that might want to snap to a grid.
       });
     },
     _addSpriteComponent: function(dir) {
-      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection));
-      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection) + "light");
+      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection));
+      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection) + "light");
     },
     _removeSpriteComponent: function() {
       var baseSpriteName, i;
@@ -245,9 +245,9 @@ Grid: for entities that might want to snap to a grid.
     },
     _pickup: function(station) {
       var overflow, pickup, room;
-      room = 100 - this.passengers;
+      room = Constants.MAX_PASSENGERS - this.passengers;
       overflow = station.population - room;
-      pickup = (overflow > 0 ? 100 - this.passengers : station.population);
+      pickup = (overflow > 0 ? Constants.MAX_PASSENGERS - this.passengers : station.population);
       station.population = (overflow > 0 ? overflow : 0);
       this.passengers += pickup;
       return pickup;
@@ -303,7 +303,7 @@ Grid: for entities that might want to snap to a grid.
     },
     _addSpriteComponent: function() {
       var dir, spriteName;
-      dir = (this.isCurving() && this.progress > 28 * Math.PI / 8 ? this.targetDirection : this.sourceDirection);
+      dir = (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection);
       spriteName = "spr_" + (this.playerOne ? "r" : "b") + "train" + (dir === "n" || dir === "s" ? "side" : "");
       this.addComponent(spriteName);
       this.lightLayer.addComponent(spriteName + "light");
@@ -359,10 +359,9 @@ Grid: for entities that might want to snap to a grid.
       var letter;
       letter = this.letter;
       this.popular = !this.popular;
-      popular = this.popular;
       Crafty("spr_" + (this.popular ? "" : "p") + "stop" + this.letter).each(function() {
-        this.removeComponent("spr_" + (popular ? "" : "p") + "stop" + letter, false);
-        this.addComponent("spr_" + (popular ? "p" : "") + "stop" + letter);
+        this.removeComponent("spr_" + (this.popular ? "" : "p") + "stop" + letter, false);
+        this.addComponent("spr_" + (this.popular ? "p" : "") + "stop" + letter);
       });
     },
     setup: function(x, y, dir) {
@@ -376,6 +375,8 @@ Grid: for entities that might want to snap to a grid.
       this.facing = dir;
       if (dir === "s") {
         this.attachToTrack(x, y + 1).attachToTrack(x + 1, y + 1);
+      } else if (dir === "n") {
+        this.attachToTrack(x, y - 1).attachToTrack(x + 1, y - 1);
       } else {
         this.attachToTrack(x + Util.dirx(dir), y).attachToTrack(x + Util.dirx(dir), y + 1);
       }
@@ -641,7 +642,7 @@ Grid: for entities that might want to snap to a grid.
       this.bind("EnterFrame", function() {
         if (GameState.running) {
           Crafty("Train").each(function() {
-            this._moveAlongTrack(this.speed);
+            this.moveAlongTrack(this.speed);
           });
           Crafty("Train").each(function() {
             this.attr("z", Math.floor(this.y));
@@ -1408,8 +1409,8 @@ Grid: for entities that might want to snap to a grid.
       follow = Crafty.e('FollowTrain').at(x - Util.dirx(dir), y - Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', train);
       end = Crafty.e('FollowTrain').at(x - 2 * Util.dirx(dir), y - 2 * Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).attr('finale', true).findTrack().attr('front', follow);
       train.followers = [follow, end];
-      follow._moveAlongTrack(6);
-      end._moveAlongTrack(12);
+      follow.moveAlongTrack(6);
+      end.moveAlongTrack(12);
       return train;
     },
     setupFromTiled: function(tiledmap) {
@@ -1580,14 +1581,14 @@ Grid: for entities that might want to snap to a grid.
   window.Constants = {
     DIR_PREFIXES: ['n', 'e', 'w', 's'],
     MINUTE_DELAY: 99,
-    COLLISION_SIZE: 484,
-    TRAIN_SPEED: 1.75,
+    COLLISION_SIZE: 22,
     TILE_HALF: 14,
     CURVE_QUARTER: 28 * Math.PI / 4,
     ENDING_DIALOGS: [['Oh no!', 'The trains collided!', 'You caused an accident!', 'What a disaster!', 'That wasn\'t supposed to happen!'], ['If anyone asks, you weren\'t having a competition.', 'You know, this is really everyone\'s fault.', 'You know, this is really everyone\'s fault. Even the passengers.', 'Some passengers were jostled, many more were late for work.', 'Remember, you\'re supposed to AVOID each other.', 'What kind of urban planner designed this place, anyway?!']],
     MAX_PASSENGERS: 100,
     FULL_SPEED: 1.75,
-    REDUCED_SPEED: 0.875
+    REDUCED_SPEED: 0.875,
+    TILE_JUMP_LIMIT: 5
   };
 
   window.GameState = {

@@ -50,7 +50,7 @@ Crafty.c "Train",
     other = this
     collisionFound = false
     Crafty("Train").each ->
-      collisionFound = true  if Math.sqrt(((other.x - @x) * (other.x - @x))) + Math.sqrt(((other.y - @y) * (other.y - @y))) < 22  unless @playerOne is other.playerOne
+      collisionFound = true  if Math.sqrt(((other.x - @x) * (other.x - @x))) + Math.sqrt(((other.y - @y) * (other.y - @y))) < Constants.COLLISION_SIZE  unless @playerOne is other.playerOne
       return
     collisionFound
 
@@ -65,8 +65,8 @@ Crafty.c "Train",
 
   _finishSection: (dir) ->
     @angle = Util.endAngle(dir)
-    @x = @currentTrack.x + Util.dirx(dir) * 14
-    @y = @currentTrack.y + Util.diry(dir) * 14
+    @x = @currentTrack.x + Util.dirx(dir) * Constants.TILE_HALF
+    @y = @currentTrack.y + Util.diry(dir) * Constants.TILE_HALF
     @sourceDirection = @targetDirection
     @_updateCurrentTrack dir
     return
@@ -77,9 +77,9 @@ Crafty.c "Train",
   _hasCurveOption: ->
     @currentTrack.dir.length is 3 and (@currentTrack.dir.indexOf(Util.opposite(@sourceDirection)) > 0) or @currentTrack.dir.length is 2 and @currentTrack.dir.indexOf(@sourceDirection) is -1
 
-  _moveAlongTrack: (dist) ->
+  moveAlongTrack: (dist) ->
     @remainingDist = dist
-    remainingTries = 5
+    remainingTries = Constants.TILE_JUMP_LIMIT
     @_removeSpriteComponent()
     @_addSpriteComponent()
     while @remainingDist > 0 and remainingTries-- > 0
@@ -113,13 +113,13 @@ Crafty.c "Train",
   _moveCurved: ->
     # Curved
     counterClockwise = ((if (@sourceDirection + @targetDirection) in ["en","nw","ws","se"] then -1 else 1))
-    angularDiff = 1 / 28 * @remainingDist * counterClockwise
+    angularDiff = 1 / (Constants.TILE_HALF * 2) * @remainingDist * counterClockwise
     if @progress < Constants.CURVE_QUARTER - @remainingDist
       
       # Move full distance
       @angle += angularDiff
-      @x += Math.cos(@angle) * (Math.sin(angularDiff) * 28) * counterClockwise
-      @y += Math.sin(@angle) * (Math.sin(angularDiff) * 28) * counterClockwise
+      @x += Math.cos(@angle) * (Math.sin(angularDiff) * (Constants.TILE_HALF * 2)) * counterClockwise
+      @y += Math.sin(@angle) * (Math.sin(angularDiff) * (Constants.TILE_HALF * 2)) * counterClockwise
       @progress += @remainingDist
       @angle += angularDiff
       @remainingDist = 0
@@ -145,8 +145,8 @@ Crafty.c "PlayerTrain",
     return
     
   _addSpriteComponent: (dir) ->
-    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
-    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection)) + "light"
+    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
+    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection)) + "light"
     return
 
   _removeSpriteComponent: ->
@@ -208,9 +208,9 @@ Crafty.c "PlayerTrain",
     return
 
   _pickup: (station) ->
-    room = 100 - @passengers
+    room = Constants.MAX_PASSENGERS - @passengers
     overflow = station.population - room # number that will be left waiting
-    pickup = ((if overflow > 0 then 100 - @passengers else station.population))
+    pickup = ((if overflow > 0 then Constants.MAX_PASSENGERS - @passengers else station.population))
     station.population = ((if overflow > 0 then overflow else 0))
     @passengers += pickup
     return pickup
@@ -251,7 +251,7 @@ Crafty.c "FollowTrain",
     return
 
   _addSpriteComponent: ->
-    dir = ((if @isCurving() and @progress > 28 * Math.PI / 8 then @targetDirection else @sourceDirection))
+    dir = ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
     spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
     @addComponent spriteName
     @lightLayer.addComponent spriteName + "light"
@@ -302,10 +302,9 @@ Crafty.c "Station",
   setPopular: (popular) ->
     letter = @letter
     @popular = not @popular
-    popular = @popular
     Crafty("spr_" + ((if @popular then "" else "p")) + "stop" + @letter).each ->
-      @removeComponent "spr_" + ((if popular then "" else "p")) + "stop" + letter, false
-      @addComponent "spr_" + ((if popular then "p" else "")) + "stop" + letter
+      @removeComponent "spr_" + ((if @popular then "" else "p")) + "stop" + letter, false
+      @addComponent "spr_" + ((if @popular then "p" else "")) + "stop" + letter
       return
     return
 
@@ -320,6 +319,8 @@ Crafty.c "Station",
     @facing = dir
     if dir is "s"
       @attachToTrack(x, y + 1).attachToTrack x + 1, y + 1
+    else if dir is "n"
+      @attachToTrack(x, y - 1).attachToTrack x + 1, y - 1
     else
       @attachToTrack(x + Util.dirx(dir), y).attachToTrack x + Util.dirx(dir), y + 1
     @setupText()
@@ -556,7 +557,7 @@ Crafty.c "TrainController",
     @bind "EnterFrame", ->
       if GameState.running
         Crafty("Train").each ->
-          @_moveAlongTrack @speed
+          @moveAlongTrack @speed
           return
 
         Crafty("Train").each ->
