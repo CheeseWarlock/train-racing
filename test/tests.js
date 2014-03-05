@@ -76,7 +76,6 @@ test("Train collision test", function() {
 
 test("Collision consistency test", function() {
   Math.seedrandom('some string');
-	console.log('starting cons');
   var red = Crafty.e("PlayerTrain").at(0,0).attr('sourceDirection', 's')
     .attr('playerOne', true).attr('targetDirection', 's').findTrack();
   red.moveAlongTrack(22.2);
@@ -101,6 +100,18 @@ test("Collision consistency test", function() {
     
   equal(collisions, 0, "Trains never collide");
   
+  
+});
+
+test("Reversing motion", function() {
+  var train = Crafty.e("PlayerTrain").at(0,1).attr('sourceDirection', 's')
+    .attr('targetDirection', 's').findTrack();
+  train.moveAlongTrack(1);
+  train.moveAlongTrack(-1);
+  equal(train.y, 28, "Trains can move backwards along straight tracks");
+  train.moveAlongTrack(30);
+  train.moveAlongTrack(-30);
+  equal(train.y, 28, "Trains can move backwards along curved tracks");
   
 });
 

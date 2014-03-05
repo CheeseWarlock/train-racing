@@ -78,6 +78,17 @@ Crafty.c "Train",
     @currentTrack.dir.length is 3 and (@currentTrack.dir.indexOf(Util.opposite(@sourceDirection)) > 0) or @currentTrack.dir.length is 2 and @currentTrack.dir.indexOf(@sourceDirection) is -1
 
   moveAlongTrack: (dist) ->
+    reversing = (dist < 0)
+    if (reversing)
+      if (@isCurving())
+        @progress = Constants.TILE_HALF * Math.PI / 2 - @progress
+      else
+        @progress = -@progress
+      dist = -dist
+      temp = @sourceDirection
+      @sourceDirection = Util.opposite(@targetDirection)
+      @targetDirection = Util.opposite(temp)
+      
     @remainingDist = dist
     remainingTries = Constants.TILE_JUMP_LIMIT
     @_removeSpriteComponent()
@@ -91,6 +102,15 @@ Crafty.c "Train",
       @lightLayer.attr
         x: @x
         y: @y
+        
+    if (reversing)
+      temp = @sourceDirection
+      @sourceDirection = Util.opposite(@targetDirection)
+      @targetDirection = Util.opposite(temp)
+      if (@isCurving())
+        @progress = Constants.TILE_HALF * Math.PI / 2 - @progress
+      else
+        @progress = -@progress
 
     return
 

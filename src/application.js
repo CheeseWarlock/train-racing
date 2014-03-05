@@ -90,7 +90,19 @@ Grid: for entities that might want to snap to a grid.
       return this.currentTrack.dir.length === 3 && (this.currentTrack.dir.indexOf(Util.opposite(this.sourceDirection)) > 0) || this.currentTrack.dir.length === 2 && this.currentTrack.dir.indexOf(this.sourceDirection) === -1;
     },
     moveAlongTrack: function(dist) {
-      var remainingTries;
+      var remainingTries, reversing, temp;
+      reversing = dist < 0;
+      if (reversing) {
+        if (this.isCurving()) {
+          this.progress = Constants.TILE_HALF * Math.PI / 2 - this.progress;
+        } else {
+          this.progress = -this.progress;
+        }
+        dist = -dist;
+        temp = this.sourceDirection;
+        this.sourceDirection = Util.opposite(this.targetDirection);
+        this.targetDirection = Util.opposite(temp);
+      }
       this.remainingDist = dist;
       remainingTries = Constants.TILE_JUMP_LIMIT;
       this._removeSpriteComponent();
@@ -107,6 +119,16 @@ Grid: for entities that might want to snap to a grid.
           x: this.x,
           y: this.y
         });
+      }
+      if (reversing) {
+        temp = this.sourceDirection;
+        this.sourceDirection = Util.opposite(this.targetDirection);
+        this.targetDirection = Util.opposite(temp);
+        if (this.isCurving()) {
+          this.progress = Constants.TILE_HALF * Math.PI / 2 - this.progress;
+        } else {
+          this.progress = -this.progress;
+        }
       }
     },
     _moveStraight: function() {
