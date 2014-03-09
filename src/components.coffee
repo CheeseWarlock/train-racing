@@ -296,7 +296,7 @@ Track section: a 1x1 piece of track with two or more dirs.
 ###
 Crafty.c "TrackSection",
   init: ->
-    @requires "Actor"
+    @requires "2D, Grid"
     return
     
   associateStation: (station) ->

@@ -352,7 +352,7 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("TrackSection", {
     init: function() {
-      this.requires("Actor");
+      this.requires("2D, Grid");
     },
     associateStation: function(station) {
       this.station = station;
