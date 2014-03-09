@@ -934,6 +934,15 @@ Grid: for entities that might want to snap to a grid.
       Crafty.background('#2B281D');
       Crafty.scene('Loading');
       return this;
+    },
+    startHeadless: function() {
+      Crafty.init(Game.width(), Game.height(), "game-stage");
+      Crafty.background('#2B281D');
+      $.getJSON("map1.json", function(data) {
+        window.selectedMap = data;
+        return Crafty.scene('PlayGame');
+      });
+      return this;
     }
   };
 

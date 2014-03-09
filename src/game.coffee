@@ -48,3 +48,12 @@ window.Game =
     Crafty.background('#2B281D')
     Crafty.scene('Loading')
     this
+    
+  startHeadless: ->
+    Crafty.init(Game.width(), Game.height(), "game-stage")
+    Crafty.background('#2B281D')
+    $.getJSON("map1.json", (data) ->
+      window.selectedMap = data
+      Crafty.scene('PlayGame')
+    )
+    this

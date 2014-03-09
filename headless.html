@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Morning Commute</title>
+	<link href="style.css" rel="stylesheet">
+	<script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="lib/crafty.js"></script>
+  <script src="lib/tiledmapbuilder.js"></script>
+  <script src="lib/create_mocks_module.js"></script>
+  <script src="src/application.js"></script>
+  <script>
+    window.addEventListener('load', Game.startHeadless);
+    setInterval(function() {
+    	Crafty("PlayerTrain").each(function() {
+    		if (this.playerOne) {
+    			$('#xyout').text(Math.floor(this._x) + " , " + Math.floor(this._y)).css({left:this._x+"px", top:this._y+"px"});
+    		}
+    		
+    	});
+    }, 50);
+  </script>
+</head>
+<body>
+	<div class="game-holder">
+		<div class="game" id="game-stage"></div>
+		<div class="linkbar"><a href="">Manual</a> - <a href="">Design Levels</a> - Made by <a href="http://twitter.com/CheeseWarlock" target="_blank">@CheeseWarlock</a></div>
+	</div>
+	<div class="display-holder">
+		<div class="display-text" id="display-manual">
+			<h3>Manual</h3>
+			<div class="scrolling-text">
+				Morning Commute is a two-player game where each player controls one train.<br/><br/>
+				Hold down your key (P or Q) to reduce your speed. If your speed is reduced when you reach a junction,
+				you will turn; otherwise you will continue going straight.<br/><br/>
+				Moving past a station will drop off and pick up passengers from that station. Each passenger has a
+				destination station. The destinations of your passengers can be seen at the bottom of the screen, with
+				the first station representing the highest demand.<br/><br/>
+				Trains have a limited capacity. If your train is full, you will need to drop off passengers before
+				picking up any more.<br/><br/>
+				At 10:00 AM, the morning commute is over and the player who has delivered more passengers wins. If the
+				trains collide, neither player wins.<br/><br/>
+				Bonus single player mode! Type 'PQPPQ' on the title screen to enable single-player mode, where the blue train (P) is replaced
+				by a cold, calculating AI that doesn't understand things like mercy or strategy.
+			</div>
+		</div>
+		<div class="display-text" id="display-design">
+			<h3>Design Levels</h3>
+			<div class="scrolling-text">				
+				You can create your own levels!<br/><br/>
+				Levels in Morning Commute were created using <a href="http://www.mapeditor.org/" target="_blank">Tiled</a>.
+				Using the <a href="src/tiled/map1.tmx" target="_blank">stage 1 map template</a> and the <a href="img/ul.png" target="_blank">map tile image</a>, 
+				create your own maps, export them as JSON, and paste the text of the resulting file into the text field below.
+				Then, select "Load From External..." from the level selection menu.<br/><br/>
+				Alternatively, just download this whole game, add some JSON files, and modify maps.json. This gives more
+				flexibility and lets you create your own collections of levels.<br/><br/>
+				Notes:<br/>
+				<ul>
+					<li>All objects must be in the proper layer.</li>
+					<li>Tracks must form complete circuits; dead ends may have unexpected results.</li>
+					<li>Stations must be facing adjacent tracks.</li>
+					<li>Train locations are marked by placing train heads in the 'Trains' layer.</li>
+					<li>Trains must start on straight sections of track.</li>
+					<li>Props should not overlap tracks.</li>
+				</ul>
+				Paste your level data here:<br/><br/>
+				<textarea id="custom-level-data"></textarea>
+			</div>
+		</div>
+	</div>
+	<span id="xyout" style="position: absolute; color: #EEDDCC; top: 220px">~</span>
+</body>
+</html>
