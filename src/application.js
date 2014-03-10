@@ -172,20 +172,26 @@ Grid: for entities that might want to snap to a grid.
       this.passengers = 0;
       this.delivered = 0;
       this.followers = [];
-      this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
-        z: 1000
-      });
+      if (!window.HEADLESS_MODE) {
+        this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
+          z: 1000
+        });
+      }
     },
     _addSpriteComponent: function(dir) {
       this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection));
-      this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection) + "light");
+      if (!window.HEADLESS_MODE) {
+        this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection) + "light");
+      }
     },
     _removeSpriteComponent: function() {
       var baseSpriteName, i;
       baseSpriteName = "spr_" + (this.playerOne ? "r" : "b") + "train";
       for (i in Constants.DIR_PREFIXES) {
         this.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i], false);
-        this.lightLayer.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i] + "light", false);
+        if (!window.HEADLESS_MODE) {
+          this.lightLayer.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i] + "light", false);
+        }
       }
     },
     _setBraking: function(braking) {
@@ -319,22 +325,28 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       this.requires("Actor, Train");
       this.curves = [];
-      this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
-        z: 1000
-      });
+      if (!window.HEADLESS_MODE) {
+        this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
+          z: 1000
+        });
+      }
     },
     _addSpriteComponent: function() {
       var dir, spriteName;
       dir = (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection);
       spriteName = "spr_" + (this.playerOne ? "r" : "b") + "train" + (dir === "n" || dir === "s" ? "side" : "");
       this.addComponent(spriteName);
-      this.lightLayer.addComponent(spriteName + "light");
+      if (!window.HEADLESS_MODE) {
+        this.lightLayer.addComponent(spriteName + "light");
+      }
     },
     _removeSpriteComponent: function() {
       var baseSpriteName;
       baseSpriteName = "spr_" + (this.playerOne ? "r" : "b") + "train";
       this.removeComponent(baseSpriteName, false).removeComponent(baseSpriteName + "side", false);
-      this.lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent(baseSpriteName + "sidelight", false);
+      if (!window.HEADLESS_MODE) {
+        this.lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent(baseSpriteName + "sidelight", false);
+      }
     },
     _updateCurrentTrack: function(dir) {
       var curve, straight;
@@ -370,7 +382,7 @@ Grid: for entities that might want to snap to a grid.
       this.dropoffP1 = 0;
       this.dropoffP2 = 0;
       this.popular = false;
-      this.requires("Actor");
+      this.requires("2D, Grid");
       this.bind("EnterFrame", function() {
         if (GameState.running) {
           this.populate();
@@ -424,34 +436,36 @@ Grid: for entities that might want to snap to a grid.
     },
     updateSprites: function() {
       var pos, remaining, x, y;
-      if (this.population / 12.0 === this.t.length + 1) {
-        remaining = Math.min(this.population, 72) - this.t.length * 12;
-        pos = this.t.length;
-        if (this.facing === "w") {
-          x = this._x + 6 * (pos % 2);
-          y = this._y + 2 + 8 * pos;
-        } else if (this.facing === "e") {
-          x = this._x + 20 - 6 * (pos % 2);
-          y = this._y + 2 + 8 * pos;
+      if (!window.HEADLESS_MODE) {
+        if (this.population / 12.0 === this.t.length + 1) {
+          remaining = Math.min(this.population, 72) - this.t.length * 12;
+          pos = this.t.length;
+          if (this.facing === "w") {
+            x = this._x + 6 * (pos % 2);
+            y = this._y + 2 + 8 * pos;
+          } else if (this.facing === "e") {
+            x = this._x + 20 - 6 * (pos % 2);
+            y = this._y + 2 + 8 * pos;
+          } else {
+            x = this._x + 2 + 8 * pos;
+            y = this._y + 12 + 4 * (pos % 2);
+          }
+          while (remaining >= 12) {
+            this.t.push(Crafty.e("StationPerson").attr({
+              x: x,
+              y: y
+            }).fadeIn(this.facing));
+            remaining -= 12;
+            pos++;
+          }
         } else {
-          x = this._x + 2 + 8 * pos;
-          y = this._y + 12 + 4 * (pos % 2);
+          while (this.t.length > this.population / 12) {
+            this.t[this.t.length - 1].fadeOut();
+            this.t.splice(this.t.length - 1, 1);
+          }
         }
-        while (remaining >= 12) {
-          this.t.push(Crafty.e("StationPerson").attr({
-            x: x,
-            y: y
-          }).fadeIn(this.facing));
-          remaining -= 12;
-          pos++;
-        }
-      } else {
-        while (this.t.length > this.population / 12) {
-          this.t[this.t.length - 1].fadeOut();
-          this.t.splice(this.t.length - 1, 1);
-        }
+        return this;
       }
-      return this;
     }
   });
 
@@ -597,60 +611,64 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("ClockController", {
     init: function() {
-      this.pauseAvailable = true;
-      this.paused = false;
-      this.requires("Dialog").attr({
-        x: 234,
-        y: 492,
-        w: 140,
-        h: 44
-      }).textColor("#84FFEC").textFont({
-        size: "43px",
-        family: "Minisystem"
-      }).css({
-        letterSpacing: "-2px",
-        border: "4px solid #606060",
-        textShadow: "0px 0px 2px #84FFEC"
-      });
       GameClock.newDay();
-      this.text(GameClock.hour + (GameClock.minute > 9 ? ":" : ":0") + GameClock.minute);
+      if (!window.HEADLESS_MODE) {
+        this.pauseAvailable = true;
+        this.paused = false;
+        this.requires("Dialog").attr({
+          x: 234,
+          y: 492,
+          w: 140,
+          h: 44
+        }).textColor("#84FFEC").textFont({
+          size: "43px",
+          family: "Minisystem"
+        }).css({
+          letterSpacing: "-2px",
+          border: "4px solid #606060",
+          textShadow: "0px 0px 2px #84FFEC"
+        });
+        this.bind("KeyDown", function(e) {
+          if (e.keyCode === Crafty.keys.SPACE) {
+            if (this.pauseAvailable) {
+              Crafty.e("PauseText");
+              this.pauseAvailable = false;
+              GameState.running = false;
+              this.paused = true;
+            } else if (this.paused) {
+              Crafty("PauseText").teardown();
+              Crafty("PauseText").destroy();
+              GameState.running = true;
+              this.paused = false;
+            }
+          }
+        });
+        this.text(GameClock.hour + (GameClock.minute > 9 ? ":" : ":0") + GameClock.minute);
+      }
       this.tickDelay = 0;
       this.bind("EnterFrame", function() {
         var percentTimePassed;
         percentTimePassed = (GameClock.hour - 6) / 4 + (GameClock.minute / 240);
         if (GameState.running && this.tickDelay++ > 22) {
           GameClock.update();
-          this.text(GameClock.hour + (GameClock.minute > 9 ? ":" : ":0") + +GameClock.minute);
           this.tickDelay = 0;
           if (GameClock.hour === 10) {
             Util.gameOver(false);
           }
+          if (!window.HEADLESS_MODE) {
+            this.text(GameClock.hour + (GameClock.minute > 9 ? ":" : ":0") + +GameClock.minute);
+            Crafty("AmbientLayer").each(function() {
+              this.color(Util.sunrise(percentTimePassed));
+            });
+            Crafty("LightLayer").each(function() {
+              this.attr("alpha", 1 - percentTimePassed);
+            });
+          }
         }
-        Crafty("AmbientLayer").each(function() {
-          this.color(Util.sunrise(percentTimePassed));
-        });
-        Crafty("LightLayer").each(function() {
-          this.attr("alpha", 1 - percentTimePassed);
-        });
       });
       setTimeout((function() {
         GameState.running = true;
       }), 1000);
-      this.bind("KeyDown", function(e) {
-        if (e.keyCode === Crafty.keys.SPACE) {
-          if (this.pauseAvailable) {
-            Crafty.e("PauseText");
-            this.pauseAvailable = false;
-            GameState.running = false;
-            this.paused = true;
-          } else if (this.paused) {
-            Crafty("PauseText").teardown();
-            Crafty("PauseText").destroy();
-            GameState.running = true;
-            this.paused = false;
-          }
-        }
-      });
     }
   });
 
@@ -930,12 +948,14 @@ Grid: for entities that might want to snap to a grid.
       return this.map_grid.height * this.map_grid.tile.height;
     },
     start: function() {
+      window.HEADLESS_MODE = false;
       Crafty.init(Game.width(), Game.height(), "game-stage");
       Crafty.background('#2B281D');
       Crafty.scene('Loading');
       return this;
     },
     startHeadless: function() {
+      window.HEADLESS_MODE = true;
       Crafty.init(Game.width(), Game.height(), "game-stage");
       Crafty.background('#2B281D');
       $.getJSON("map1.json", function(data) {
@@ -1286,24 +1306,28 @@ Grid: for entities that might want to snap to a grid.
   });
 
   Crafty.scene('PlayGame', function() {
+    var builder;
     Crafty.background('rgb(80, 160, 40)');
-    Crafty.e("2D, Canvas, TiledMapBuilder").setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled);
-    Crafty.e('2D, Canvas, spr_brushed').attr({
-      w: 616,
-      h: 84,
-      y: 476,
-      z: 800
-    });
-    Crafty.e('ClockController');
+    builder = Crafty.e((window.HEADLESS_MODE ? "" : "2D, Canvas, ") + "TiledMapBuilder");
+    builder.setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled);
     Crafty.e('TrainController');
-    Util.assignStations();
-    return Crafty.e('2D, Canvas, Color, AmbientLayer').attr({
-      x: 0,
-      y: 0,
-      z: 600,
-      h: 1000,
-      w: 1000
-    }).color('rgba(3,29,51,0.5)');
+    Crafty.e('ClockController');
+    if (!window.HEADLESS_MODE) {
+      Crafty.e('2D, Canvas, spr_brushed').attr({
+        w: 616,
+        h: 84,
+        y: 476,
+        z: 800
+      });
+      Crafty.e('2D, Canvas, Color, AmbientLayer').attr({
+        x: 0,
+        y: 0,
+        z: 600,
+        h: 1000,
+        w: 1000
+      }).color('rgba(3,29,51,0.5)');
+    }
+    return Util.assignStations();
   });
 
   Crafty.scene('GameOver', function() {
@@ -1391,11 +1415,13 @@ Grid: for entities that might want to snap to a grid.
       var i;
       i = 0;
       return Crafty('Station').each(function() {
-        Crafty.e('2D, Canvas, spr_stop' + ['a', 'b', 'c', 'd', 'e', 'f'][i]).attr({
-          x: this.x + (this.facing === 'e' || this.facing === 'w' ? 6 : 20),
-          y: this.y - 20,
-          z: 999
-        });
+        if (!window.HEADLESS_MODE) {
+          Crafty.e('2D, Canvas, spr_stop' + ['a', 'b', 'c', 'd', 'e', 'f'][i]).attr({
+            x: this.x + (this.facing === 'e' || this.facing === 'w' ? 6 : 20),
+            y: this.y - 20,
+            z: 999
+          });
+        }
         return this.letter = ['a', 'b', 'c', 'd', 'e', 'f'][i++];
       });
     },
@@ -1508,7 +1534,7 @@ Grid: for entities that might want to snap to a grid.
         for (prop in tile.__c) {
           if (prop.substring(0, 4) === 'Tile') {
             tilecode = prop.substring(4);
-            if (tilecode === '29' || tilecode === '30' || tilecode === '33' || tilecode === '34' || tilecode === '35' || tilecode === '36' || tilecode === '39' || tilecode === '40' || tilecode === '41' || tilecode === '42' || tilecode === '43' || tilecode === '44' || tilecode === '45' || tilecode === '46' || tilecode === '47' || tilecode === '48' || tilecode === '49' || tilecode === '50' || tilecode === '53' || tilecode === '54' || tilecode === '62' || tilecode === '63' || tilecode === '64') {
+            if ((tilecode === '29' || tilecode === '30' || tilecode === '33' || tilecode === '34' || tilecode === '35' || tilecode === '36' || tilecode === '39' || tilecode === '40' || tilecode === '41' || tilecode === '42' || tilecode === '43' || tilecode === '44' || tilecode === '45' || tilecode === '46' || tilecode === '47' || tilecode === '48' || tilecode === '49' || tilecode === '50' || tilecode === '53' || tilecode === '54' || tilecode === '62' || tilecode === '63' || tilecode === '64') && (!window.HEADLESS_MODE)) {
               Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({
                 x: tile.x,
                 y: tile.y,
@@ -1567,37 +1593,41 @@ Grid: for entities that might want to snap to a grid.
           }
         }
       }
-      _ref3 = tiledmap.getEntitiesInLayer('Props');
-      for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-        tile = _ref3[_l];
-        tile.attr('z', 9);
-        for (prop in tile.__c) {
-          if (prop.substring(0, 4) === 'Tile') {
-            tilecode = prop.substring(4);
-            if (tilecode === '29' || tilecode === '30' || tilecode === '33' || tilecode === '34' || tilecode === '25' || tilecode === '36' || tilecode === '39' || tilecode === '40' || tilecode === '41' || tilecode === '42' || tilecode === '43' || tilecode === '44' || tilecode === '45' || tilecode === '46' || tilecode === '47' || tilecode === '48' || tilecode === '49' || tilecode === '50' || tilecode === '53' || tilecode === '54' || tilecode === '62' || tilecode === '63' || tilecode === '64' || tilecode === '67' || tilecode === '68' || tilecode === '69' || tilecode === '73' || tilecode === '74' || tilecode === '76' || tilecode === '79' || tilecode === '80') {
-              Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({
-                x: tile.x,
-                y: tile.y,
-                z: 801
-              });
+      if (tiledmap.getEntitiesInLayer('Props')) {
+        _ref3 = tiledmap.getEntitiesInLayer('Props');
+        for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+          tile = _ref3[_l];
+          tile.attr('z', 9);
+          for (prop in tile.__c) {
+            if (prop.substring(0, 4) === 'Tile') {
+              tilecode = prop.substring(4);
+              if (tilecode === '29' || tilecode === '30' || tilecode === '33' || tilecode === '34' || tilecode === '25' || tilecode === '36' || tilecode === '39' || tilecode === '40' || tilecode === '41' || tilecode === '42' || tilecode === '43' || tilecode === '44' || tilecode === '45' || tilecode === '46' || tilecode === '47' || tilecode === '48' || tilecode === '49' || tilecode === '50' || tilecode === '53' || tilecode === '54' || tilecode === '62' || tilecode === '63' || tilecode === '64' || tilecode === '67' || tilecode === '68' || tilecode === '69' || tilecode === '73' || tilecode === '74' || tilecode === '76' || tilecode === '79' || tilecode === '80') {
+                Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({
+                  x: tile.x,
+                  y: tile.y,
+                  z: 801
+                });
+              }
             }
           }
         }
       }
-      if (firstTrain) {
-        Crafty.e('PlayerScore').attr({
-          "x": 0,
-          "y": 512
-        }).attr({
-          train: firstTrain,
-          playerOne: true
-        }).setup();
-      }
-      if (secondTrain) {
-        return Crafty.e('PlayerScore').attr({
-          "x": 392,
-          "y": 512
-        }).attr("train", secondTrain).setup();
+      if (!window.HEADLESS_MODE) {
+        if (firstTrain) {
+          Crafty.e('PlayerScore').attr({
+            "x": 0,
+            "y": 512
+          }).attr({
+            train: firstTrain,
+            playerOne: true
+          }).setup();
+        }
+        if (secondTrain) {
+          return Crafty.e('PlayerScore').attr({
+            "x": 392,
+            "y": 512
+          }).attr("train", secondTrain).setup();
+        }
       }
     },
     sunrise: function(percent) {

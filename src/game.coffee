@@ -44,12 +44,14 @@ window.Game =
     () -> this.map_grid.height * this.map_grid.tile.height
   
   start: -> 
+    window.HEADLESS_MODE = false
     Crafty.init(Game.width(), Game.height(), "game-stage")
     Crafty.background('#2B281D')
     Crafty.scene('Loading')
     this
     
   startHeadless: ->
+    window.HEADLESS_MODE = true
     Crafty.init(Game.width(), Game.height(), "game-stage")
     Crafty.background('#2B281D')
     $.getJSON("map1.json", (data) ->

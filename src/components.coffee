@@ -161,19 +161,22 @@ Crafty.c "PlayerTrain",
     @passengers = 0
     @delivered = 0
     @followers = [] # following train cars
-    @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
+    if (!window.HEADLESS_MODE)
+      @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
     return
     
   _addSpriteComponent: (dir) ->
     @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
-    @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection)) + "light"
+    if (!window.HEADLESS_MODE)
+      @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection)) + "light"
     return
 
   _removeSpriteComponent: ->
     baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
     for i of Constants.DIR_PREFIXES
       @removeComponent baseSpriteName + Constants.DIR_PREFIXES[i], false
-      @lightLayer.removeComponent baseSpriteName + Constants.DIR_PREFIXES[i] + "light", false
+      if (!window.HEADLESS_MODE)
+        @lightLayer.removeComponent baseSpriteName + Constants.DIR_PREFIXES[i] + "light", false
     return
 
   _setBraking: (braking) ->
@@ -267,20 +270,23 @@ Crafty.c "FollowTrain",
   init: ->
     @requires "Actor, Train"
     @curves = []
-    @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
+    if (!window.HEADLESS_MODE)
+      @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
     return
 
   _addSpriteComponent: ->
     dir = ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
     spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
     @addComponent spriteName
-    @lightLayer.addComponent spriteName + "light"
+    if (!window.HEADLESS_MODE)
+      @lightLayer.addComponent spriteName + "light"
     return
 
   _removeSpriteComponent: ->
     baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
     @removeComponent(baseSpriteName, false).removeComponent baseSpriteName + "side", false
-    @lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent baseSpriteName + "sidelight", false
+    if (!window.HEADLESS_MODE)
+      @lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent baseSpriteName + "sidelight", false
     return
 
   _updateCurrentTrack: (dir) ->
@@ -313,7 +319,7 @@ Crafty.c "Station",
     @dropoffP1 = 0
     @dropoffP2 = 0
     @popular = false
-    @requires "Actor"
+    @requires "2D, Grid"
     @bind "EnterFrame", ->
       @populate()  if GameState.running
       return
@@ -364,30 +370,31 @@ Crafty.c "Station",
     this
 
   updateSprites: ->
-    if @population / 12.0 is @t.length + 1
-      remaining = Math.min(@population, 72) - (@t.length) * 12
-      pos = @t.length
-      if @facing is "w"
-        x = @_x + 6 * (pos % 2)
-        y = @_y + 2 + 8 * pos
-      else if @facing is "e"
-        x = @_x + 20 - 6 * (pos % 2)
-        y = @_y + 2 + 8 * pos
+    if (!window.HEADLESS_MODE)
+      if @population / 12.0 is @t.length + 1
+        remaining = Math.min(@population, 72) - (@t.length) * 12
+        pos = @t.length
+        if @facing is "w"
+          x = @_x + 6 * (pos % 2)
+          y = @_y + 2 + 8 * pos
+        else if @facing is "e"
+          x = @_x + 20 - 6 * (pos % 2)
+          y = @_y + 2 + 8 * pos
+        else
+          x = @_x + 2 + 8 * pos
+          y = @_y + 12 + 4 * (pos % 2)
+        while remaining >= 12
+          @t.push Crafty.e("StationPerson").attr(
+            x: x
+            y: y
+          ).fadeIn(@facing)
+          remaining -= 12
+          pos++
       else
-        x = @_x + 2 + 8 * pos
-        y = @_y + 12 + 4 * (pos % 2)
-      while remaining >= 12
-        @t.push Crafty.e("StationPerson").attr(
-          x: x
-          y: y
-        ).fadeIn(@facing)
-        remaining -= 12
-        pos++
-    else
-      while @t.length > @population / 12
-        @t[@t.length - 1].fadeOut()
-        @t.splice @t.length - 1, 1
-    this
+        while @t.length > @population / 12
+          @t[@t.length - 1].fadeOut()
+          @t.splice @t.length - 1, 1
+      this
 
 
 ###
@@ -513,58 +520,60 @@ Crafty.c "Dialog",
 
 Crafty.c "ClockController",
   init: ->
-    @pauseAvailable = true
-    @paused = false
-    @requires("Dialog").attr(
-      x: 234
-      y: 492
-      w: 140
-      h: 44
-    ).textColor("#84FFEC").textFont(
-      size: "43px"
-      family: "Minisystem"
-    ).css (
-      letterSpacing: "-2px"
-      border: "4px solid #606060"
-      textShadow: "0px 0px 2px #84FFEC"
-    )
     GameClock.newDay()
-    @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + GameClock.minute
+    if (!window.HEADLESS_MODE)
+      @pauseAvailable = true
+      @paused = false
+      @requires("Dialog").attr(
+        x: 234
+        y: 492
+        w: 140
+        h: 44
+      ).textColor("#84FFEC").textFont(
+        size: "43px"
+        family: "Minisystem"
+      ).css (
+        letterSpacing: "-2px"
+        border: "4px solid #606060"
+        textShadow: "0px 0px 2px #84FFEC"
+      )
+      @bind "KeyDown", (e) ->
+        if e.keyCode is Crafty.keys.SPACE
+          if @pauseAvailable
+            Crafty.e "PauseText"
+            @pauseAvailable = false
+            GameState.running = false
+            @paused = true
+          else if @paused
+            Crafty("PauseText").teardown()
+            Crafty("PauseText").destroy()
+            GameState.running = true
+            @paused = false
+        return
+      @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + GameClock.minute
     @tickDelay = 0
     @bind "EnterFrame", ->
       percentTimePassed = (GameClock.hour - 6) / 4 + (GameClock.minute / 240)
       if GameState.running and @tickDelay++ > 22
         GameClock.update()
-        @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + +GameClock.minute
         @tickDelay = 0
         Util.gameOver false  if GameClock.hour is 10
-      Crafty("AmbientLayer").each ->
-        @color Util.sunrise(percentTimePassed)
-        return
-
-      Crafty("LightLayer").each ->
-        @attr "alpha", 1 - percentTimePassed
-        return
+        if (!window.HEADLESS_MODE)
+          @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + +GameClock.minute
+          Crafty("AmbientLayer").each ->
+            @color Util.sunrise(percentTimePassed)
+            return
+    
+          Crafty("LightLayer").each ->
+            @attr "alpha", 1 - percentTimePassed
+            return
 
       return
-
+  
     setTimeout (->
       GameState.running = true
       return
     ), 1000
-    @bind "KeyDown", (e) ->
-      if e.keyCode is Crafty.keys.SPACE
-        if @pauseAvailable
-          Crafty.e "PauseText"
-          @pauseAvailable = false
-          GameState.running = false
-          @paused = true
-        else if @paused
-          Crafty("PauseText").teardown()
-          Crafty("PauseText").destroy()
-          GameState.running = true
-          @paused = false
-      return
 
     return
 

@@ -55,7 +55,8 @@ window.Util =
       i = 0
       Crafty('Station').each(
         () ->
-          Crafty.e('2D, Canvas, spr_stop' + ['a','b','c','d','e','f'][i]).attr({x: this.x + (if (this.facing == 'e' || this.facing == 'w') then 6 else 20), y: this.y - 20, z: 999});
+          if (!window.HEADLESS_MODE)
+            Crafty.e('2D, Canvas, spr_stop' + ['a','b','c','d','e','f'][i]).attr({x: this.x + (if (this.facing == 'e' || this.facing == 'w') then 6 else 20), y: this.y - 20, z: 999});
           this.letter = ['a','b','c','d','e','f'][i++]
       )
   
@@ -135,7 +136,7 @@ window.Util =
       for prop of tile.__c
         if prop.substring(0,4) == 'Tile'
           tilecode = prop.substring(4)
-          if tilecode in ['29','30','33','34','35','36','39','40','41','42','43','44','45','46','47','48','49','50','53','54','62','63','64']
+          if tilecode in ['29','30','33','34','35','36','39','40','41','42','43','44','45','46','47','48','49','50','53','54','62','63','64'] and (!window.HEADLESS_MODE)
             Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({x:tile.x, y:tile.y, z:801})
           switch tilecode
             when '35' then tile.addComponent('Station').setupAttach('w')
@@ -165,23 +166,25 @@ window.Util =
             when '24'
               secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 's')
           tile.destroy()
-    for tile in tiledmap.getEntitiesInLayer('Props')
-      tile.attr('z', 9)
-      for prop of tile.__c
-        if prop.substring(0,4) == 'Tile'
-          tilecode = prop.substring(4)
-          if tilecode in ['29','30','33','34','25','36','39','40','41','42','43','44','45','46','47','48','49','50','53','54','62','63','64', '67', '68', '69', '73', '74', '76', '79', '80']
-            Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({x:tile.x, y:tile.y, z:801})
-    if firstTrain
-      Crafty.e('PlayerScore').attr(
-        "x":0,"y":512
-      ).attr(
-        train: firstTrain, playerOne: true
-      ).setup()
-    if secondTrain
-      Crafty.e('PlayerScore').attr(
-        "x":392,"y":512
-      ).attr("train", secondTrain).setup()
+    if tiledmap.getEntitiesInLayer('Props')
+      for tile in tiledmap.getEntitiesInLayer('Props')
+        tile.attr('z', 9)
+        for prop of tile.__c
+          if prop.substring(0,4) == 'Tile'
+            tilecode = prop.substring(4)
+            if tilecode in ['29','30','33','34','25','36','39','40','41','42','43','44','45','46','47','48','49','50','53','54','62','63','64', '67', '68', '69', '73', '74', '76', '79', '80']
+              Crafty.e('2D, Canvas, LightLayer, spr_light' + tilecode).attr({x:tile.x, y:tile.y, z:801})
+    if (!window.HEADLESS_MODE)
+      if firstTrain
+        Crafty.e('PlayerScore').attr(
+          "x":0,"y":512
+        ).attr(
+          train: firstTrain, playerOne: true
+        ).setup()
+      if secondTrain
+        Crafty.e('PlayerScore').attr(
+          "x":392,"y":512
+        ).attr("train", secondTrain).setup()
     
   
   sunrise: (percent) ->
