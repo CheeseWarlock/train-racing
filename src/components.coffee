@@ -583,10 +583,10 @@ Controls train movement. Makes sure all trains move before checking collision.
 ###
 Crafty.c "TrainController",
   init: ->
-    @bind "EnterFrame", ->
+    @bind "EnterFrame", (data) ->
       if GameState.running
         Crafty("Train").each ->
-          @moveAlongTrack @speed
+          @moveAlongTrack @speed * data.dt / 20
           return
 
         Crafty("Train").each ->

@@ -679,10 +679,10 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("TrainController", {
     init: function() {
-      this.bind("EnterFrame", function() {
+      this.bind("EnterFrame", function(data) {
         if (GameState.running) {
           Crafty("Train").each(function() {
-            this.moveAlongTrack(this.speed);
+            this.moveAlongTrack(this.speed * data.dt / 20);
           });
           Crafty("Train").each(function() {
             this.attr("z", Math.floor(this.y));
