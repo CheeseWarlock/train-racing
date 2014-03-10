@@ -1,14 +1,14 @@
 Crafty.scene('Title', () ->
   this.letters = ""
   Crafty.e('2D, Canvas, spr_title').attr({x:220})
-  Crafty.e('TitleText').attr({y: 185}).text('Compete to see who can deliver more passengers!')
-  Crafty.e('TitleText').attr({y: 250}).text('Hold keys to slow down and turn at junctions.')
-  Crafty.e('2D, Canvas, spr_keyq').attr({x: 110, y: 305})
-  Crafty.e('2D, DOM, Text').attr({x: 170, y: 311, w: 200}).text('Red Line').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 335, y: 305})
-  Crafty.e('2D, DOM, Text, nobots').attr({x: 395, y: 311, w: 200}).text('Blue Line').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
-  Crafty.e('TitleText').attr({y: 380}).text('And whatever you do, don\'t cause a collision!')
-  Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 440})
+  Crafty.e('TitleText').attr({y: 193}).text('Compete to deliver more passengers by 10:00 AM!')
+  Crafty.e('TitleText').attr({y: 248}).text('Hold your key to slow down and turn at junctions:')
+  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 300})
+  Crafty.e('2D, DOM, Text').attr({x: 166, y: 348, w: 200}).text('Red Line').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
+  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 300})
+  Crafty.e('2D, DOM, Text, nobots').attr({x: 343, y: 348, w: 200}).text('Blue Line').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
+  Crafty.e('TitleText').attr({y: 406}).text('And whatever you do, don\'t cause a collision!')
+  Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 458})
   
   Crafty.e('2D, Keyboard').bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.SPACE

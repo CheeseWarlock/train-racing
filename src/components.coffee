@@ -613,7 +613,7 @@ Crafty.c "EndingText",
       margin: "0px 150px"
       width: 600
       height: 200
-      boxShadow: "-8px 8px 0px rgba(0,0,0,0.4)"
+      boxShadow: "-8px 8px 0px rgba(47,32,16,0.35)"
 
     @bind "KeyDown", (e) ->
       if e.keyCode is Crafty.keys.SPACE
