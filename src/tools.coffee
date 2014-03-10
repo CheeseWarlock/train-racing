@@ -94,6 +94,8 @@ window.Util =
     .attr('targetDirection', dir)
     .findTrack().bindKeyboardTurn((if playerOne then Crafty.keys.Q else (if window.singlePlayerMode then null else Crafty.keys.P)))
     
+    train.moveAlongTrack(0)
+    
     train.followers = []
     front = train
     for i in (if cars > 1 then [2..Math.max(2,cars)] else [])

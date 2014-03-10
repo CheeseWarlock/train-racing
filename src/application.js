@@ -1474,6 +1474,7 @@ Grid: for entities that might want to snap to a grid.
       }
       letter = (playerOne ? 'r' : 'b');
       train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().bindKeyboardTurn((playerOne ? Crafty.keys.Q : (window.singlePlayerMode ? null : Crafty.keys.P)));
+      train.moveAlongTrack(0);
       train.followers = [];
       front = train;
       _ref1 = (cars > 1 ? (function() {
