@@ -87,25 +87,22 @@ window.Util =
           setTimeout(() ->
             Crafty.e('VictoryText')
           , 800)
-  createTrain: (x, y, playerOne, dir) ->
+  createTrain: (x, y, playerOne, dir, cars=6) ->
     letter = (if playerOne then 'r' else 'b')
     
     train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
-    .attr('targetDirection', dir).addComponent('spr_' + letter + 'train' + dir)
+    .attr('targetDirection', dir)
     .findTrack().bindKeyboardTurn((if playerOne then Crafty.keys.Q else (if window.singlePlayerMode then null else Crafty.keys.P)))
     
-    follow = Crafty.e('FollowTrain').at(x-Util.dirx(dir), y-Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir)
-    .attr('targetDirection', dir)
-    .findTrack().attr('front', train)
-    
-    end = Crafty.e('FollowTrain').at(x-2*Util.dirx(dir), y-2*Util.diry(dir)).attr('playerOne', playerOne).attr('sourceDirection', dir)
-    .attr('targetDirection', dir).attr('finale', true)
-    .findTrack().attr('front', follow)
-    
-    train.followers = [follow, end]
-
-    follow.moveAlongTrack(6)
-    end.moveAlongTrack(12)
+    train.followers = []
+    front = train
+    for i in [2..Math.max(2,cars)]
+      temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
+      .attr('targetDirection', dir)
+      .findTrack().attr('front', front)
+      front = temp
+      train.followers.push(front)
+      front.moveAlongTrack(-22 * (i-1))
     
     train
     

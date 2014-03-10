@@ -80,6 +80,7 @@ Crafty.c "Train",
   moveAlongTrack: (dist) ->
     reversing = (dist < 0)
     if (reversing)
+      @angle = @angle + Math.PI
       if (@isCurving())
         @progress = Constants.TILE_HALF * Math.PI / 2 - @progress
       else
@@ -104,6 +105,7 @@ Crafty.c "Train",
         y: @y
         
     if (reversing)
+      @angle = @angle - Math.PI
       temp = @sourceDirection
       @sourceDirection = Util.opposite(@targetDirection)
       @targetDirection = Util.opposite(temp)

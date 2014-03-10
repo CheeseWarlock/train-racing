@@ -46,6 +46,7 @@ window.Game =
   start: -> 
     window.HEADLESS_MODE = false
     Crafty.init(Game.width(), Game.height(), "game-stage")
+    Crafty.pixelart(true)
     Crafty.background('#2B281D')
     Crafty.scene('Loading')
     this
