@@ -46,7 +46,7 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("Train", {
     init: function() {
-      this.requires("Actor, Keyboard");
+      this.requires((window.HEADLESS_MODE ? "2D, Grid" : "Actor, Keyboard"));
       this.speed = Constants.FULL_SPEED;
       this.playerOne = false;
       this.angle = 0;
@@ -179,17 +179,17 @@ Grid: for entities that might want to snap to a grid.
       }
     },
     _addSpriteComponent: function(dir) {
-      this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection));
       if (!window.HEADLESS_MODE) {
+        this.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection));
         this.lightLayer.addComponent("spr_" + (this.playerOne ? "r" : "b") + "train" + (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection) + "light");
       }
     },
     _removeSpriteComponent: function() {
       var baseSpriteName, i;
-      baseSpriteName = "spr_" + (this.playerOne ? "r" : "b") + "train";
-      for (i in Constants.DIR_PREFIXES) {
-        this.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i], false);
-        if (!window.HEADLESS_MODE) {
+      if (!window.HEADLESS_MODE) {
+        baseSpriteName = "spr_" + (this.playerOne ? "r" : "b") + "train";
+        for (i in Constants.DIR_PREFIXES) {
+          this.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i], false);
           this.lightLayer.removeComponent(baseSpriteName + Constants.DIR_PREFIXES[i] + "light", false);
         }
       }
@@ -323,7 +323,7 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("FollowTrain", {
     init: function() {
-      this.requires("Actor, Train");
+      this.requires("Train");
       this.curves = [];
       if (!window.HEADLESS_MODE) {
         this.lightLayer = Crafty.e("2D, Canvas, LightLayer").attr({
@@ -333,18 +333,18 @@ Grid: for entities that might want to snap to a grid.
     },
     _addSpriteComponent: function() {
       var dir, spriteName;
-      dir = (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection);
-      spriteName = "spr_" + (this.playerOne ? "r" : "b") + "train" + (dir === "n" || dir === "s" ? "side" : "");
-      this.addComponent(spriteName);
       if (!window.HEADLESS_MODE) {
+        dir = (this.isCurving() && this.progress > Constants.TILE_HALF * Math.PI / 4 ? this.targetDirection : this.sourceDirection);
+        spriteName = "spr_" + (this.playerOne ? "r" : "b") + "train" + (dir === "n" || dir === "s" ? "side" : "");
+        this.addComponent(spriteName);
         this.lightLayer.addComponent(spriteName + "light");
       }
     },
     _removeSpriteComponent: function() {
       var baseSpriteName;
-      baseSpriteName = "spr_" + (this.playerOne ? "r" : "b") + "train";
-      this.removeComponent(baseSpriteName, false).removeComponent(baseSpriteName + "side", false);
       if (!window.HEADLESS_MODE) {
+        baseSpriteName = "spr_" + (this.playerOne ? "r" : "b") + "train";
+        this.removeComponent(baseSpriteName, false).removeComponent(baseSpriteName + "side", false);
         this.lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent(baseSpriteName + "sidelight", false);
       }
     },

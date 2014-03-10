@@ -34,7 +34,7 @@ Train: moves along track, contains movement logic.
 ###
 Crafty.c "Train",
   init: ->
-    @requires "Actor, Keyboard"
+    @requires (if window.HEADLESS_MODE then "2D, Grid" else "Actor, Keyboard")
     @speed = Constants.FULL_SPEED
     @playerOne = false
     @angle = 0
@@ -166,16 +166,16 @@ Crafty.c "PlayerTrain",
     return
     
   _addSpriteComponent: (dir) ->
-    @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
     if (!window.HEADLESS_MODE)
+      @addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
       @lightLayer.addComponent "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection)) + "light"
     return
 
   _removeSpriteComponent: ->
-    baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
-    for i of Constants.DIR_PREFIXES
-      @removeComponent baseSpriteName + Constants.DIR_PREFIXES[i], false
-      if (!window.HEADLESS_MODE)
+    if (!window.HEADLESS_MODE)
+      baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
+      for i of Constants.DIR_PREFIXES
+        @removeComponent baseSpriteName + Constants.DIR_PREFIXES[i], false
         @lightLayer.removeComponent baseSpriteName + Constants.DIR_PREFIXES[i] + "light", false
     return
 
@@ -268,24 +268,24 @@ Crafty.c "PlayerTrain",
 
 Crafty.c "FollowTrain",
   init: ->
-    @requires "Actor, Train"
+    @requires "Train"
     @curves = []
     if (!window.HEADLESS_MODE)
       @lightLayer = Crafty.e("2D, Canvas, LightLayer").attr(z: 1000)
     return
 
   _addSpriteComponent: ->
-    dir = ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
-    spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
-    @addComponent spriteName
     if (!window.HEADLESS_MODE)
+      dir = ((if @isCurving() and @progress > Constants.TILE_HALF * Math.PI / 4 then @targetDirection else @sourceDirection))
+      spriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train" + ((if dir is "n" or dir is "s" then "side" else ""))
+      @addComponent spriteName
       @lightLayer.addComponent spriteName + "light"
     return
 
   _removeSpriteComponent: ->
-    baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
-    @removeComponent(baseSpriteName, false).removeComponent baseSpriteName + "side", false
     if (!window.HEADLESS_MODE)
+      baseSpriteName = "spr_" + ((if @playerOne then "r" else "b")) + "train"
+      @removeComponent(baseSpriteName, false).removeComponent baseSpriteName + "side", false
       @lightLayer.removeComponent(baseSpriteName + "light", false).removeComponent baseSpriteName + "sidelight", false
     return
 
