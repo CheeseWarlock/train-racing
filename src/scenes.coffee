@@ -4,9 +4,9 @@ Crafty.scene('Title', () ->
   Crafty.e('TitleText').attr({y: 193}).text('Compete to deliver more passengers by 10:00 AM!')
   Crafty.e('TitleText').attr({y: 248}).text('Hold your key to slow down and turn at junctions:')
   Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 300})
-  Crafty.e('2D, DOM, Text').attr({x: 166, y: 348, w: 200}).text('Red Line').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
+  Crafty.e('2D, DOM, Text').attr({x: 161, y: 348, w: 200}).text('Red Train').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
   Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 300})
-  Crafty.e('2D, DOM, Text, nobots').attr({x: 343, y: 348, w: 200}).text('Blue Line').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
+  Crafty.e('2D, DOM, Text, nobots').attr({x: 338, y: 348, w: 200}).text('Blue Train').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
   Crafty.e('TitleText').attr({y: 406}).text('And whatever you do, don\'t cause a collision!')
   Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 458})
   
@@ -170,8 +170,9 @@ Crafty.scene('SelectMap', () ->
     Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
     curry+=48
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load From External...")
+  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load Map...")
   Crafty.e('2D, Canvas, spr_selectarrow').attr({x: 200, y: 140})
+  Crafty.e('2D, Canvas, spr_space').attr({x: 420, y: 130})
   
   Crafty.e('2D, Canvas, Color').color('#2B281D')
   .attr(
@@ -221,31 +222,31 @@ Crafty.scene('SelectMap', () ->
       this.selection-=1
       if this.selection == -1
         this.selection = window.MapList.length
-        Crafty('spr_selectarrow').each(() ->
+        Crafty('spr_selectarrow, spr_space').each(() ->
           this.attr('y', this._y + 48 * (window.MapList.length + 1))
         )
-      this.text(if this.selection < window.MapList.length then window.MapList[this.selection][1] else "Load From External...")
-      Crafty('spr_selectarrow').each(() ->
+      this.text(if this.selection < window.MapList.length then window.MapList[this.selection][1] else "Load Map...")
+      Crafty('spr_selectarrow, spr_space').each(() ->
         this.attr('y', this._y - 48)
       )
     if e.keyCode == Crafty.keys.P
       this.selection+=1
       if this.selection == window.MapList.length + 1
         this.selection = 0
-        Crafty('spr_selectarrow').each(() ->
+        Crafty('spr_selectarrow, spr_space').each(() ->
           this.attr('y', this._y - 48 * (window.MapList.length + 1))
         )
-      this.text(if this.selection < window.MapList.length then window.MapList[this.selection][1] else "Load From External...")
-      Crafty('spr_selectarrow').each(() ->
+      this.text(if this.selection < window.MapList.length then window.MapList[this.selection][1] else "Load Map...")
+      Crafty('spr_selectarrow, spr_space').each(() ->
         this.attr('y', this._y + 48)
       )
   ).bind('EnterFrame', () ->
     if Crafty('spr_selectarrow').y > 284
-      Crafty('spr_selectarrow, spr_selectstn, spr_selectline, aaa').each(() ->
+      Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(() ->
         this.y -= 6;
       )
     else if Crafty('spr_selectarrow').y < 140 + Math.min(96, this.selection * 48)
-      Crafty('spr_selectarrow, spr_selectstn, spr_selectline, aaa').each(() ->
+      Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(() ->
         this.y += 6;
       )
   )

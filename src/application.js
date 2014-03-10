@@ -990,10 +990,10 @@ Grid: for entities that might want to snap to a grid.
       y: 300
     });
     Crafty.e('2D, DOM, Text').attr({
-      x: 166,
+      x: 161,
       y: 348,
       w: 200
-    }).text('Red Line').textFont({
+    }).text('Red Train').textFont({
       size: '26px',
       family: 'Aller'
     }).textColor('#E23228');
@@ -1002,10 +1002,10 @@ Grid: for entities that might want to snap to a grid.
       y: 300
     });
     Crafty.e('2D, DOM, Text, nobots').attr({
-      x: 343,
+      x: 338,
       y: 348,
       w: 200
-    }).text('Blue Line').textFont({
+    }).text('Blue Train').textFont({
       size: '26px',
       family: 'Aller'
     }).textColor('#4956FF');
@@ -1212,10 +1212,14 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Load From External...");
+    }).textColor('#5CC64C').text("Load Map...");
     Crafty.e('2D, Canvas, spr_selectarrow').attr({
       x: 200,
       y: 140
+    });
+    Crafty.e('2D, Canvas, spr_space').attr({
+      x: 420,
+      y: 130
     });
     Crafty.e('2D, Canvas, Color').color('#2B281D').attr({
       y: 0,
@@ -1262,12 +1266,12 @@ Grid: for entities that might want to snap to a grid.
         this.selection -= 1;
         if (this.selection === -1) {
           this.selection = window.MapList.length;
-          Crafty('spr_selectarrow').each(function() {
+          Crafty('spr_selectarrow, spr_space').each(function() {
             return this.attr('y', this._y + 48 * (window.MapList.length + 1));
           });
         }
-        this.text(this.selection < window.MapList.length ? window.MapList[this.selection][1] : "Load From External...");
-        Crafty('spr_selectarrow').each(function() {
+        this.text(this.selection < window.MapList.length ? window.MapList[this.selection][1] : "Load Map...");
+        Crafty('spr_selectarrow, spr_space').each(function() {
           return this.attr('y', this._y - 48);
         });
       }
@@ -1275,22 +1279,22 @@ Grid: for entities that might want to snap to a grid.
         this.selection += 1;
         if (this.selection === window.MapList.length + 1) {
           this.selection = 0;
-          Crafty('spr_selectarrow').each(function() {
+          Crafty('spr_selectarrow, spr_space').each(function() {
             return this.attr('y', this._y - 48 * (window.MapList.length + 1));
           });
         }
-        this.text(this.selection < window.MapList.length ? window.MapList[this.selection][1] : "Load From External...");
-        return Crafty('spr_selectarrow').each(function() {
+        this.text(this.selection < window.MapList.length ? window.MapList[this.selection][1] : "Load Map...");
+        return Crafty('spr_selectarrow, spr_space').each(function() {
           return this.attr('y', this._y + 48);
         });
       }
     }).bind('EnterFrame', function() {
       if (Crafty('spr_selectarrow').y > 284) {
-        return Crafty('spr_selectarrow, spr_selectstn, spr_selectline, aaa').each(function() {
+        return Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(function() {
           return this.y -= 6;
         });
       } else if (Crafty('spr_selectarrow').y < 140 + Math.min(96, this.selection * 48)) {
-        return Crafty('spr_selectarrow, spr_selectstn, spr_selectline, aaa').each(function() {
+        return Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(function() {
           return this.y += 6;
         });
       }
