@@ -87,7 +87,7 @@ window.Util =
           setTimeout(() ->
             Crafty.e('VictoryText')
           , 800)
-  createTrain: (x, y, playerOne, dir, cars=6) ->
+  createTrain: (x, y, playerOne, dir, cars=3) ->
     letter = (if playerOne then 'r' else 'b')
     
     train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
@@ -96,7 +96,7 @@ window.Util =
     
     train.followers = []
     front = train
-    for i in [2..Math.max(2,cars)]
+    for i in (if cars > 1 then [2..Math.max(2,cars)] else [])
       temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
       .attr('targetDirection', dir)
       .findTrack().attr('front', front)

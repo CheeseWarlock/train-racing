@@ -64,6 +64,9 @@ Crafty.c "Train",
     @sourceDirection != @targetDirection
 
   _finishSection: (dir) ->
+    if (@reversing)
+      if (true and !(@_hasCurveOption() and @_hasStraightOption()) and @currentTrack.dir.length == 3)
+        @curves.push @_hasCurveOption()
     @angle = Util.endAngle(dir)
     @x = @currentTrack.x + Util.dirx(dir) * Constants.TILE_HALF
     @y = @currentTrack.y + Util.diry(dir) * Constants.TILE_HALF
@@ -78,8 +81,8 @@ Crafty.c "Train",
     @currentTrack.dir.length is 3 and (@currentTrack.dir.indexOf(Util.opposite(@sourceDirection)) > 0) or @currentTrack.dir.length is 2 and @currentTrack.dir.indexOf(@sourceDirection) is -1
 
   moveAlongTrack: (dist) ->
-    reversing = (dist < 0)
-    if (reversing)
+    @reversing = (dist < 0)
+    if (@reversing)
       @angle = @angle + Math.PI
       if (@isCurving())
         @progress = Constants.TILE_HALF * Math.PI / 2 - @progress
@@ -104,7 +107,7 @@ Crafty.c "Train",
         x: @x
         y: @y
         
-    if (reversing)
+    if (@reversing)
       @angle = @angle - Math.PI
       temp = @sourceDirection
       @sourceDirection = Util.opposite(@targetDirection)

@@ -77,6 +77,11 @@ Grid: for entities that might want to snap to a grid.
       return this.sourceDirection !== this.targetDirection;
     },
     _finishSection: function(dir) {
+      if (this.reversing) {
+        if (true && !(this._hasCurveOption() && this._hasStraightOption()) && this.currentTrack.dir.length === 3) {
+          this.curves.push(this._hasCurveOption());
+        }
+      }
       this.angle = Util.endAngle(dir);
       this.x = this.currentTrack.x + Util.dirx(dir) * Constants.TILE_HALF;
       this.y = this.currentTrack.y + Util.diry(dir) * Constants.TILE_HALF;
@@ -90,9 +95,9 @@ Grid: for entities that might want to snap to a grid.
       return this.currentTrack.dir.length === 3 && (this.currentTrack.dir.indexOf(Util.opposite(this.sourceDirection)) > 0) || this.currentTrack.dir.length === 2 && this.currentTrack.dir.indexOf(this.sourceDirection) === -1;
     },
     moveAlongTrack: function(dist) {
-      var remainingTries, reversing, temp;
-      reversing = dist < 0;
-      if (reversing) {
+      var remainingTries, temp;
+      this.reversing = dist < 0;
+      if (this.reversing) {
         this.angle = this.angle + Math.PI;
         if (this.isCurving()) {
           this.progress = Constants.TILE_HALF * Math.PI / 2 - this.progress;
@@ -121,7 +126,7 @@ Grid: for entities that might want to snap to a grid.
           y: this.y
         });
       }
-      if (reversing) {
+      if (this.reversing) {
         this.angle = this.angle - Math.PI;
         temp = this.sourceDirection;
         this.sourceDirection = Util.opposite(this.targetDirection);
@@ -1463,15 +1468,21 @@ Grid: for entities that might want to snap to a grid.
       }
     },
     createTrain: function(x, y, playerOne, dir, cars) {
-      var front, i, letter, temp, train, _i, _ref;
+      var front, i, letter, temp, train, _i, _j, _len, _ref, _ref1, _results;
       if (cars == null) {
-        cars = 6;
+        cars = 3;
       }
       letter = (playerOne ? 'r' : 'b');
       train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().bindKeyboardTurn((playerOne ? Crafty.keys.Q : (window.singlePlayerMode ? null : Crafty.keys.P)));
       train.followers = [];
       front = train;
-      for (i = _i = 2, _ref = Math.max(2, cars); 2 <= _ref ? _i <= _ref : _i >= _ref; i = 2 <= _ref ? ++_i : --_i) {
+      _ref1 = (cars > 1 ? (function() {
+        _results = [];
+        for (var _j = 2, _ref = Math.max(2, cars); 2 <= _ref ? _j <= _ref : _j >= _ref; 2 <= _ref ? _j++ : _j--){ _results.push(_j); }
+        return _results;
+      }).apply(this) : []);
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        i = _ref1[_i];
         temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', front);
         front = temp;
         train.followers.push(front);
