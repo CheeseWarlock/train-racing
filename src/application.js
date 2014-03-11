@@ -636,7 +636,7 @@ Grid: for entities that might want to snap to a grid.
           textShadow: "0px 0px 2px #84FFEC"
         });
         this.bind("KeyDown", function(e) {
-          if (e.keyCode === Crafty.keys.SPACE) {
+          if (e.keyCode === Crafty.keys.SPACE && (GameState.running || this.paused)) {
             if (this.pauseAvailable) {
               Crafty.e("PauseText");
               this.pauseAvailable = false;
@@ -653,12 +653,16 @@ Grid: for entities that might want to snap to a grid.
         this.text(GameClock.hour + (GameClock.minute > 9 ? ":" : ":0") + GameClock.minute);
       }
       this.tickDelay = 0;
-      this.bind("EnterFrame", function() {
+      this.bind("EnterFrame", function(data) {
         var percentTimePassed;
         percentTimePassed = (GameClock.hour - 6) / 4 + (GameClock.minute / 240);
-        if (GameState.running && this.tickDelay++ > 22) {
+        if (GameState.running) {
+          this.tickDelay += data.dt / 20;
+          GameClock.elapsed += data.dt / 20;
+        }
+        if (GameState.running && (this.tickDelay > Constants.MINUTE_LENGTH)) {
           GameClock.update();
-          this.tickDelay = 0;
+          this.tickDelay -= Constants.MINUTE_LENGTH;
           if (GameClock.hour === 10) {
             Util.gameOver(false);
           }
@@ -1674,7 +1678,8 @@ Grid: for entities that might want to snap to a grid.
     MAX_PASSENGERS: 100,
     FULL_SPEED: 1.75,
     REDUCED_SPEED: 0.875,
-    TILE_JUMP_LIMIT: 5
+    TILE_JUMP_LIMIT: 5,
+    MINUTE_LENGTH: 22
   };
 
   window.GameState = {
@@ -1682,6 +1687,7 @@ Grid: for entities that might want to snap to a grid.
   };
 
   window.GameClock = {
+    elapsed: 0,
     newDay: function() {
       this.hour = 6;
       return this.minute = 0;

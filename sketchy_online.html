@@ -29,7 +29,7 @@ $(document).ready(function() {
 		if (event.which == 32) {
 			// ???
 		} else {
-			socket.emit('toggle off', {game: "GAME_ID", player: PLAYER_ONE});
+			socket.emit('toggle off', {game: "GAME_ID", player: PLAYER_ONE, time: window.GameClock.elapsed});
 		}
 	});
 	

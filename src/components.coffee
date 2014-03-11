@@ -543,7 +543,7 @@ Crafty.c "ClockController",
         textShadow: "0px 0px 2px #84FFEC"
       )
       @bind "KeyDown", (e) ->
-        if e.keyCode is Crafty.keys.SPACE
+        if e.keyCode is Crafty.keys.SPACE and (GameState.running or @paused)
           if @pauseAvailable
             Crafty.e "PauseText"
             @pauseAvailable = false
@@ -557,11 +557,14 @@ Crafty.c "ClockController",
         return
       @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + GameClock.minute
     @tickDelay = 0
-    @bind "EnterFrame", ->
+    @bind "EnterFrame", (data)->
       percentTimePassed = (GameClock.hour - 6) / 4 + (GameClock.minute / 240)
-      if GameState.running and @tickDelay++ > 22
+      if GameState.running
+        @tickDelay+=(data.dt / 20)
+        GameClock.elapsed += (data.dt / 20)
+      if GameState.running and (@tickDelay > Constants.MINUTE_LENGTH)
         GameClock.update()
-        @tickDelay = 0
+        @tickDelay -= Constants.MINUTE_LENGTH
         Util.gameOver false  if GameClock.hour is 10
         if (!window.HEADLESS_MODE)
           @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + +GameClock.minute

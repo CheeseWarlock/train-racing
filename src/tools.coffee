@@ -215,11 +215,13 @@ window.Constants =
   FULL_SPEED: 1.75
   REDUCED_SPEED: 0.875
   TILE_JUMP_LIMIT: 5
+  MINUTE_LENGTH: 22
   
 window.GameState =
   running: false  
 
 window.GameClock = 
+  elapsed: 0
   newDay: () ->
     this.hour = 6
     this.minute = 0
