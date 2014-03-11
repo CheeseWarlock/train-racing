@@ -10,18 +10,28 @@
   <script src="lib/create_mocks_module.js"></script>
   <script src="src/application.js"></script>
   <script>
-    window.addEventListener('load', Game.start);
+    window.addEventListener('load', function() {
+    	Game.start();
+    	window.MULTIPLAYER = true;
+    });
   </script>
   <script>
+  
   PLAYER_ONE = true;
-  var socket = io.connect('http://joecardwell-helloworld.jit.su:80');
+  window.socket = io.connect('http://joecardwell-helloworld.jit.su:80');
 
 $(document).ready(function() {
 	$(window).keydown(function(event) {
 		if (event.which == 32) {
-			socket.emit('continue', {game: "GAME_ID", player: PLAYER_ONE});
+			//socket.emit('continue', {game: "GAME_ID", player: PLAYER_ONE});
 		} else {
-			socket.emit('toggle on', {game: "GAME_ID", player: PLAYER_ONE});
+			var d;
+			Crafty("PlayerTrain").each(function() {
+				if (PLAYER_ONE == this.playerOne) {
+					d = this.distanceTraveled;
+				};
+			});
+			socket.emit('toggle on', {game: "GAME_ID", player: PLAYER_ONE, distanceTraveled: d});
 		}
 	});
 
@@ -29,7 +39,13 @@ $(document).ready(function() {
 		if (event.which == 32) {
 			// ???
 		} else {
-			socket.emit('toggle off', {game: "GAME_ID", player: PLAYER_ONE, time: window.GameClock.elapsed});
+			var d;
+			Crafty("PlayerTrain").each(function() {
+				if (PLAYER_ONE == this.playerOne) {
+					d = this.distanceTraveled;
+				};
+			});
+			socket.emit('toggle off', {game: "GAME_ID", player: PLAYER_ONE, distanceTraveled: d});
 		}
 	});
 	
@@ -39,28 +55,60 @@ $(document).ready(function() {
 });
 
 socket.on('toggle on', function(data) {
-	console.log('on');
+	var backtrack;
+	Crafty("Train").each(function() {
+		if (data.player == this.playerOne && (data.player != PLAYER_ONE)) {
+			backtrack = (this.distanceTraveled - data.distanceTraveled);
+			if (backtrack < 0) this.moveAlongTrack(backtrack);
+		};
+	});
 	Crafty("PlayerTrain").each(function() {
 		if (data.player == this.playerOne) {
 			this._setBraking(true);
 		};
 	});
+	Crafty("Train").each(function() {
+		if (data.player == this.playerOne && (data.player != PLAYER_ONE)) {
+			if (backtrack < 0) this.moveAlongTrack(-backtrack);
+		};
+	});
+	console.log(backtrack);
 });
 
 socket.on('toggle off', function(data) {
-	console.log('off');
+	var backtrack;
+	Crafty("Train").each(function() {
+		if (data.player == this.playerOne && (data.player != PLAYER_ONE)) {
+			backtrack = (this.distanceTraveled - data.distanceTraveled);
+			if (backtrack < 0) this.moveAlongTrack(backtrack);
+		};
+	});
 	Crafty("PlayerTrain").each(function() {
 		if (data.player == this.playerOne) {
 			this._setBraking(false);
 		};
 	});
+	Crafty("Train").each(function() {
+		if (data.player == this.playerOne && (data.player != PLAYER_ONE)) {
+			if (backtrack < 0) this.moveAlongTrack(-backtrack);
+		};
+	});
+	console.log(backtrack);
 });
 
 socket.on('continue', function(data) {
-	console.log('got it');
 	if (data.player != PLAYER_ONE) {
 		Crafty.trigger('KeyDown', {keyCode: Crafty.keys.SPACE});
 	}
+});
+
+socket.on('initiate game', function(data) {
+	$.getJSON(window.MapList[data.map][0], function(data) {
+        window.selectedMap = data;
+	});
+    window.setTimeout(function() {    	
+    	Crafty.scene('PlayGame');
+    }, 5000);
 });
 
 </script>

@@ -42,6 +42,7 @@ Crafty.c "Train",
     @progress = 0
     @targetDirection
     @sourceDirection
+    @distanceTraveled = 0
     return
 
   checkCollision: ->
@@ -81,6 +82,7 @@ Crafty.c "Train",
     @currentTrack.dir.length is 3 and (@currentTrack.dir.indexOf(Util.opposite(@sourceDirection)) > 0) or @currentTrack.dir.length is 2 and @currentTrack.dir.indexOf(@sourceDirection) is -1
 
   moveAlongTrack: (dist) ->
+    @distanceTraveled += dist
     @reversing = (dist < 0)
     if (@reversing)
       @angle = @angle + Math.PI

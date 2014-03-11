@@ -105,6 +105,7 @@ window.Util =
       front = temp
       train.followers.push(front)
       front.moveAlongTrack(-22 * (i-1))
+      front.distanceTraveled = 0
     
     train
     

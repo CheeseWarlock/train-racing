@@ -54,6 +54,7 @@ Grid: for entities that might want to snap to a grid.
       this.progress = 0;
       this.targetDirection;
       this.sourceDirection;
+      this.distanceTraveled = 0;
     },
     checkCollision: function() {
       var collisionFound, other;
@@ -96,6 +97,7 @@ Grid: for entities that might want to snap to a grid.
     },
     moveAlongTrack: function(dist) {
       var remainingTries, temp;
+      this.distanceTraveled += dist;
       this.reversing = dist < 0;
       if (this.reversing) {
         this.angle = this.angle + Math.PI;
@@ -1496,6 +1498,7 @@ Grid: for entities that might want to snap to a grid.
         front = temp;
         train.followers.push(front);
         front.moveAlongTrack(-22 * (i - 1));
+        front.distanceTraveled = 0;
       }
       return train;
     },
