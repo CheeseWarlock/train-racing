@@ -22,6 +22,10 @@ module("Placement and movement tests", {
 		Crafty.e("TrackSection").attr('dir', ['n','w']).at(2,2);
 		Crafty.e("TrackSection").attr('dir', ['n','s']).at(2,1);
 		Crafty.e("TrackSection").attr('dir', ['n','s']).at(2,0);
+		Crafty.e("TrackSection").attr('dir', ['n','s']).at(6,10);
+		Crafty.e("TrackSection").attr('dir', ['s','n','w']).at(6,9);
+		Crafty.e("TrackSection").attr('dir', ['n','s']).at(6,8);
+		Crafty.e("TrackSection").attr('dir', ['n','s','w']).at(6,7);
 	},
 	teardown: function() {
 		Crafty("TrackSection").destroy();
@@ -30,7 +34,7 @@ module("Placement and movement tests", {
 });
 
 test("Track setup", function() {
-  equal(Crafty("TrackSection").length, 7, "Track sections created");
+  equal(Crafty("TrackSection").length, 11, "Track sections created");
   var track = Util.trackAt(0,0);
   deepEqual(track.dir, ['n','s'], "Tracks findable");
 });
@@ -113,5 +117,10 @@ test("Reversing motion", function() {
   train.moveAlongTrack(-30);
   equal(train.y, 28, "Trains can move backwards along curved tracks");
   
+});
+
+
+test("Finding next junctions", function() {
+	equal(AI.findNextJunction(6,10,'n'),3,"Finding good");
 });
 

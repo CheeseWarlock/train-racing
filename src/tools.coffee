@@ -233,6 +233,17 @@ window.GameClock =
     else
       this.minute += 1
       
+window.AI =
+  findNextJunction: (x, y, dir) ->
+    dist = 0
+    heading = dir
+    track = Util.trackAt(x, y)
+    while (track.dir.length == 2 or track.dir[1] != Util.opposite(heading))
+      heading = (if Util.opposite(heading) == track.dir[0] then track.dir[track.dir.length - 1] else track.dir[0])
+      dist += 1
+      track = Util.trackAt(track.at().x + Util.dirx(dir), track.at().y + Util.diry(dir))
+    dist
+      
 $.getJSON('./maps.json', (mapListSource) ->
   window.MapList = mapListSource
 )

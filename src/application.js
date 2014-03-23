@@ -1705,6 +1705,21 @@ Grid: for entities that might want to snap to a grid.
     }
   };
 
+  window.AI = {
+    findNextJunction: function(x, y, dir) {
+      var dist, heading, track;
+      dist = 0;
+      heading = dir;
+      track = Util.trackAt(x, y);
+      while (track.dir.length === 2 || track.dir[1] !== Util.opposite(heading)) {
+        heading = (Util.opposite(heading) === track.dir[0] ? track.dir[track.dir.length - 1] : track.dir[0]);
+        dist += 1;
+        track = Util.trackAt(track.at().x + Util.dirx(dir), track.at().y + Util.diry(dir));
+      }
+      return dist;
+    }
+  };
+
   $.getJSON('./maps.json', function(mapListSource) {
     return window.MapList = mapListSource;
   });

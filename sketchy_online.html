@@ -59,7 +59,7 @@ socket.on('toggle on', function(data) {
 	Crafty("Train").each(function() {
 		if (data.player == this.playerOne && (data.player != PLAYER_ONE)) {
 			backtrack = (this.distanceTraveled - data.distanceTraveled);
-			if (backtrack < 0) this.moveAlongTrack(backtrack);
+			if (backtrack < 0) this.moveAlongTrack(backtrack + 1);
 		};
 	});
 	Crafty("PlayerTrain").each(function() {
@@ -69,7 +69,7 @@ socket.on('toggle on', function(data) {
 	});
 	Crafty("Train").each(function() {
 		if (data.player == this.playerOne && (data.player != PLAYER_ONE)) {
-			if (backtrack < 0) this.moveAlongTrack(-backtrack);
+			if (backtrack < 0) this.moveAlongTrack(-backtrack - 1);
 		};
 	});
 	console.log(backtrack);
