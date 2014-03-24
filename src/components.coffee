@@ -564,7 +564,6 @@ Crafty.c "ClockController",
     @tickDelay = 0
     @bind "EnterFrame", (data)->
       percentTimePassed = Math.max(0, (GameClock.hour - 6) / 4 + (GameClock.minute / 240))
-      console.log(percentTimePassed)
       if GameState.running
         @tickDelay+=(data.dt / 20)
         GameClock.elapsed += (data.dt / 20)

@@ -65,23 +65,9 @@ window.Util =
       if (GameState.running)
         GameState.running = false
         if (failure)
-          for i in [800,1600,2400]
-            setTimeout(() ->
-              Crafty('Train').each(() ->
-                this._removeSpriteComponent()
-              )
-            , i)
-          
-          for i in [1200,2000,2800]
-            setTimeout(() ->
-              Crafty('Train').each(() ->
-                this._addSpriteComponent()
-              )
-            , i)
-            
           setTimeout(() ->
             Crafty.e('FailureText')
-          , 2800)
+          , 1000)
           this
         else
           setTimeout(() ->

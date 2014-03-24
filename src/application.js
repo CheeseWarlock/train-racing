@@ -666,7 +666,6 @@ Grid: for entities that might want to snap to a grid.
       this.bind("EnterFrame", function(data) {
         var percentTimePassed;
         percentTimePassed = Math.max(0, (GameClock.hour - 6) / 4 + (GameClock.minute / 240));
-        console.log(percentTimePassed);
         if (GameState.running) {
           this.tickDelay += data.dt / 20;
           GameClock.elapsed += data.dt / 20;
@@ -1454,31 +1453,12 @@ Grid: for entities that might want to snap to a grid.
       });
     },
     gameOver: function(failure) {
-      var i, _i, _j, _len, _len1, _ref, _ref1;
       if (GameState.running) {
         GameState.running = false;
         if (failure) {
-          _ref = [800, 1600, 2400];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            i = _ref[_i];
-            setTimeout(function() {
-              return Crafty('Train').each(function() {
-                return this._removeSpriteComponent();
-              });
-            }, i);
-          }
-          _ref1 = [1200, 2000, 2800];
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            i = _ref1[_j];
-            setTimeout(function() {
-              return Crafty('Train').each(function() {
-                return this._addSpriteComponent();
-              });
-            }, i);
-          }
           setTimeout(function() {
             return Crafty.e('FailureText');
-          }, 2800);
+          }, 1000);
           return this;
         } else {
           return setTimeout(function() {
