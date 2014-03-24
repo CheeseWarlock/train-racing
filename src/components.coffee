@@ -563,7 +563,8 @@ Crafty.c "ClockController",
       @text GameClock.hour + ((if GameClock.minute > 9 then ":" else ":0")) + GameClock.minute
     @tickDelay = 0
     @bind "EnterFrame", (data)->
-      percentTimePassed = (GameClock.hour - 6) / 4 + (GameClock.minute / 240)
+      percentTimePassed = Math.max(0, (GameClock.hour - 6) / 4 + (GameClock.minute / 240))
+      console.log(percentTimePassed)
       if GameState.running
         @tickDelay+=(data.dt / 20)
         GameClock.elapsed += (data.dt / 20)
@@ -582,11 +583,7 @@ Crafty.c "ClockController",
             return
 
       return
-  
-    setTimeout (->
-      GameState.running = true
-      return
-    ), 1000
+    GameState.running = true
 
     return
 
@@ -597,7 +594,7 @@ Controls train movement. Makes sure all trains move before checking collision.
 Crafty.c "TrainController",
   init: ->
     @bind "EnterFrame", (data) ->
-      if GameState.running
+      if GameState.running and GameClock.hour > 5
         Crafty("Train").each ->
           @moveAlongTrack @speed * data.dt / 20
           return

@@ -224,8 +224,8 @@ window.GameState =
 window.GameClock = 
   elapsed: 0
   newDay: () ->
-    this.hour = 6
-    this.minute = 0
+    this.hour = 5
+    this.minute = 55
   update: () ->
     if (this.minute >= 59)
       this.hour += 1

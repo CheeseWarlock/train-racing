@@ -665,7 +665,8 @@ Grid: for entities that might want to snap to a grid.
       this.tickDelay = 0;
       this.bind("EnterFrame", function(data) {
         var percentTimePassed;
-        percentTimePassed = (GameClock.hour - 6) / 4 + (GameClock.minute / 240);
+        percentTimePassed = Math.max(0, (GameClock.hour - 6) / 4 + (GameClock.minute / 240));
+        console.log(percentTimePassed);
         if (GameState.running) {
           this.tickDelay += data.dt / 20;
           GameClock.elapsed += data.dt / 20;
@@ -687,9 +688,7 @@ Grid: for entities that might want to snap to a grid.
           }
         }
       });
-      setTimeout((function() {
-        GameState.running = true;
-      }), 1000);
+      GameState.running = true;
     }
   });
 
@@ -701,7 +700,7 @@ Grid: for entities that might want to snap to a grid.
   Crafty.c("TrainController", {
     init: function() {
       this.bind("EnterFrame", function(data) {
-        if (GameState.running) {
+        if (GameState.running && GameClock.hour > 5) {
           Crafty("Train").each(function() {
             this.moveAlongTrack(this.speed * data.dt / 20);
           });
@@ -1700,8 +1699,8 @@ Grid: for entities that might want to snap to a grid.
   window.GameClock = {
     elapsed: 0,
     newDay: function() {
-      this.hour = 6;
-      return this.minute = 0;
+      this.hour = 5;
+      return this.minute = 55;
     },
     update: function() {
       if (this.minute >= 59) {
