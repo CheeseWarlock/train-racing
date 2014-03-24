@@ -313,7 +313,15 @@ Grid: for entities that might want to snap to a grid.
       });
     },
     _updateCurrentTrack: function(dir) {
-      var curve, f, isCurving, straight, _i, _len, _ref;
+      var backThroughCurve, curve, f, isCurving, straight, _i, _j, _len, _len1, _ref, _ref1;
+      backThroughCurve = this.reversing && !(this._hasCurveOption() && this._hasStraightOption()) && this.currentTrack.dir.length === 3;
+      if (backThroughCurve) {
+        _ref = this.followers;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          f = _ref[_i];
+          f.curves.shift();
+        }
+      }
       this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
       this._arriveAtStation();
       straight = this._hasStraightOption();
@@ -321,9 +329,9 @@ Grid: for entities that might want to snap to a grid.
       this.targetDirection = ((straight && curve && this.curveCommandEnabled) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
         isCurving = this.isCurving();
-        _ref = this.followers;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          f = _ref[_i];
+        _ref1 = this.followers;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          f = _ref1[_j];
           f.curves.push(isCurving);
         }
       }

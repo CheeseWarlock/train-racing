@@ -261,6 +261,10 @@ Crafty.c "PlayerTrain",
       @update()
     
   _updateCurrentTrack: (dir) ->
+    backThroughCurve = (@reversing and !(@_hasCurveOption() and @_hasStraightOption()) and @currentTrack.dir.length == 3)
+    if backThroughCurve
+      for f in @followers
+        f.curves.shift()
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
     @_arriveAtStation()
     straight = @_hasStraightOption()
@@ -270,7 +274,6 @@ Crafty.c "PlayerTrain",
       isCurving = @isCurving()
       for f in @followers
         f.curves.push isCurving
-
     return
 
 Crafty.c "FollowTrain",
