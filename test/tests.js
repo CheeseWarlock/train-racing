@@ -120,7 +120,7 @@ test("Reversing motion", function() {
 });
 
 
-test("Finding next junctions", function() {
-	equal(AI.findNextJunction(6,10,'n'),3,"Finding good");
+test("AI track-analysis", function() {
+	equal(AI.checkAlongSegment(6,10,'n').distance,3,"Junctions are found properly");
 });
 

@@ -160,9 +160,9 @@ Crafty.c "Train",
 
 
 ###
-PlayerTrain: a train controlled by a player.
+TrainHead: the first car of a train. Master of the movement of its train.
 ###
-Crafty.c "PlayerTrain",
+Crafty.c "TrainHead",
   init: ->
     @requires "Train"
     @passengers = 0
@@ -204,23 +204,6 @@ Crafty.c "PlayerTrain",
       return
     return
 
-  bindKeyboardTurn: (keyCode) ->
-    if keyCode?
-      @bind "KeyDown", do (e=keyCode) ->
-        (e) ->
-          @_setBraking true  if e.keyCode is keyCode
-      @bind "KeyUp", do (e=keyCode) ->
-        (e) ->
-          @_setBraking false  if e.keyCode is keyCode
-      this
-    else
-      @bind "EnterFrame", ->
-        if @speed is Constants.REDUCED_SPEED
-          @_setBraking false  if Math.random() > 0.925
-        else
-          @_setBraking true  if Math.random() > 0.94
-        return
-
   _arriveAtStation: ->
     if @currentTrack.station
       station = @currentTrack.station
@@ -259,6 +242,14 @@ Crafty.c "PlayerTrain",
       @updateSprites()
     Crafty("PlayerScore").each ->
       @update()
+
+
+###
+PlayerTrain: a train controlled by a player.
+###
+Crafty.c "PlayerTrain",
+  init: () ->
+    @requires("TrainHead")
     
   _updateCurrentTrack: (dir) ->
     backThroughCurve = (@reversing and !(@_hasCurveOption() and @_hasStraightOption()) and @currentTrack.dir.length == 3)
@@ -275,6 +266,23 @@ Crafty.c "PlayerTrain",
       for f in @followers
         f.curves.push isCurving
     return
+    
+  bindKeyboardTurn: (keyCode) ->
+    if keyCode?
+      @bind "KeyDown", do (e=keyCode) ->
+        (e) ->
+          @_setBraking true  if e.keyCode is keyCode
+      @bind "KeyUp", do (e=keyCode) ->
+        (e) ->
+          @_setBraking false  if e.keyCode is keyCode
+      this
+    else
+      @bind "EnterFrame", ->
+        if @speed is Constants.REDUCED_SPEED
+          @_setBraking false  if Math.random() > 0.925
+        else
+          @_setBraking true  if Math.random() > 0.94
+        return
 
 Crafty.c "FollowTrain",
   init: ->
@@ -304,6 +312,34 @@ Crafty.c "FollowTrain",
     curve = @_hasCurveOption()
     straight = @_hasStraightOption()
     @targetDirection = ((if (curve and straight and (@curves.shift() or false)) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection)  else @sourceDirection))
+    return
+
+
+Crafty.c "AITrain",
+  init: ->
+    @requires("TrainHead")
+    
+  _updateCurrentTrack: (dir) ->
+    # AI decision-making process
+    # look down both paths and get [trains, stations] recursively
+    # Determine if enemy train is coming towards
+    _updateCurrentTrack: (dir) ->
+    backThroughCurve = (@reversing and !(@_hasCurveOption() and @_hasStraightOption()) and @currentTrack.dir.length == 3)
+    if backThroughCurve
+      for f in @followers
+        f.curves.shift()
+    @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
+    @_arriveAtStation()
+    straight = @_hasStraightOption()
+    curve = @_hasCurveOption()
+    if (straight and curve)
+      # Fancy AI stuff goes here!
+      decision = Math.random() > 0.5
+    @targetDirection = ((if (straight and curve and decision) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
+    if straight and curve
+      isCurving = @isCurving()
+      for f in @followers
+        f.curves.push isCurving
     return
 
 

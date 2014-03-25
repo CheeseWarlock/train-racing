@@ -171,11 +171,11 @@ Grid: for entities that might want to snap to a grid.
   });
 
   /*
-  PlayerTrain: a train controlled by a player.
+  TrainHead: the first car of a train. Master of the movement of its train.
   */
 
 
-  Crafty.c("PlayerTrain", {
+  Crafty.c("TrainHead", {
     init: function() {
       this.requires("Train");
       this.passengers = 0;
@@ -227,37 +227,6 @@ Grid: for entities that might want to snap to a grid.
           this.speed = (braking ? Constants.REDUCED_SPEED : Constants.FULL_SPEED);
         }
       });
-    },
-    bindKeyboardTurn: function(keyCode) {
-      if (keyCode != null) {
-        this.bind("KeyDown", (function(e) {
-          return function(e) {
-            if (e.keyCode === keyCode) {
-              return this._setBraking(true);
-            }
-          };
-        })(keyCode));
-        this.bind("KeyUp", (function(e) {
-          return function(e) {
-            if (e.keyCode === keyCode) {
-              return this._setBraking(false);
-            }
-          };
-        })(keyCode));
-        return this;
-      } else {
-        return this.bind("EnterFrame", function() {
-          if (this.speed === Constants.REDUCED_SPEED) {
-            if (Math.random() > 0.925) {
-              this._setBraking(false);
-            }
-          } else {
-            if (Math.random() > 0.94) {
-              this._setBraking(true);
-            }
-          }
-        });
-      }
     },
     _arriveAtStation: function() {
       var passengersGained, station;
@@ -311,6 +280,17 @@ Grid: for entities that might want to snap to a grid.
       return Crafty("PlayerScore").each(function() {
         return this.update();
       });
+    }
+  });
+
+  /*
+  PlayerTrain: a train controlled by a player.
+  */
+
+
+  Crafty.c("PlayerTrain", {
+    init: function() {
+      return this.requires("TrainHead");
     },
     _updateCurrentTrack: function(dir) {
       var backThroughCurve, curve, f, isCurving, straight, _i, _j, _len, _len1, _ref, _ref1;
@@ -334,6 +314,37 @@ Grid: for entities that might want to snap to a grid.
           f = _ref1[_j];
           f.curves.push(isCurving);
         }
+      }
+    },
+    bindKeyboardTurn: function(keyCode) {
+      if (keyCode != null) {
+        this.bind("KeyDown", (function(e) {
+          return function(e) {
+            if (e.keyCode === keyCode) {
+              return this._setBraking(true);
+            }
+          };
+        })(keyCode));
+        this.bind("KeyUp", (function(e) {
+          return function(e) {
+            if (e.keyCode === keyCode) {
+              return this._setBraking(false);
+            }
+          };
+        })(keyCode));
+        return this;
+      } else {
+        return this.bind("EnterFrame", function() {
+          if (this.speed === Constants.REDUCED_SPEED) {
+            if (Math.random() > 0.925) {
+              this._setBraking(false);
+            }
+          } else {
+            if (Math.random() > 0.94) {
+              this._setBraking(true);
+            }
+          }
+        });
       }
     }
   });
@@ -371,6 +382,42 @@ Grid: for entities that might want to snap to a grid.
       curve = this._hasCurveOption();
       straight = this._hasStraightOption();
       this.targetDirection = ((curve && straight && (this.curves.shift() || false)) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
+    }
+  });
+
+  Crafty.c("AITrain", {
+    init: function() {
+      return this.requires("TrainHead");
+    },
+    _updateCurrentTrack: function(dir) {
+      var backThroughCurve, curve, decision, f, isCurving, straight, _i, _j, _len, _len1, _ref, _ref1;
+      ({
+        _updateCurrentTrack: function(dir) {}
+      });
+      backThroughCurve = this.reversing && !(this._hasCurveOption() && this._hasStraightOption()) && this.currentTrack.dir.length === 3;
+      if (backThroughCurve) {
+        _ref = this.followers;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          f = _ref[_i];
+          f.curves.shift();
+        }
+      }
+      this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
+      this._arriveAtStation();
+      straight = this._hasStraightOption();
+      curve = this._hasCurveOption();
+      if (straight && curve) {
+        decision = Math.random() > 0.5;
+      }
+      this.targetDirection = ((straight && curve && decision) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
+      if (straight && curve) {
+        isCurving = this.isCurving();
+        _ref1 = this.followers;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          f = _ref1[_j];
+          f.curves.push(isCurving);
+        }
+      }
     }
   });
 
@@ -1473,7 +1520,10 @@ Grid: for entities that might want to snap to a grid.
         cars = 3;
       }
       letter = (playerOne ? 'r' : 'b');
-      train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().bindKeyboardTurn((playerOne ? Crafty.keys.Q : (window.singlePlayerMode ? null : Crafty.keys.P)));
+      train = Crafty.e((playerOne || !window.singlePlayerMode ? 'PlayerTrain' : 'AITrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack();
+      if (playerOne || !window.singlePlayerMode) {
+        train.bindKeyboardTurn((playerOne ? Crafty.keys.Q : Crafty.keys.P));
+      }
       train.moveAlongTrack(0);
       train.followers = [];
       front = train;
@@ -1696,17 +1746,35 @@ Grid: for entities that might want to snap to a grid.
   };
 
   window.AI = {
-    findNextJunction: function(x, y, dir) {
-      var dist, heading, track;
+    checkAlongSegment: function(x, y, dir) {
+      var dist, heading, track, trainPosition, trainPositions, trainPresences, _i, _len;
+      trainPositions = [];
+      trainPresences = {
+        playerOne: false,
+        playerTwo: false
+      };
+      Crafty("Train").each(function() {
+        return trainPositions.push([this.at().x, this.at().y, this.playerOne]);
+      });
       dist = 0;
       heading = dir;
       track = Util.trackAt(x, y);
       while (track.dir.length === 2 || track.dir[1] !== Util.opposite(heading)) {
         heading = (Util.opposite(heading) === track.dir[0] ? track.dir[track.dir.length - 1] : track.dir[0]);
         dist += 1;
-        track = Util.trackAt(track.at().x + Util.dirx(dir), track.at().y + Util.diry(dir));
+        x += Util.dirx(dir);
+        y += Util.diry(dir);
+        for (_i = 0, _len = trainPositions.length; _i < _len; _i++) {
+          trainPosition = trainPositions[_i];
+          if (this[0] === x && this[1] === y) {
+            trainPresences[(playerOne ? "playerOne" : "playerTwo")] = true;
+          }
+        }
+        track = Util.trackAt(x, y);
       }
-      return dist;
+      return {
+        distance: dist
+      };
     }
   };
 

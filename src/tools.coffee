@@ -76,9 +76,11 @@ window.Util =
   createTrain: (x, y, playerOne, dir, cars=3) ->
     letter = (if playerOne then 'r' else 'b')
     
-    train = Crafty.e('PlayerTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
+    train = Crafty.e((if playerOne or !(window.singlePlayerMode) then 'PlayerTrain' else 'AITrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
     .attr('targetDirection', dir)
-    .findTrack().bindKeyboardTurn((if playerOne then Crafty.keys.Q else (if window.singlePlayerMode then null else Crafty.keys.P)))
+    .findTrack()
+    
+    if playerOne or !(window.singlePlayerMode) then train.bindKeyboardTurn((if playerOne then Crafty.keys.Q else Crafty.keys.P))
     
     train.moveAlongTrack(0)
     
@@ -220,15 +222,31 @@ window.GameClock =
       this.minute += 1
       
 window.AI =
-  findNextJunction: (x, y, dir) ->
+  checkAlongSegment: (x, y, dir) ->
+    trainPositions = []
+    trainPresences =
+      playerOne:
+        false
+      playerTwo:
+        false
+    Crafty("Train").each () ->
+      trainPositions.push [@at().x, @at().y, @playerOne]
     dist = 0
     heading = dir
     track = Util.trackAt(x, y)
     while (track.dir.length == 2 or track.dir[1] != Util.opposite(heading))
       heading = (if Util.opposite(heading) == track.dir[0] then track.dir[track.dir.length - 1] else track.dir[0])
       dist += 1
-      track = Util.trackAt(track.at().x + Util.dirx(dir), track.at().y + Util.diry(dir))
-    dist
+      x += Util.dirx(dir)
+      y += Util.diry(dir)
+      for trainPosition in trainPositions
+        if @[0] == x and @[1] == y
+          # This train is on the path!
+          trainPresences[(if playerOne then "playerOne" else "playerTwo")] = true
+      track = Util.trackAt(x, y)
+    distance:
+      dist
+    
       
 $.getJSON('./maps.json', (mapListSource) ->
   window.MapList = mapListSource
