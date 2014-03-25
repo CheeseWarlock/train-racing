@@ -88,6 +88,9 @@ Grid: for entities that might want to snap to a grid.
       this.y = this.currentTrack.y + Util.diry(dir) * Constants.TILE_HALF;
       this.sourceDirection = this.targetDirection;
       this._updateCurrentTrack(dir);
+      if (this._arriveAtStation != null) {
+        this._arriveAtStation();
+      }
     },
     _hasStraightOption: function() {
       return this.currentTrack.dir.indexOf(this.sourceDirection) > -1;
@@ -227,6 +230,17 @@ Grid: for entities that might want to snap to a grid.
           this.speed = (braking ? Constants.REDUCED_SPEED : Constants.FULL_SPEED);
         }
       });
+    }
+  });
+
+  /*
+  CarryingTrain: a train that "carries" passengers. Data is still stored in the TrainHead.
+  */
+
+
+  Crafty.c("CarryingTrain", {
+    init: function() {
+      return this.requires("Train");
     },
     _arriveAtStation: function() {
       var passengersGained, station;
@@ -241,8 +255,8 @@ Grid: for entities that might want to snap to a grid.
     _dropoff: function(station) {
       var deliveries;
       deliveries = (this.playerOne ? station.dropoffP1 : station.dropoffP2);
-      this.passengers -= deliveries;
-      this.delivered += deliveries;
+      this.head.passengers -= deliveries;
+      this.head.delivered += deliveries;
       if (this.playerOne) {
         station.dropoffP1 = 0;
       } else {
@@ -255,7 +269,7 @@ Grid: for entities that might want to snap to a grid.
       overflow = station.population - room;
       pickup = (overflow > 0 ? Constants.MAX_PASSENGERS - this.passengers : station.population);
       station.population = (overflow > 0 ? overflow : 0);
-      this.passengers += pickup;
+      this.head.passengers += pickup;
       return pickup;
     },
     _assignDestinations: function(passengers, boardedAtStation, onPlayerOne) {
@@ -303,7 +317,6 @@ Grid: for entities that might want to snap to a grid.
         }
       }
       this.currentTrack = Util.trackAt(this.currentTrack.at().x + Util.dirx(dir), this.currentTrack.at().y + Util.diry(dir));
-      this._arriveAtStation();
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
       this.targetDirection = ((straight && curve && this.curveCommandEnabled) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
@@ -349,6 +362,11 @@ Grid: for entities that might want to snap to a grid.
     }
   });
 
+  /*
+  FollowTrain: a train car that follows a TrainHead or another FollowTrain.
+  */
+
+
   Crafty.c("FollowTrain", {
     init: function() {
       this.requires("Train");
@@ -385,15 +403,17 @@ Grid: for entities that might want to snap to a grid.
     }
   });
 
+  /*
+  AITrain: a train controlled by AI.
+  */
+
+
   Crafty.c("AITrain", {
     init: function() {
       return this.requires("TrainHead");
     },
     _updateCurrentTrack: function(dir) {
       var backThroughCurve, curve, decision, f, isCurving, straight, _i, _j, _len, _len1, _ref, _ref1;
-      ({
-        _updateCurrentTrack: function(dir) {}
-      });
       backThroughCurve = this.reversing && !(this._hasCurveOption() && this._hasStraightOption()) && this.currentTrack.dir.length === 3;
       if (backThroughCurve) {
         _ref = this.followers;
@@ -1527,6 +1547,7 @@ Grid: for entities that might want to snap to a grid.
       train.moveAlongTrack(0);
       train.followers = [];
       front = train;
+      train.attr('head', train);
       _ref1 = (cars > 1 ? (function() {
         _results = [];
         for (var _j = 2, _ref = Math.max(2, cars); 2 <= _ref ? _j <= _ref : _j >= _ref; 2 <= _ref ? _j++ : _j--){ _results.push(_j); }
@@ -1534,7 +1555,10 @@ Grid: for entities that might want to snap to a grid.
       }).apply(this) : []);
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         i = _ref1[_i];
-        temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', front);
+        temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', front).attr('head', train);
+        if (i === 2) {
+          temp.addComponent("CarryingTrain");
+        }
         front = temp;
         train.followers.push(front);
         front.moveAlongTrack(-22 * (i - 1));

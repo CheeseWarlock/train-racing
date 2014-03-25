@@ -86,10 +86,14 @@ window.Util =
     
     train.followers = []
     front = train
+    train.attr('head', train)
     for i in (if cars > 1 then [2..Math.max(2,cars)] else [])
       temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
       .attr('targetDirection', dir)
       .findTrack().attr('front', front)
+      .attr('head', train)
+      if (i == 2)
+        temp.addComponent("CarryingTrain")
       front = temp
       train.followers.push(front)
       front.moveAlongTrack(-22 * (i-1))

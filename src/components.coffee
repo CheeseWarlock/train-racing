@@ -73,6 +73,7 @@ Crafty.c "Train",
     @y = @currentTrack.y + Util.diry(dir) * Constants.TILE_HALF
     @sourceDirection = @targetDirection
     @_updateCurrentTrack dir
+    if @_arriveAtStation? then @_arriveAtStation()
     return
 
   _hasStraightOption: ->
@@ -204,6 +205,14 @@ Crafty.c "TrainHead",
       return
     return
 
+  
+###
+CarryingTrain: a train that "carries" passengers. Data is still stored in the TrainHead.
+###
+Crafty.c "CarryingTrain",
+  init: () ->
+    @requires("Train")
+    
   _arriveAtStation: ->
     if @currentTrack.station
       station = @currentTrack.station
@@ -215,8 +224,8 @@ Crafty.c "TrainHead",
 
   _dropoff: (station) ->
     deliveries = ((if @playerOne then station.dropoffP1 else station.dropoffP2))
-    @passengers -= deliveries
-    @delivered += deliveries
+    @head.passengers -= deliveries
+    @head.delivered += deliveries
     (if @playerOne then station.dropoffP1 = 0 else station.dropoffP2 = 0)
     return
 
@@ -225,7 +234,7 @@ Crafty.c "TrainHead",
     overflow = station.population - room # number that will be left waiting
     pickup = ((if overflow > 0 then Constants.MAX_PASSENGERS - @passengers else station.population))
     station.population = ((if overflow > 0 then overflow else 0))
-    @passengers += pickup
+    @head.passengers += pickup
     return pickup
 
   _assignDestinations: (passengers, boardedAtStation, onPlayerOne) ->
@@ -257,7 +266,6 @@ Crafty.c "PlayerTrain",
       for f in @followers
         f.curves.shift()
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
-    @_arriveAtStation()
     straight = @_hasStraightOption()
     curve = @_hasCurveOption()
     @targetDirection = ((if (straight and curve and @curveCommandEnabled) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
@@ -284,6 +292,10 @@ Crafty.c "PlayerTrain",
           @_setBraking true  if Math.random() > 0.94
         return
 
+
+###
+FollowTrain: a train car that follows a TrainHead or another FollowTrain.
+###
 Crafty.c "FollowTrain",
   init: ->
     @requires "Train"
@@ -315,6 +327,9 @@ Crafty.c "FollowTrain",
     return
 
 
+###
+AITrain: a train controlled by AI.
+###
 Crafty.c "AITrain",
   init: ->
     @requires("TrainHead")
@@ -323,7 +338,6 @@ Crafty.c "AITrain",
     # AI decision-making process
     # look down both paths and get [trains, stations] recursively
     # Determine if enemy train is coming towards
-    _updateCurrentTrack: (dir) ->
     backThroughCurve = (@reversing and !(@_hasCurveOption() and @_hasStraightOption()) and @currentTrack.dir.length == 3)
     if backThroughCurve
       for f in @followers
