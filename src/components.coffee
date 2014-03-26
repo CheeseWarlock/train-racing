@@ -343,12 +343,15 @@ Crafty.c "AITrain",
       for f in @followers
         f.curves.shift()
     @currentTrack = Util.trackAt(@currentTrack.at().x + Util.dirx(dir), @currentTrack.at().y + Util.diry(dir))
-    @_arriveAtStation()
+    if @_arriveAtStation? then @_arriveAtStation()
     straight = @_hasStraightOption()
     curve = @_hasCurveOption()
     if (straight and curve)
       # Fancy AI stuff goes here!
-      decision = Math.random() > 0.5
+      searchPlayer = (if @playerOne then "playerTwo" else "playerOne")
+      straightPriority = !(AI.checkAlongSegment(@currentTrack.at().x, @currentTrack.at().y, @sourceDirection).trainsFound[searchPlayer])
+      curvePriority = !(AI.checkAlongSegment(@currentTrack.at().x, @currentTrack.at().y, Util.getTargetDirection(@currentTrack, @sourceDirection)).trainsFound[searchPlayer])
+      decision = (if straightPriority == curvePriority then (Math.random() > 0.5) else curvePriority)
     @targetDirection = ((if (straight and curve and decision) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
       isCurving = @isCurving()
