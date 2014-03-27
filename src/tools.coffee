@@ -235,28 +235,30 @@ window.AI =
       playerTwo:
         false
     Crafty("Train").each () ->
-      trainPositions.push [@at().x, @at().y, @playerOne]
+      trainPositions.push [@currentTrack.at().x, @currentTrack.at().y, @playerOne]
     dist = 0
     heading = dir
     track = Util.trackAt(x, y)
     while (track.dir.length == 2 or track.dir[1] != Util.opposite(heading))
       if (track.station) then stations.push(track.station)
-      heading = (if Util.opposite(heading) == track.dir[0] then track.dir[track.dir.length - 1] else track.dir[0])
+      if track.dir.length == 2
+        heading = (if Util.opposite(heading) == track.dir[0] then track.dir[track.dir.length - 1] else track.dir[0])
+      else 
+        heading = track.dir[1]
       dist += 1
       x += Util.dirx(heading)
       y += Util.diry(heading)
       for trainPosition in trainPositions
-        if @[0] == x and @[1] == y
+        if trainPosition[0] == x and trainPosition[1] == y
           # This train is on the path!
-          trainPresences[(if playerOne then "playerOne" else "playerTwo")] = true
+          trainPresences[(if trainPosition[2] then "playerOne" else "playerTwo")] = true
       track = Util.trackAt(x, y)
     distance:
       dist
     trainsFound:
       trainPresences
-    stationsFound:
+    stations:
       stations
-    
       
 $.getJSON('./maps.json', (mapListSource) ->
   window.MapList = mapListSource

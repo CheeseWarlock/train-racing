@@ -349,9 +349,20 @@ Crafty.c "AITrain",
     if (straight and curve)
       # Fancy AI stuff goes here!
       searchPlayer = (if @playerOne then "playerTwo" else "playerOne")
-      straightPriority = !(AI.checkAlongSegment(@currentTrack.at().x, @currentTrack.at().y, @sourceDirection).trainsFound[searchPlayer])
-      curvePriority = !(AI.checkAlongSegment(@currentTrack.at().x, @currentTrack.at().y, Util.getTargetDirection(@currentTrack, @sourceDirection)).trainsFound[searchPlayer])
-      decision = (if straightPriority == curvePriority then (Math.random() > 0.5) else curvePriority)
+      dropoffPlayer = (if @playerOne then "dropoffP1" else "dropoffP2")
+      straightSegment = AI.checkAlongSegment(@currentTrack.at().x+Util.dirx(@sourceDirection), @currentTrack.at().y+Util.diry(@sourceDirection), @sourceDirection)
+      curvedSegment = AI.checkAlongSegment(@currentTrack.at().x+Util.dirx(Util.getTargetDirection(@currentTrack, @sourceDirection)), @currentTrack.at().y+Util.diry(Util.getTargetDirection(@currentTrack, @sourceDirection)), Util.getTargetDirection(@currentTrack, @sourceDirection))
+      straightPriority = 0
+      curvedPriority = 0
+      for station in straightSegment.stations
+        straightPriority += (station.population + station[dropoffPlayer])
+      for station in curvedSegment.stations
+        curvedPriority += (station.population + station[dropoffPlayer])
+      straightPriority += (if straightSegment.trainsFound[searchPlayer] then -100 else 0)
+      curvedPriority += (if curvedSegment.trainsFound[searchPlayer] then -100 else 0)
+      straightPriority += Math.random() * 20 - 10
+      # Pick the proper path or a random one
+      decision = (curvedPriority > straightPriority)
     @targetDirection = ((if (straight and curve and decision) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
       isCurving = @isCurving()

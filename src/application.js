@@ -413,7 +413,7 @@ Grid: for entities that might want to snap to a grid.
       return this.requires("TrainHead");
     },
     _updateCurrentTrack: function(dir) {
-      var backThroughCurve, curve, curvePriority, decision, f, isCurving, searchPlayer, straight, straightPriority, _i, _j, _len, _len1, _ref, _ref1;
+      var backThroughCurve, curve, curvedPriority, curvedSegment, decision, dropoffPlayer, f, isCurving, searchPlayer, station, straight, straightPriority, straightSegment, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
       backThroughCurve = this.reversing && !(this._hasCurveOption() && this._hasStraightOption()) && this.currentTrack.dir.length === 3;
       if (backThroughCurve) {
         _ref = this.followers;
@@ -430,16 +430,32 @@ Grid: for entities that might want to snap to a grid.
       curve = this._hasCurveOption();
       if (straight && curve) {
         searchPlayer = (this.playerOne ? "playerTwo" : "playerOne");
-        straightPriority = !(AI.checkAlongSegment(this.currentTrack.at().x, this.currentTrack.at().y, this.sourceDirection).trainsFound[searchPlayer]);
-        curvePriority = !(AI.checkAlongSegment(this.currentTrack.at().x, this.currentTrack.at().y, Util.getTargetDirection(this.currentTrack, this.sourceDirection)).trainsFound[searchPlayer]);
-        decision = (straightPriority === curvePriority ? Math.random() > 0.5 : curvePriority);
+        dropoffPlayer = (this.playerOne ? "dropoffP1" : "dropoffP2");
+        straightSegment = AI.checkAlongSegment(this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection);
+        curvedSegment = AI.checkAlongSegment(this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection));
+        straightPriority = 0;
+        curvedPriority = 0;
+        _ref1 = straightSegment.stations;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          station = _ref1[_j];
+          straightPriority += station.population + station[dropoffPlayer];
+        }
+        _ref2 = curvedSegment.stations;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          station = _ref2[_k];
+          curvedPriority += station.population + station[dropoffPlayer];
+        }
+        straightPriority += (straightSegment.trainsFound[searchPlayer] ? -100 : 0);
+        curvedPriority += (curvedSegment.trainsFound[searchPlayer] ? -100 : 0);
+        straightPriority += Math.random() * 20 - 10;
+        decision = curvedPriority > straightPriority;
       }
       this.targetDirection = ((straight && curve && decision) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
         isCurving = this.isCurving();
-        _ref1 = this.followers;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          f = _ref1[_j];
+        _ref3 = this.followers;
+        for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+          f = _ref3[_l];
           f.curves.push(isCurving);
         }
       }
@@ -1784,7 +1800,7 @@ Grid: for entities that might want to snap to a grid.
         playerTwo: false
       };
       Crafty("Train").each(function() {
-        return trainPositions.push([this.at().x, this.at().y, this.playerOne]);
+        return trainPositions.push([this.currentTrack.at().x, this.currentTrack.at().y, this.playerOne]);
       });
       dist = 0;
       heading = dir;
@@ -1793,14 +1809,18 @@ Grid: for entities that might want to snap to a grid.
         if (track.station) {
           stations.push(track.station);
         }
-        heading = (Util.opposite(heading) === track.dir[0] ? track.dir[track.dir.length - 1] : track.dir[0]);
+        if (track.dir.length === 2) {
+          heading = (Util.opposite(heading) === track.dir[0] ? track.dir[track.dir.length - 1] : track.dir[0]);
+        } else {
+          heading = track.dir[1];
+        }
         dist += 1;
         x += Util.dirx(heading);
         y += Util.diry(heading);
         for (_i = 0, _len = trainPositions.length; _i < _len; _i++) {
           trainPosition = trainPositions[_i];
-          if (this[0] === x && this[1] === y) {
-            trainPresences[(playerOne ? "playerOne" : "playerTwo")] = true;
+          if (trainPosition[0] === x && trainPosition[1] === y) {
+            trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = true;
           }
         }
         track = Util.trackAt(x, y);
@@ -1808,7 +1828,7 @@ Grid: for entities that might want to snap to a grid.
       return {
         distance: dist,
         trainsFound: trainPresences,
-        stationsFound: stations
+        stations: stations
       };
     }
   };
