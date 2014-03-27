@@ -265,9 +265,9 @@ Grid: for entities that might want to snap to a grid.
     },
     _pickup: function(station) {
       var overflow, pickup, room;
-      room = Constants.MAX_PASSENGERS - this.passengers;
+      room = Constants.MAX_PASSENGERS - this.head.passengers;
       overflow = station.population - room;
-      pickup = (overflow > 0 ? Constants.MAX_PASSENGERS - this.passengers : station.population);
+      pickup = (overflow > 0 ? Constants.MAX_PASSENGERS - this.head.passengers : station.population);
       station.population = (overflow > 0 ? overflow : 0);
       this.head.passengers += pickup;
       return pickup;

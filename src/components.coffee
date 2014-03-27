@@ -230,9 +230,9 @@ Crafty.c "CarryingTrain",
     return
 
   _pickup: (station) ->
-    room = Constants.MAX_PASSENGERS - @passengers
+    room = Constants.MAX_PASSENGERS - @head.passengers
     overflow = station.population - room # number that will be left waiting
-    pickup = ((if overflow > 0 then Constants.MAX_PASSENGERS - @passengers else station.population))
+    pickup = ((if overflow > 0 then Constants.MAX_PASSENGERS - @head.passengers else station.population))
     station.population = ((if overflow > 0 then overflow else 0))
     @head.passengers += pickup
     return pickup
