@@ -239,11 +239,11 @@ window.AI =
     dist = 0
     heading = dir
     track = Util.trackAt(x, y)
-    while (track.dir.length == 2 or track.dir[1] != Util.opposite(heading))
+    while (track.dir.length != 3 or track.dir[1] != Util.opposite(heading))
       if (track.station) then stations.push(track.station)
       if track.dir.length == 2
         heading = (if Util.opposite(heading) == track.dir[0] then track.dir[track.dir.length - 1] else track.dir[0])
-      else 
+      else if track.dir.length == 3
         heading = track.dir[1]
       dist += 1
       x += Util.dirx(heading)

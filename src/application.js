@@ -1805,13 +1805,13 @@ Grid: for entities that might want to snap to a grid.
       dist = 0;
       heading = dir;
       track = Util.trackAt(x, y);
-      while (track.dir.length === 2 || track.dir[1] !== Util.opposite(heading)) {
+      while (track.dir.length !== 3 || track.dir[1] !== Util.opposite(heading)) {
         if (track.station) {
           stations.push(track.station);
         }
         if (track.dir.length === 2) {
           heading = (Util.opposite(heading) === track.dir[0] ? track.dir[track.dir.length - 1] : track.dir[0]);
-        } else {
+        } else if (track.dir.length === 3) {
           heading = track.dir[1];
         }
         dist += 1;
