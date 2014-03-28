@@ -866,7 +866,7 @@ Grid: for entities that might want to snap to a grid.
       this.requires("EndingText");
       p1score = 0;
       p2score = 0;
-      Crafty("PlayerTrain").each(function() {
+      Crafty("TrainHead").each(function() {
         if (this.playerOne) {
           p1score = this.delivered;
         } else {

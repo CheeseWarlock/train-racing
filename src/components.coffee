@@ -731,7 +731,7 @@ Crafty.c "VictoryText",
     @requires "EndingText"
     p1score = 0
     p2score = 0
-    Crafty("PlayerTrain").each ->
+    Crafty("TrainHead").each ->
       if @playerOne
         p1score = @delivered
       else
