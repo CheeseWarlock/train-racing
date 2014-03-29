@@ -1130,17 +1130,7 @@ Grid: for entities that might want to snap to a grid.
     });
     return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.SPACE) {
-        Crafty.scene('SelectMap');
-      }
-      if (e.keyCode === Crafty.keys.P) {
-        this.letters += 'P';
-      }
-      if (e.keyCode === Crafty.keys.Q) {
-        this.letters += 'Q';
-      }
-      if (this.letters.slice(-5) === 'PQPPQ') {
-        Crafty("nobots").destroy();
-        return window.singlePlayerMode = true;
+        return Crafty.scene('SelectMode');
       }
     });
   });
@@ -1426,6 +1416,54 @@ Grid: for entities that might want to snap to a grid.
     return Crafty.e('2D, Canvas, spr_arrowl').attr({
       x: 338,
       y: 480
+    });
+  });
+
+  Crafty.scene('SelectMode', function() {
+    Crafty.e('TitleText').attr({
+      y: 218
+    }).text('Select a mode:');
+    Crafty.e('2D, Canvas, spr_keyq').attr({
+      x: 194,
+      y: 270
+    });
+    Crafty.e('2D, DOM, Text').attr({
+      x: 153,
+      y: 318,
+      w: 200
+    }).text('One Player').textFont({
+      size: '26px',
+      family: 'Aller'
+    }).textColor('#E23228');
+    Crafty.e('2D, Canvas, spr_keyp, nobots').attr({
+      x: 375,
+      y: 270
+    });
+    Crafty.e('2D, DOM, Text, nobots').attr({
+      x: 327,
+      y: 318,
+      w: 200
+    }).text('Two Pl').textFont({
+      size: '26px',
+      family: 'Aller'
+    }).textColor('#E23228');
+    Crafty.e('2D, DOM, Text, nobots').attr({
+      x: 407,
+      y: 318,
+      w: 200
+    }).text('ayers').textFont({
+      size: '26px',
+      family: 'Aller'
+    }).textColor('#4956FF');
+    return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
+      if (e.keyCode === Crafty.keys.P) {
+        Crafty.scene('SelectMap');
+      }
+      if (e.keyCode === Crafty.keys.Q) {
+        Crafty("nobots").destroy();
+        window.singlePlayerMode = true;
+        return Crafty.scene('SelectMap');
+      }
     });
   });
 
