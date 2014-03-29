@@ -255,6 +255,8 @@ window.AI =
       track = Util.trackAt(x, y)
     distance:
       dist
+    endpoint:
+      track
     trainsFound:
       trainPresences
     stations:

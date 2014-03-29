@@ -412,8 +412,33 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       return this.requires("TrainHead");
     },
+    _getSegmentPriority: function(depth, x, y, dir) {
+      var cdir, curvedPriority, dropoffPlayer, newx, newy, priority, results, sdir, searchPlayer, station, straightPriority, _i, _len, _ref;
+      searchPlayer = (this.playerOne ? "playerTwo" : "playerOne");
+      dropoffPlayer = (this.playerOne ? "dropoffP1" : "dropoffP2");
+      results = AI.checkAlongSegment(x, y, dir);
+      cdir = results.endpoint.dir[2];
+      sdir = results.endpoint.dir[0];
+      newx = results.endpoint.at().x;
+      newy = results.endpoint.at().y;
+      if (depth > 0) {
+        straightPriority = this._getSegmentPriority(depth - 1, newx + Util.dirx(sdir), newy + Util.diry(sdir), sdir);
+        curvedPriority = this._getSegmentPriority(depth - 1, newx + Util.dirx(cdir), newy + Util.diry(cdir), cdir);
+      } else {
+        straightPriority = 0;
+        curvedPriority = 0;
+      }
+      priority = 0;
+      _ref = results.stations;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        station = _ref[_i];
+        priority += station.population + station[dropoffPlayer];
+      }
+      priority += (results.trainsFound[searchPlayer] ? -100 : 0);
+      return priority + Math.max(straightPriority + curvedPriority);
+    },
     _updateCurrentTrack: function(dir) {
-      var backThroughCurve, curve, curvedPriority, curvedSegment, decision, dropoffPlayer, f, isCurving, searchPlayer, station, straight, straightPriority, straightSegment, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
+      var backThroughCurve, curve, curvedPriority, decision, f, isCurving, straight, straightPriority, _i, _j, _len, _len1, _ref, _ref1;
       backThroughCurve = this.reversing && !(this._hasCurveOption() && this._hasStraightOption()) && this.currentTrack.dir.length === 3;
       if (backThroughCurve) {
         _ref = this.followers;
@@ -429,33 +454,17 @@ Grid: for entities that might want to snap to a grid.
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
       if (straight && curve) {
-        searchPlayer = (this.playerOne ? "playerTwo" : "playerOne");
-        dropoffPlayer = (this.playerOne ? "dropoffP1" : "dropoffP2");
-        straightSegment = AI.checkAlongSegment(this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection);
-        curvedSegment = AI.checkAlongSegment(this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection));
-        straightPriority = 0;
-        curvedPriority = 0;
-        _ref1 = straightSegment.stations;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          station = _ref1[_j];
-          straightPriority += station.population + station[dropoffPlayer];
-        }
-        _ref2 = curvedSegment.stations;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          station = _ref2[_k];
-          curvedPriority += station.population + station[dropoffPlayer];
-        }
-        straightPriority += (straightSegment.trainsFound[searchPlayer] ? -100 : 0);
-        curvedPriority += (curvedSegment.trainsFound[searchPlayer] ? -100 : 0);
+        straightPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection);
+        curvedPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection));
         straightPriority += Math.random() * 20 - 10;
         decision = curvedPriority > straightPriority;
       }
       this.targetDirection = ((straight && curve && decision) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
         isCurving = this.isCurving();
-        _ref3 = this.followers;
-        for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-          f = _ref3[_l];
+        _ref1 = this.followers;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          f = _ref1[_j];
           f.curves.push(isCurving);
         }
       }
@@ -1827,6 +1836,7 @@ Grid: for entities that might want to snap to a grid.
       }
       return {
         distance: dist,
+        endpoint: track,
         trainsFound: trainPresences,
         stations: stations
       };

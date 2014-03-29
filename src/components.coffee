@@ -333,7 +333,30 @@ AITrain: a train controlled by AI.
 Crafty.c "AITrain",
   init: ->
     @requires("TrainHead")
+  
+  _getSegmentPriority: (depth, x, y, dir) ->
+    #takes in: the first segment after the split!
+    # returns: the priority
+    searchPlayer = (if @playerOne then "playerTwo" else "playerOne")
+    dropoffPlayer = (if @playerOne then "dropoffP1" else "dropoffP2")
+    results = AI.checkAlongSegment(x, y, dir)
+    cdir = results.endpoint.dir[2]
+    sdir = results.endpoint.dir[0]
+    newx = results.endpoint.at().x
+    newy = results.endpoint.at().y
+    if (depth > 0)
+      straightPriority = @_getSegmentPriority(depth-1, newx+Util.dirx(sdir), newy+Util.diry(sdir), sdir)
+      curvedPriority = @_getSegmentPriority(depth-1, newx+Util.dirx(cdir), newy+Util.diry(cdir), cdir)
+    else
+      straightPriority = 0
+      curvedPriority = 0
+    priority = 0
+    for station in results.stations
+        priority += (station.population + station[dropoffPlayer])
+    priority += (if results.trainsFound[searchPlayer] then -100 else 0)
+    priority + Math.max(straightPriority + curvedPriority)
     
+  
   _updateCurrentTrack: (dir) ->
     # AI decision-making process
     # look down both paths and get [trains, stations] recursively
@@ -348,18 +371,8 @@ Crafty.c "AITrain",
     curve = @_hasCurveOption()
     if (straight and curve)
       # Fancy AI stuff goes here!
-      searchPlayer = (if @playerOne then "playerTwo" else "playerOne")
-      dropoffPlayer = (if @playerOne then "dropoffP1" else "dropoffP2")
-      straightSegment = AI.checkAlongSegment(@currentTrack.at().x+Util.dirx(@sourceDirection), @currentTrack.at().y+Util.diry(@sourceDirection), @sourceDirection)
-      curvedSegment = AI.checkAlongSegment(@currentTrack.at().x+Util.dirx(Util.getTargetDirection(@currentTrack, @sourceDirection)), @currentTrack.at().y+Util.diry(Util.getTargetDirection(@currentTrack, @sourceDirection)), Util.getTargetDirection(@currentTrack, @sourceDirection))
-      straightPriority = 0
-      curvedPriority = 0
-      for station in straightSegment.stations
-        straightPriority += (station.population + station[dropoffPlayer])
-      for station in curvedSegment.stations
-        curvedPriority += (station.population + station[dropoffPlayer])
-      straightPriority += (if straightSegment.trainsFound[searchPlayer] then -100 else 0)
-      curvedPriority += (if curvedSegment.trainsFound[searchPlayer] then -100 else 0)
+      straightPriority = @_getSegmentPriority(1, @currentTrack.at().x+Util.dirx(@sourceDirection), @currentTrack.at().y+Util.diry(@sourceDirection), @sourceDirection)
+      curvedPriority = @_getSegmentPriority(1, @currentTrack.at().x+Util.dirx(Util.getTargetDirection(@currentTrack, @sourceDirection)), @currentTrack.at().y+Util.diry(Util.getTargetDirection(@currentTrack, @sourceDirection)), Util.getTargetDirection(@currentTrack, @sourceDirection))
       straightPriority += Math.random() * 20 - 10
       # Pick the proper path or a random one
       decision = (curvedPriority > straightPriority)
