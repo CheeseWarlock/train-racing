@@ -1847,7 +1847,7 @@ Grid: for entities that might want to snap to a grid.
         playerTwo: false
       };
       Crafty("Train").each(function() {
-        return trainPositions.push([this.currentTrack.at().x, this.currentTrack.at().y, this.playerOne]);
+        return trainPositions.push([this.currentTrack.at().x, this.currentTrack.at().y, this.playerOne, this.targetDirection]);
       });
       dist = 0;
       heading = dir;
@@ -1867,7 +1867,9 @@ Grid: for entities that might want to snap to a grid.
         for (_i = 0, _len = trainPositions.length; _i < _len; _i++) {
           trainPosition = trainPositions[_i];
           if (trainPosition[0] === x && trainPosition[1] === y) {
-            trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = true;
+            if (trainPosition[3] === Util.opposite(heading)) {
+              trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = true;
+            }
           }
         }
         track = Util.trackAt(x, y);

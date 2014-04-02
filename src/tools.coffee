@@ -235,7 +235,7 @@ window.AI =
       playerTwo:
         false
     Crafty("Train").each () ->
-      trainPositions.push [@currentTrack.at().x, @currentTrack.at().y, @playerOne]
+      trainPositions.push [@currentTrack.at().x, @currentTrack.at().y, @playerOne, @targetDirection]
     dist = 0
     heading = dir
     track = Util.trackAt(x, y)
@@ -250,8 +250,9 @@ window.AI =
       y += Util.diry(heading)
       for trainPosition in trainPositions
         if trainPosition[0] == x and trainPosition[1] == y
-          # This train is on the path!
-          trainPresences[(if trainPosition[2] then "playerOne" else "playerTwo")] = true
+          if (trainPosition[3] == Util.opposite(heading))
+            # This train is on the path!
+            trainPresences[(if trainPosition[2] then "playerOne" else "playerTwo")] = true
       track = Util.trackAt(x, y)
     distance:
       dist
