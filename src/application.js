@@ -1123,18 +1123,18 @@ Grid: for entities that might want to snap to a grid.
       x: 220
     });
     Crafty.e('TitleText').attr({
-      y: 163
+      y: 173
     }).text('Compete to deliver more passengers by 10:00 AM!');
     Crafty.e('TitleText').attr({
-      y: 218
+      y: 228
     }).text('Hold your key to slow down and turn at junctions:');
     Crafty.e('2D, Canvas, spr_keyq').attr({
       x: 194,
-      y: 270
+      y: 280
     });
     Crafty.e('2D, DOM, Text').attr({
       x: 161,
-      y: 318,
+      y: 328,
       w: 200
     }).text('Red Train').textFont({
       size: '26px',
@@ -1142,11 +1142,11 @@ Grid: for entities that might want to snap to a grid.
     }).textColor('#E23228');
     Crafty.e('2D, Canvas, spr_keyp, nobots').attr({
       x: 375,
-      y: 270
+      y: 280
     });
     Crafty.e('2D, DOM, Text, nobots').attr({
       x: 338,
-      y: 318,
+      y: 328,
       w: 200
     }).text('Blue Train').textFont({
       size: '26px',
@@ -1246,7 +1246,7 @@ Grid: for entities that might want to snap to a grid.
       Crafty.sprite(200, 12, 'img/barback.png', {
         spr_barback: [0, 0]
       });
-      Crafty.sprite(176, 114, 'img/title.png', {
+      Crafty.sprite(176, 176, 'img/title.png', {
         spr_title: [0, 0]
       });
       Crafty.sprite(616, 84, 'img/brushed.png', {

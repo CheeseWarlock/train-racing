@@ -1,12 +1,12 @@
 Crafty.scene('Title', () ->
   this.letters = ""
   Crafty.e('2D, Canvas, spr_title').attr({x:220})
-  Crafty.e('TitleText').attr({y: 163}).text('Compete to deliver more passengers by 10:00 AM!')
-  Crafty.e('TitleText').attr({y: 218}).text('Hold your key to slow down and turn at junctions:')
-  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 270})
-  Crafty.e('2D, DOM, Text').attr({x: 161, y: 318, w: 200}).text('Red Train').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 270})
-  Crafty.e('2D, DOM, Text, nobots').attr({x: 338, y: 318, w: 200}).text('Blue Train').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
+  Crafty.e('TitleText').attr({y: 173}).text('Compete to deliver more passengers by 10:00 AM!')
+  Crafty.e('TitleText').attr({y: 228}).text('Hold your key to slow down and turn at junctions:')
+  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 280})
+  Crafty.e('2D, DOM, Text').attr({x: 161, y: 328, w: 200}).text('Red Train').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
+  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 280})
+  Crafty.e('2D, DOM, Text, nobots').attr({x: 338, y: 328, w: 200}).text('Blue Train').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
   Crafty.e('TitleText').attr({y: 376}).text('Your passengers\' destinations are shown at the bottom.')
   Crafty.e('TitleText').attr({y: 431}).text('Avoid collisions at all costs!')
   Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 483})
@@ -84,7 +84,7 @@ Crafty.scene('Loading', () ->
     Crafty.sprite(200, 12, 'img/barback.png',
       spr_barback: [0,0]
     )
-    Crafty.sprite(176, 114, 'img/title.png',
+    Crafty.sprite(176, 176, 'img/title.png',
       spr_title: [0,0]
     )
     Crafty.sprite(616, 84, 'img/brushed.png',
