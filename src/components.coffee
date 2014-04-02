@@ -692,7 +692,11 @@ Crafty.c "EndingText",
       x: 0
       y: 112
       w: 268
-      h: 130
+      h: 160
+    Crafty.e('2D, DOM, Text').attr({x: 230, y: 250,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Try Again")
+    Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Select Map")
+    Crafty.e('2D, DOM, spr_selectarrow').attr({x: 190, y: 250, z: 50})
+    Crafty.e('2D, DOM, spr_space').attr({x: 340, y: 240, z: 50})
 
     @css
       padding: 20
@@ -704,12 +708,12 @@ Crafty.c "EndingText",
     @bind "KeyDown", (e) ->
       if e.keyCode is Crafty.keys.SPACE
         Crafty("TrainController").destroy() # Because of the 2D issue
-        Crafty.scene "PlayGame"
+        Crafty.scene(if (Crafty("spr_selectarrow").attr('y') == 280) then "SelectMap" else "PlayGame")
+      if e.keyCode is Crafty.keys.Q or e.keyCode is Crafty.keys.P
+        sec = (Crafty("spr_selectarrow").attr('y') == 280)
+        Crafty("spr_selectarrow").attr({y: (if sec then 250 else 280)})
+        Crafty("spr_space").attr({y: (if sec then 240 else 270)})
       return
-
-    Crafty.e("2D, DOM, spr_space").attr
-      x: @x + 260
-      y: @y + 152
 
     return
 

@@ -821,7 +821,35 @@ Grid: for entities that might want to snap to a grid.
         x: 0,
         y: 112,
         w: 268,
-        h: 130
+        h: 160
+      });
+      Crafty.e('2D, DOM, Text').attr({
+        x: 230,
+        y: 250,
+        w: 200,
+        z: 50
+      }).textFont({
+        size: '17px',
+        family: 'Aller'
+      }).textColor('#5CC64C').text("Try Again");
+      Crafty.e('2D, DOM, Text').attr({
+        x: 230,
+        y: 280,
+        w: 200,
+        z: 50
+      }).textFont({
+        size: '17px',
+        family: 'Aller'
+      }).textColor('#5CC64C').text("Select Map");
+      Crafty.e('2D, DOM, spr_selectarrow').attr({
+        x: 190,
+        y: 250,
+        z: 50
+      });
+      Crafty.e('2D, DOM, spr_space').attr({
+        x: 340,
+        y: 240,
+        z: 50
       });
       this.css({
         padding: 20,
@@ -831,14 +859,20 @@ Grid: for entities that might want to snap to a grid.
         boxShadow: "-8px 8px 0px rgba(47,32,16,0.35)"
       });
       this.bind("KeyDown", function(e) {
+        var sec;
         if (e.keyCode === Crafty.keys.SPACE) {
           Crafty("TrainController").destroy();
-          Crafty.scene("PlayGame");
+          Crafty.scene(Crafty("spr_selectarrow").attr('y') === 280 ? "SelectMap" : "PlayGame");
         }
-      });
-      Crafty.e("2D, DOM, spr_space").attr({
-        x: this.x + 260,
-        y: this.y + 152
+        if (e.keyCode === Crafty.keys.Q || e.keyCode === Crafty.keys.P) {
+          sec = Crafty("spr_selectarrow").attr('y') === 280;
+          Crafty("spr_selectarrow").attr({
+            y: (sec ? 250 : 280)
+          });
+          Crafty("spr_space").attr({
+            y: (sec ? 240 : 270)
+          });
+        }
       });
     }
   });
