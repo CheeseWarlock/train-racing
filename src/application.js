@@ -1357,6 +1357,22 @@ Grid: for entities that might want to snap to a grid.
       x: 420,
       y: 130
     });
+    Crafty.e('2D, Canvas, spr_selectline').attr({
+      x: 250,
+      y: curry + 24
+    });
+    Crafty.e('2D, Canvas, spr_selectstn').attr({
+      x: 250,
+      y: curry + 48
+    });
+    Crafty.e('2D, Canvas, Text, aaa').attr({
+      x: 280,
+      y: curry + 48,
+      w: 200
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#E23228').text("Back to Title");
     Crafty.e('2D, Canvas, Color').color('#2B281D').attr({
       y: 0,
       x: 0,
@@ -1379,7 +1395,7 @@ Grid: for entities that might want to snap to a grid.
       size: '30px'
     }).bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.SPACE) {
-        if (!window.MapList[this.selection]) {
+        if (this.selection < window.MapList.length) {
           try {
             window.selectedMap = JSON.parse($("#custom-level-data").val());
             Crafty.scene('PlayGame');
@@ -1391,38 +1407,45 @@ Grid: for entities that might want to snap to a grid.
               window.dontGoAway = true;
             }
           }
-        } else {
+        } else if (this.selection === window.MapList.length) {
           $.getJSON(window.MapList[this.selection][0], function(data) {
             window.selectedMap = data;
             return Crafty.scene('PlayGame');
           });
+        } else {
+          Crafty.scene('Title');
         }
       }
       if (e.keyCode === Crafty.keys.Q) {
         this.selection -= 1;
         if (this.selection === -1) {
-          this.selection = window.MapList.length;
+          this.selection = window.MapList.length + 1;
           Crafty('spr_selectarrow, spr_space').each(function() {
-            return this.attr('y', this._y + 48 * (window.MapList.length + 1));
+            return this.attr('y', this._y + 48 * (window.MapList.length + 2));
           });
         }
-        this.text(this.selection < window.MapList.length ? window.MapList[this.selection][1] : "Load Map...");
         Crafty('spr_selectarrow, spr_space').each(function() {
           return this.attr('y', this._y - 48);
         });
       }
       if (e.keyCode === Crafty.keys.P) {
         this.selection += 1;
-        if (this.selection === window.MapList.length + 1) {
+        if (this.selection === window.MapList.length + 2) {
           this.selection = 0;
           Crafty('spr_selectarrow, spr_space').each(function() {
-            return this.attr('y', this._y - 48 * (window.MapList.length + 1));
+            return this.attr('y', this._y - 48 * (window.MapList.length + 2));
           });
         }
-        this.text(this.selection < window.MapList.length ? window.MapList[this.selection][1] : "Load Map...");
-        return Crafty('spr_selectarrow, spr_space').each(function() {
+        Crafty('spr_selectarrow, spr_space').each(function() {
           return this.attr('y', this._y + 48);
         });
+      }
+      if (this.selection < window.MapList.length) {
+        return this.text(window.MapList[this.selection][1]);
+      } else if (this.selection === window.MapList.length) {
+        return this.text("Load Map...");
+      } else {
+        return this.text("Back to Title");
       }
     }).bind('EnterFrame', function() {
       if (Crafty('spr_selectarrow').y > 284) {

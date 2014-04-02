@@ -166,6 +166,10 @@ Crafty.scene('SelectMap', () ->
   Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load Map...")
   Crafty.e('2D, Canvas, spr_selectarrow').attr({x: 200, y: 140})
   Crafty.e('2D, Canvas, spr_space').attr({x: 420, y: 130})
+  Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
+  Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry+48})
+  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry+48,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title")
+  
   
   Crafty.e('2D, Canvas, Color').color('#2B281D')
   .attr(
@@ -196,7 +200,7 @@ Crafty.scene('SelectMap', () ->
   )
   .bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.SPACE
-      if (!(window.MapList[this.selection]))
+      if (this.selection < window.MapList.length)
         try
           window.selectedMap = JSON.parse($("#custom-level-data").val())
           Crafty.scene('PlayGame')
@@ -206,33 +210,39 @@ Crafty.scene('SelectMap', () ->
             $('#display-credits').hide()
             $('#display-design').show()
             window.dontGoAway = true
-      else
+      else if (this.selection == window.MapList.length)
         $.getJSON(window.MapList[this.selection][0], (data) ->
           window.selectedMap = data
           Crafty.scene('PlayGame')
         )
+      else
+        Crafty.scene('Title')
     if e.keyCode == Crafty.keys.Q
       this.selection-=1
       if this.selection == -1
-        this.selection = window.MapList.length
+        this.selection = window.MapList.length + 1
         Crafty('spr_selectarrow, spr_space').each(() ->
-          this.attr('y', this._y + 48 * (window.MapList.length + 1))
+          this.attr('y', this._y + 48 * (window.MapList.length + 2))
         )
-      this.text(if this.selection < window.MapList.length then window.MapList[this.selection][1] else "Load Map...")
       Crafty('spr_selectarrow, spr_space').each(() ->
         this.attr('y', this._y - 48)
       )
     if e.keyCode == Crafty.keys.P
       this.selection+=1
-      if this.selection == window.MapList.length + 1
+      if this.selection == window.MapList.length + 2
         this.selection = 0
         Crafty('spr_selectarrow, spr_space').each(() ->
-          this.attr('y', this._y - 48 * (window.MapList.length + 1))
+          this.attr('y', this._y - 48 * (window.MapList.length + 2))
         )
-      this.text(if this.selection < window.MapList.length then window.MapList[this.selection][1] else "Load Map...")
       Crafty('spr_selectarrow, spr_space').each(() ->
         this.attr('y', this._y + 48)
       )
+    if (this.selection < window.MapList.length)
+      this.text(window.MapList[this.selection][1])
+    else if (this.selection == window.MapList.length)
+      this.text("Load Map...")
+    else
+      this.text("Back to Title")
   ).bind('EnterFrame', () ->
     if Crafty('spr_selectarrow').y > 284
       Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(() ->
