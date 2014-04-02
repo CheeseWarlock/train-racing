@@ -200,7 +200,7 @@ Crafty.scene('SelectMap', () ->
   )
   .bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.SPACE
-      if (this.selection < window.MapList.length)
+      if (this.selection == window.MapList.length)
         try
           window.selectedMap = JSON.parse($("#custom-level-data").val())
           Crafty.scene('PlayGame')
@@ -210,7 +210,7 @@ Crafty.scene('SelectMap', () ->
             $('#display-credits').hide()
             $('#display-design').show()
             window.dontGoAway = true
-      else if (this.selection == window.MapList.length)
+      else if (this.selection < window.MapList.length)
         $.getJSON(window.MapList[this.selection][0], (data) ->
           window.selectedMap = data
           Crafty.scene('PlayGame')

@@ -923,7 +923,7 @@ Grid: for entities that might want to snap to a grid.
           borderBottom: "4px solid #" + (p1score > p2score ? "B71607" : "1E2DCE")
         });
       }
-      this.text("The morning rush is over!<br/>Passengers delivered:<br/>Red: " + p1score + ", Blue: " + p2score + "<br/>" + (p1score === p2score ? "It's a Draw!" : (p1score > p2score ? "Red" : "Blue") + " Line wins!") + "<br/>Total deliveries: " + (p1score + p2score));
+      this.text("The morning rush is over!<br/>Passengers delivered:<br/>Red: " + p1score + ", Blue: " + p2score + "<br/>" + (p1score === p2score ? "It's a Draw!" : (p1score > p2score ? "Red" : "Blue") + " Line wins!"));
     }
   });
 
@@ -1395,7 +1395,7 @@ Grid: for entities that might want to snap to a grid.
       size: '30px'
     }).bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.SPACE) {
-        if (this.selection < window.MapList.length) {
+        if (this.selection === window.MapList.length) {
           try {
             window.selectedMap = JSON.parse($("#custom-level-data").val());
             Crafty.scene('PlayGame');
@@ -1407,7 +1407,7 @@ Grid: for entities that might want to snap to a grid.
               window.dontGoAway = true;
             }
           }
-        } else if (this.selection === window.MapList.length) {
+        } else if (this.selection < window.MapList.length) {
           $.getJSON(window.MapList[this.selection][0], function(data) {
             window.selectedMap = data;
             return Crafty.scene('PlayGame');

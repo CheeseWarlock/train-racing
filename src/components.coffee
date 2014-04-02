@@ -761,7 +761,7 @@ Crafty.c "VictoryText",
         borderTop: "4px solid #" + ((if p1score > p2score then "FF817C" else "848EFF"))
         borderBottom: "4px solid #" + ((if p1score > p2score then "B71607" else "1E2DCE"))
 
-    @text "The morning rush is over!<br/>Passengers delivered:<br/>Red: " + p1score + ", Blue: " + p2score + "<br/>" + ((if p1score is p2score then "It's a Draw!" else (((if p1score > p2score then "Red" else "Blue")) + " Line wins!"))) + "<br/>Total deliveries: " + (p1score + p2score)
+    @text "The morning rush is over!<br/>Passengers delivered:<br/>Red: " + p1score + ", Blue: " + p2score + "<br/>" + ((if p1score is p2score then "It's a Draw!" else (((if p1score > p2score then "Red" else "Blue")) + " Line wins!")))
     return
 
 Crafty.c "FailureText",
