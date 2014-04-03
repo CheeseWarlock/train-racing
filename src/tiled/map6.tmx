@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="22" height="20" tilewidth="28" tileheight="28" backgroundcolor="#50a028">
  <tileset firstgid="1" name="Tracks" tilewidth="28" tileheight="28">
-  <image source="../../../../../Documents/Aptana Studio 3 Workspace/Crafty/img/ul.png" width="168" height="392"/>
+  <image source="../../../../../Documents/Aptana Studio 3 Workspace/Crafty/img/ul.png" width="168" height="448"/>
  </tileset>
  <layer name="Tracks" width="22" height="20">
   <data encoding="base64" compression="zlib">
@@ -20,7 +20,7 @@
  </layer>
  <layer name="Props" width="22" height="20">
   <data encoding="base64" compression="zlib">
-   eJzNk9sKwjAMhvsiFfRGQW8UPA4PTLFTsAr6/s/iX1gwxJRFGMMfPrZkzZKmjXMf9ZxNpeKrDGt4npsxV1IEQfH3wQB48e+kgvm0WC5Z+xCMhM+7vCg+CFvLXTp7n9uQ1rsobDqrUH+rlJicZO9+WVcp79a8SYXioz2Q5F652jiHpv0fwakhlxdPrqis24ALuFoKFOL9PYtvB3AHDyWOzzPNnSbeD6p3DhaG2rS54/eCau9yfsZg4r7v2hO8MnaqmeYustglWIE1mIJZSzVuwQ7sa7vL/vy73vq6FZU=
+   eJzNk9sKwjAMhvsiE/RGQW8UPA4PTHFTsAoKytjc+7+Ff6FhIaSwizH84aOnpEnT1phaPdNMCahA6clBptiE5OLcGsSp/N4WpMp6HwxAJPZ2itmc5sslcx+CkZiLTFjk7+IUYj8ZOzHN69yGtNpZ1nf50l2lfi1TfEKStSPx91EG7DKl3zSuU6zM0RlIVrEhtXEPofOTjuAkYuXCJhItl1XsNuACrsL2o+wtxet7FmsHcAcPMe/u8s3G9O808XpQvnOwCNh/WV/7d/xdUO5d/p8xmJj6rRW+fYIXs+NjlzP9O8t8l2AF1mAKZi3luAU7sPfjLuvz7/oBgzccKQ==
   </data>
  </layer>
 </map>
