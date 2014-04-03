@@ -243,13 +243,24 @@ Grid: for entities that might want to snap to a grid.
       return this.requires("Train");
     },
     _arriveAtStation: function() {
-      var passengersGained, station;
+      var droppedOff, passengersGained, station, x;
       if (this.currentTrack.station) {
         station = this.currentTrack.station;
-        this._dropoff(station);
+        droppedOff = this._dropoff(station);
         passengersGained = this._pickup(station);
         this._assignDestinations(passengersGained, station, this.playerOne);
         this._updateStationSprites();
+        x = droppedOff + passengersGained;
+        switch (false) {
+          case !(x > 40):
+            Crafty.audio.play("get3");
+            break;
+          case !(x > 20):
+            Crafty.audio.play("get2");
+            break;
+          case !(x > 2):
+            Crafty.audio.play("get1");
+        }
       }
     },
     _dropoff: function(station) {
@@ -262,6 +273,7 @@ Grid: for entities that might want to snap to a grid.
       } else {
         station.dropoffP2 = 0;
       }
+      return deliveries;
     },
     _pickup: function(station) {
       var overflow, pickup, room;
@@ -333,31 +345,21 @@ Grid: for entities that might want to snap to a grid.
       if (keyCode != null) {
         this.bind("KeyDown", (function(e) {
           return function(e) {
-            if (e.keyCode === keyCode) {
+            if (e.keyCode === keyCode && GameState.running) {
+              Crafty.audio.play('brakeson');
               return this._setBraking(true);
             }
           };
         })(keyCode));
         this.bind("KeyUp", (function(e) {
           return function(e) {
-            if (e.keyCode === keyCode) {
+            if (e.keyCode === keyCode && GameState.running) {
+              Crafty.audio.play('brakesoff');
               return this._setBraking(false);
             }
           };
         })(keyCode));
         return this;
-      } else {
-        return this.bind("EnterFrame", function() {
-          if (this.speed === Constants.REDUCED_SPEED) {
-            if (Math.random() > 0.925) {
-              this._setBraking(false);
-            }
-          } else {
-            if (Math.random() > 0.94) {
-              this._setBraking(true);
-            }
-          }
-        });
       }
     }
   });
@@ -745,11 +747,13 @@ Grid: for entities that might want to snap to a grid.
         this.bind("KeyDown", function(e) {
           if (e.keyCode === Crafty.keys.SPACE && (GameState.running || this.paused)) {
             if (this.pauseAvailable) {
+              Crafty.audio.play("select");
               Crafty.e("PauseText");
               this.pauseAvailable = false;
               GameState.running = false;
               this.paused = true;
             } else if (this.paused) {
+              Crafty.audio.play("select");
               Crafty("PauseText").teardown();
               Crafty("PauseText").destroy();
               GameState.running = true;
@@ -802,7 +806,8 @@ Grid: for entities that might want to snap to a grid.
           });
           Crafty("Train").each(function() {
             this.attr("z", Math.floor(this.y));
-            if (this.checkCollision()) {
+            if (this.checkCollision() && GameState.running) {
+              Crafty.audio.play("crash");
               Util.gameOver(true);
             }
           });
@@ -861,10 +866,12 @@ Grid: for entities that might want to snap to a grid.
       this.bind("KeyDown", function(e) {
         var sec;
         if (e.keyCode === Crafty.keys.SPACE) {
+          Crafty.audio.play("select");
           Crafty("TrainController").destroy();
           Crafty.scene(Crafty("spr_selectarrow").attr('y') === 280 ? "SelectMap" : "PlayGame");
         }
         if (e.keyCode === Crafty.keys.Q || e.keyCode === Crafty.keys.P) {
+          Crafty.audio.play("arrowtick");
           sec = Crafty("spr_selectarrow").attr('y') === 280;
           Crafty("spr_selectarrow").attr({
             y: (sec ? 250 : 280)
@@ -1164,12 +1171,21 @@ Grid: for entities that might want to snap to a grid.
     });
     return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.SPACE) {
+        Crafty.audio.play("select");
         return Crafty.scene('SelectMode');
       }
     });
   });
 
   Crafty.scene('Loading', function() {
+    Crafty.audio.create("get1", "assets/get1.wav");
+    Crafty.audio.create("get2", "assets/get2.wav");
+    Crafty.audio.create("get3", "assets/get3.wav");
+    Crafty.audio.create("crash", "assets/crash.wav");
+    Crafty.audio.create("select", "assets/select.wav");
+    Crafty.audio.create("arrowtick", "assets/arrowtick.wav");
+    Crafty.audio.create("brakeson", "assets/brakeson.wav");
+    Crafty.audio.create("brakesoff", "assets/brakesoff.wav");
     return Crafty.load(['img/ul.png', 'img/ppl.png', 'img/news.png'], function() {
       var spritenames, test;
       Crafty.sprite(28, 'img/ul.png', {
@@ -1395,6 +1411,7 @@ Grid: for entities that might want to snap to a grid.
       size: '30px'
     }).bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.SPACE) {
+        Crafty.audio.play("select");
         if (this.selection === window.MapList.length) {
           try {
             window.selectedMap = JSON.parse($("#custom-level-data").val());
@@ -1417,6 +1434,7 @@ Grid: for entities that might want to snap to a grid.
         }
       }
       if (e.keyCode === Crafty.keys.Q) {
+        Crafty.audio.play("arrowtick");
         this.selection -= 1;
         if (this.selection === -1) {
           this.selection = window.MapList.length + 1;
@@ -1429,6 +1447,7 @@ Grid: for entities that might want to snap to a grid.
         });
       }
       if (e.keyCode === Crafty.keys.P) {
+        Crafty.audio.play("arrowtick");
         this.selection += 1;
         if (this.selection === window.MapList.length + 2) {
           this.selection = 0;
@@ -1478,15 +1497,15 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.scene('SelectMode', function() {
     Crafty.e('TitleText').attr({
-      y: 218
+      y: 198
     }).text('Select a mode:');
     Crafty.e('2D, Canvas, spr_keyq').attr({
       x: 194,
-      y: 270
+      y: 250
     });
     Crafty.e('2D, DOM, Text').attr({
       x: 153,
-      y: 318,
+      y: 298,
       w: 200
     }).text('One Player').textFont({
       size: '26px',
@@ -1494,19 +1513,19 @@ Grid: for entities that might want to snap to a grid.
     }).textColor('#E23228');
     Crafty.e('2D, Canvas, spr_keyp, nobots').attr({
       x: 375,
-      y: 270
+      y: 250
     });
-    Crafty.e('2D, DOM, Text, nobots').attr({
+    Crafty.e('2D, DOM, Text').attr({
       x: 327,
-      y: 318,
+      y: 298,
       w: 200
     }).text('Two Pl').textFont({
       size: '26px',
       family: 'Aller'
     }).textColor('#E23228');
-    Crafty.e('2D, DOM, Text, nobots').attr({
+    Crafty.e('2D, DOM, Text').attr({
       x: 407,
-      y: 318,
+      y: 298,
       w: 200
     }).text('ayers').textFont({
       size: '26px',
@@ -1514,10 +1533,11 @@ Grid: for entities that might want to snap to a grid.
     }).textColor('#4956FF');
     return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.P) {
+        Crafty.audio.play("select");
         Crafty.scene('SelectMap');
       }
       if (e.keyCode === Crafty.keys.Q) {
-        Crafty("nobots").destroy();
+        Crafty.audio.play("select");
         window.singlePlayerMode = true;
         return Crafty.scene('SelectMap');
       }

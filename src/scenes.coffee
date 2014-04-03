@@ -13,11 +13,20 @@ Crafty.scene('Title', () ->
   
   Crafty.e('2D, Keyboard').bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.SPACE
+      Crafty.audio.play("select")
       Crafty.scene('SelectMode')
   )
 )
 
 Crafty.scene('Loading', () ->
+  Crafty.audio.create("get1", "assets/get1.wav")
+  Crafty.audio.create("get2", "assets/get2.wav")
+  Crafty.audio.create("get3", "assets/get3.wav")
+  Crafty.audio.create("crash", "assets/crash.wav")
+  Crafty.audio.create("select", "assets/select.wav")
+  Crafty.audio.create("arrowtick", "assets/arrowtick.wav")
+  Crafty.audio.create("brakeson", "assets/brakeson.wav")
+  Crafty.audio.create("brakesoff", "assets/brakesoff.wav")
   Crafty.load(['img/ul.png', 'img/ppl.png', 'img/news.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
       spr_rtrain: [2,0]
@@ -200,6 +209,7 @@ Crafty.scene('SelectMap', () ->
   )
   .bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.SPACE
+      Crafty.audio.play("select")
       if (this.selection == window.MapList.length)
         try
           window.selectedMap = JSON.parse($("#custom-level-data").val())
@@ -218,6 +228,7 @@ Crafty.scene('SelectMap', () ->
       else
         Crafty.scene('Title')
     if e.keyCode == Crafty.keys.Q
+      Crafty.audio.play("arrowtick")
       this.selection-=1
       if this.selection == -1
         this.selection = window.MapList.length + 1
@@ -228,6 +239,7 @@ Crafty.scene('SelectMap', () ->
         this.attr('y', this._y - 48)
       )
     if e.keyCode == Crafty.keys.P
+      Crafty.audio.play("arrowtick")
       this.selection+=1
       if this.selection == window.MapList.length + 2
         this.selection = 0
@@ -261,18 +273,19 @@ Crafty.scene('SelectMap', () ->
 )
 
 Crafty.scene('SelectMode', () ->
-  Crafty.e('TitleText').attr({y: 218}).text('Select a mode:')
-  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 270})
-  Crafty.e('2D, DOM, Text').attr({x: 153, y: 318, w: 200}).text('One Player').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 270})
-  Crafty.e('2D, DOM, Text, nobots').attr({x: 327, y: 318, w: 200}).text('Two Pl').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, DOM, Text, nobots').attr({x: 407, y: 318, w: 200}).text('ayers').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
+  Crafty.e('TitleText').attr({y: 198}).text('Select a mode:')
+  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 250})
+  Crafty.e('2D, DOM, Text').attr({x: 153, y: 298, w: 200}).text('One Player').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
+  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 250})
+  Crafty.e('2D, DOM, Text').attr({x: 327, y: 298, w: 200}).text('Two Pl').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
+  Crafty.e('2D, DOM, Text').attr({x: 407, y: 298, w: 200}).text('ayers').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
 
   Crafty.e('2D, Keyboard').bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.P
+      Crafty.audio.play("select")
       Crafty.scene('SelectMap')
     if e.keyCode == Crafty.keys.Q
-      Crafty("nobots").destroy()
+      Crafty.audio.play("select")
       window.singlePlayerMode = true
       Crafty.scene('SelectMap')
   )

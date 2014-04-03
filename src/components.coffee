@@ -216,10 +216,15 @@ Crafty.c "CarryingTrain",
   _arriveAtStation: ->
     if @currentTrack.station
       station = @currentTrack.station
-      @_dropoff station
+      droppedOff = @_dropoff station
       passengersGained = @_pickup station
       @_assignDestinations passengersGained, station, @playerOne
       @_updateStationSprites()
+      x = (droppedOff + passengersGained)
+      switch 
+        when x > 40 then Crafty.audio.play("get3")
+        when x > 20 then Crafty.audio.play("get2")
+        when x > 2 then Crafty.audio.play("get1")
     return
 
   _dropoff: (station) ->
@@ -227,7 +232,7 @@ Crafty.c "CarryingTrain",
     @head.passengers -= deliveries
     @head.delivered += deliveries
     (if @playerOne then station.dropoffP1 = 0 else station.dropoffP2 = 0)
-    return
+    return deliveries
 
   _pickup: (station) ->
     room = Constants.MAX_PASSENGERS - @head.passengers
@@ -279,18 +284,15 @@ Crafty.c "PlayerTrain",
     if keyCode?
       @bind "KeyDown", do (e=keyCode) ->
         (e) ->
-          @_setBraking true  if e.keyCode is keyCode
+          if e.keyCode is keyCode and GameState.running
+            Crafty.audio.play('brakeson')
+            @_setBraking true  
       @bind "KeyUp", do (e=keyCode) ->
         (e) ->
-          @_setBraking false  if e.keyCode is keyCode
+          if e.keyCode is keyCode and GameState.running
+            Crafty.audio.play('brakesoff')
+            @_setBraking false  
       this
-    else
-      @bind "EnterFrame", ->
-        if @speed is Constants.REDUCED_SPEED
-          @_setBraking false  if Math.random() > 0.925
-        else
-          @_setBraking true  if Math.random() > 0.94
-        return
 
 
 ###
@@ -627,11 +629,13 @@ Crafty.c "ClockController",
       @bind "KeyDown", (e) ->
         if e.keyCode is Crafty.keys.SPACE and (GameState.running or @paused)
           if @pauseAvailable
+            Crafty.audio.play("select")
             Crafty.e "PauseText"
             @pauseAvailable = false
             GameState.running = false
             @paused = true
           else if @paused
+            Crafty.audio.play("select")
             Crafty("PauseText").teardown()
             Crafty("PauseText").destroy()
             GameState.running = true
@@ -677,7 +681,9 @@ Crafty.c "TrainController",
 
         Crafty("Train").each ->
           @attr("z", Math.floor(@y))
-          Util.gameOver true  if @checkCollision()
+          if @checkCollision() and GameState.running
+            Crafty.audio.play("crash")
+            Util.gameOver true
           return
 
       return
@@ -707,9 +713,11 @@ Crafty.c "EndingText",
 
     @bind "KeyDown", (e) ->
       if e.keyCode is Crafty.keys.SPACE
+        Crafty.audio.play("select")
         Crafty("TrainController").destroy() # Because of the 2D issue
         Crafty.scene(if (Crafty("spr_selectarrow").attr('y') == 280) then "SelectMap" else "PlayGame")
       if e.keyCode is Crafty.keys.Q or e.keyCode is Crafty.keys.P
+        Crafty.audio.play("arrowtick")
         sec = (Crafty("spr_selectarrow").attr('y') == 280)
         Crafty("spr_selectarrow").attr({y: (if sec then 250 else 280)})
         Crafty("spr_space").attr({y: (if sec then 240 else 270)})
