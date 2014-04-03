@@ -500,7 +500,7 @@ Grid: for entities that might want to snap to a grid.
       this.popular = false;
       this.requires("2D, Grid");
       this.bind("EnterFrame", function() {
-        if (GameState.running) {
+        if (GameState.running && GameClock.hour > 5) {
           this.populate();
         }
       });
@@ -1186,6 +1186,7 @@ Grid: for entities that might want to snap to a grid.
     Crafty.audio.create("arrowtick", "assets/arrowtick.wav");
     Crafty.audio.create("brakeson", "assets/brakeson.wav");
     Crafty.audio.create("brakesoff", "assets/brakesoff.wav");
+    Crafty.audio.toggleMute();
     return Crafty.load(['img/ul.png', 'img/ppl.png', 'img/news.png'], function() {
       var spritenames, test;
       Crafty.sprite(28, 'img/ul.png', {
@@ -1272,7 +1273,9 @@ Grid: for entities that might want to snap to a grid.
         spr_selectstn: [0, 0],
         spr_selectarrow: [1, 0],
         spr_selectline: [0, 1],
-        spr_selectstn2: [1, 1]
+        spr_selectstn2: [1, 1],
+        spr_checkbox: [0, 2],
+        spr_checkboxchecked: [1, 2]
       });
       Crafty.sprite(134, 68, 'img/coffee.png', {
         spr_coffee: [0, 0]
@@ -1511,7 +1514,7 @@ Grid: for entities that might want to snap to a grid.
       size: '26px',
       family: 'Aller'
     }).textColor('#E23228');
-    Crafty.e('2D, Canvas, spr_keyp, nobots').attr({
+    Crafty.e('2D, Canvas, spr_keyp').attr({
       x: 375,
       y: 250
     });
@@ -1531,7 +1534,7 @@ Grid: for entities that might want to snap to a grid.
       size: '26px',
       family: 'Aller'
     }).textColor('#4956FF');
-    return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
+    Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.P) {
         Crafty.audio.play("select");
         Crafty.scene('SelectMap');
@@ -1539,8 +1542,33 @@ Grid: for entities that might want to snap to a grid.
       if (e.keyCode === Crafty.keys.Q) {
         Crafty.audio.play("select");
         window.singlePlayerMode = true;
-        return Crafty.scene('SelectMap');
+        Crafty.scene('SelectMap');
       }
+      if (e.keyCode === Crafty.keys.SPACE) {
+        if (Crafty.audio.muted) {
+          Crafty('checkybox').removeComponent('spr_checkbox', false).addComponent('spr_checkboxchecked');
+        } else {
+          Crafty('checkybox').removeComponent('spr_checkboxchecked', false).addComponent('spr_checkbox');
+        }
+        Crafty.audio.toggleMute();
+        return Crafty.audio.play('arrowtick');
+      }
+    });
+    Crafty.e('2D, Canvas, Text').attr({
+      x: 214,
+      y: 440,
+      w: 200
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#FFFDE8').text("Sound");
+    Crafty.e('2D, Canvas, spr_space').attr({
+      x: 308,
+      y: 430
+    });
+    return Crafty.e('2D, Canvas, checkybox, spr_checkbox' + (Crafty.audio.muted ? '' : 'checked')).attr({
+      x: 278,
+      y: 440
     });
   });
 

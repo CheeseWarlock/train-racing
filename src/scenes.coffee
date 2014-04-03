@@ -27,6 +27,7 @@ Crafty.scene('Loading', () ->
   Crafty.audio.create("arrowtick", "assets/arrowtick.wav")
   Crafty.audio.create("brakeson", "assets/brakeson.wav")
   Crafty.audio.create("brakesoff", "assets/brakesoff.wav")
+  Crafty.audio.toggleMute()
   Crafty.load(['img/ul.png', 'img/ppl.png', 'img/news.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
       spr_rtrain: [2,0]
@@ -104,6 +105,8 @@ Crafty.scene('Loading', () ->
       spr_selectarrow: [1,0]
       spr_selectline: [0,1]
       spr_selectstn2: [1,1]
+      spr_checkbox: [0,2]
+      spr_checkboxchecked: [1,2]
     )
     Crafty.sprite(134, 68, 'img/coffee.png',
       spr_coffee: [0,0]
@@ -276,7 +279,7 @@ Crafty.scene('SelectMode', () ->
   Crafty.e('TitleText').attr({y: 198}).text('Select a mode:')
   Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 250})
   Crafty.e('2D, DOM, Text').attr({x: 153, y: 298, w: 200}).text('One Player').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 250})
+  Crafty.e('2D, Canvas, spr_keyp').attr({x: 375, y: 250})
   Crafty.e('2D, DOM, Text').attr({x: 327, y: 298, w: 200}).text('Two Pl').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
   Crafty.e('2D, DOM, Text').attr({x: 407, y: 298, w: 200}).text('ayers').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
 
@@ -288,7 +291,18 @@ Crafty.scene('SelectMode', () ->
       Crafty.audio.play("select")
       window.singlePlayerMode = true
       Crafty.scene('SelectMap')
+    if e.keyCode == Crafty.keys.SPACE
+      if (Crafty.audio.muted)
+        Crafty('checkybox').removeComponent('spr_checkbox', false).addComponent('spr_checkboxchecked')
+      else
+        Crafty('checkybox').removeComponent('spr_checkboxchecked', false).addComponent('spr_checkbox')
+      Crafty.audio.toggleMute()
+      Crafty.audio.play('arrowtick')
   )
+  Crafty.e('2D, Canvas, Text').attr({x: 214, y: 440,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text("Sound")
+  Crafty.e('2D, Canvas, spr_space').attr({x: 308, y: 430})
+  Crafty.e('2D, Canvas, checkybox, spr_checkbox' + (if Crafty.audio.muted then '' else 'checked')).attr({x: 278, y: 440})
+  
 )
 
 Crafty.scene('PlayGame', () ->

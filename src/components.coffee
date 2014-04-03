@@ -410,7 +410,7 @@ Crafty.c "Station",
     @popular = false
     @requires "2D, Grid"
     @bind "EnterFrame", ->
-      @populate()  if GameState.running
+      @populate() if (GameState.running and GameClock.hour > 5)
       return
     return
 
