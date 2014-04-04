@@ -562,6 +562,9 @@ Grid: for entities that might want to snap to a grid.
           } else if (this.facing === "e") {
             x = this._x + 20 - 6 * (pos % 2);
             y = this._y + 2 + 8 * pos;
+          } else if (this.facing === "n") {
+            x = this._x + 2 + 8 * pos;
+            y = this._y - 6 + 4 * (pos % 2);
           } else {
             x = this._x + 2 + 8 * pos;
             y = this._y + 12 + 4 * (pos % 2);

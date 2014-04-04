@@ -469,6 +469,9 @@ Crafty.c "Station",
         else if @facing is "e"
           x = @_x + 20 - 6 * (pos % 2)
           y = @_y + 2 + 8 * pos
+        else if @facing is "n"
+          x = @_x + 2 + 8 * pos
+          y = @_y - 6 + 4 * (pos % 2)
         else
           x = @_x + 2 + 8 * pos
           y = @_y + 12 + 4 * (pos % 2)
