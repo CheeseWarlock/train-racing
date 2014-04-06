@@ -704,8 +704,14 @@ Crafty.c "EndingText",
       h: 160
     Crafty.e('2D, DOM, Text').attr({x: 230, y: 250,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Try Again")
     Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Select Map")
-    Crafty.e('2D, DOM, spr_selectarrow').attr({x: 190, y: 250, z: 50})
-    Crafty.e('2D, DOM, spr_space').attr({x: 340, y: 240, z: 50})
+    arrow = Crafty.e('DOM, SelectArrow').attr({x: 190, y: 250, z: 50, callbacks: [
+      () ->
+        Crafty("TrainController").destroy() # Because of the 2D issue
+        Crafty.scene("PlayGame")
+      , () ->
+        Crafty("TrainController").destroy() # Because of the 2D issue
+        Crafty.scene("SelectMap")
+    ]})
 
     @css
       padding: 20
@@ -713,18 +719,6 @@ Crafty.c "EndingText",
       width: 600
       height: 200
       boxShadow: "-8px 8px 0px rgba(47,32,16,0.35)"
-
-    @bind "KeyDown", (e) ->
-      if e.keyCode is Crafty.keys.SPACE
-        Crafty.audio.play("select")
-        Crafty("TrainController").destroy() # Because of the 2D issue
-        Crafty.scene(if (Crafty("spr_selectarrow").attr('y') == 280) then "SelectMap" else "PlayGame")
-      if e.keyCode is Crafty.keys.Q or e.keyCode is Crafty.keys.P
-        Crafty.audio.play("arrowtick")
-        sec = (Crafty("spr_selectarrow").attr('y') == 280)
-        Crafty("spr_selectarrow").attr({y: (if sec then 250 else 280)})
-        Crafty("spr_space").attr({y: (if sec then 240 else 270)})
-      return
 
     return
 
@@ -872,3 +866,34 @@ Crafty.c "TitleText",
       family: "Aller"
     ).textColor "#FFFDE8"
     return
+
+
+###
+A selector for a menu item.
+Give it an array of callbacks for menu items.
+###
+Crafty.c "SelectArrow",
+  init: ->
+    @requires("2D, spr_selectarrow")
+    @spaceIcon = Crafty.e('2D, ' + (if @has('DOM') then 'DOM' else 'Canvas') + ', spr_space').attr({x: 150, y: -10})
+    @attach(@spaceIcon)
+    @lineHeight = 30
+    @itemCount = 2
+    @selectedIndex = 0
+    @callbacks = []
+    @bind "KeyDown", (e) ->
+      zeroPosition = @_y - (@selectedIndex * @lineHeight)
+      if e.keyCode is Crafty.keys.P 
+        Crafty.audio.play("arrowtick")
+        if (++@selectedIndex >= @itemCount)
+          @selectedIndex = 0
+      else if e.keyCode is Crafty.keys.Q
+        Crafty.audio.play("arrowtick")
+        if (--@selectedIndex < 0)
+          @selectedIndex = @itemCount - 1
+      else if e.keyCode is Crafty.keys.SPACE
+        Crafty.audio.play("select")
+        if @callbacks[@selectedIndex]
+          @callbacks[@selectedIndex]()
+      @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
+      return

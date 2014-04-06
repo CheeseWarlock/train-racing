@@ -821,6 +821,7 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("EndingText", {
     init: function() {
+      var arrow;
       this.requires("Dialog").textFont({
         size: "20px"
       });
@@ -849,15 +850,19 @@ Grid: for entities that might want to snap to a grid.
         size: '17px',
         family: 'Aller'
       }).textColor('#5CC64C').text("Select Map");
-      Crafty.e('2D, DOM, spr_selectarrow').attr({
+      arrow = Crafty.e('DOM, SelectArrow').attr({
         x: 190,
         y: 250,
-        z: 50
-      });
-      Crafty.e('2D, DOM, spr_space').attr({
-        x: 340,
-        y: 240,
-        z: 50
+        z: 50,
+        callbacks: [
+          function() {
+            Crafty("TrainController").destroy();
+            return Crafty.scene("PlayGame");
+          }, function() {
+            Crafty("TrainController").destroy();
+            return Crafty.scene("SelectMap");
+          }
+        ]
       });
       this.css({
         padding: 20,
@@ -865,24 +870,6 @@ Grid: for entities that might want to snap to a grid.
         width: 600,
         height: 200,
         boxShadow: "-8px 8px 0px rgba(47,32,16,0.35)"
-      });
-      this.bind("KeyDown", function(e) {
-        var sec;
-        if (e.keyCode === Crafty.keys.SPACE) {
-          Crafty.audio.play("select");
-          Crafty("TrainController").destroy();
-          Crafty.scene(Crafty("spr_selectarrow").attr('y') === 280 ? "SelectMap" : "PlayGame");
-        }
-        if (e.keyCode === Crafty.keys.Q || e.keyCode === Crafty.keys.P) {
-          Crafty.audio.play("arrowtick");
-          sec = Crafty("spr_selectarrow").attr('y') === 280;
-          Crafty("spr_selectarrow").attr({
-            y: (sec ? 250 : 280)
-          });
-          Crafty("spr_space").attr({
-            y: (sec ? 240 : 270)
-          });
-        }
       });
     }
   });
@@ -1053,6 +1040,50 @@ Grid: for entities that might want to snap to a grid.
         size: "17px",
         family: "Aller"
       }).textColor("#FFFDE8");
+    }
+  });
+
+  /*
+  A selector for a menu item.
+  Give it an array of callbacks for menu items.
+  */
+
+
+  Crafty.c("SelectArrow", {
+    init: function() {
+      this.requires("2D, spr_selectarrow");
+      this.spaceIcon = Crafty.e('2D, ' + (this.has('DOM') ? 'DOM' : 'Canvas') + ', spr_space').attr({
+        x: 150,
+        y: -10
+      });
+      this.attach(this.spaceIcon);
+      this.lineHeight = 30;
+      this.itemCount = 2;
+      this.selectedIndex = 0;
+      this.callbacks = [];
+      return this.bind("KeyDown", function(e) {
+        var zeroPosition;
+        zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
+        if (e.keyCode === Crafty.keys.P) {
+          Crafty.audio.play("arrowtick");
+          if (++this.selectedIndex >= this.itemCount) {
+            this.selectedIndex = 0;
+          }
+        } else if (e.keyCode === Crafty.keys.Q) {
+          Crafty.audio.play("arrowtick");
+          if (--this.selectedIndex < 0) {
+            this.selectedIndex = this.itemCount - 1;
+          }
+        } else if (e.keyCode === Crafty.keys.SPACE) {
+          Crafty.audio.play("select");
+          if (this.callbacks[this.selectedIndex]) {
+            this.callbacks[this.selectedIndex]();
+          }
+        }
+        this.attr({
+          y: zeroPosition + (this.selectedIndex * this.lineHeight)
+        });
+      });
     }
   });
 
@@ -1336,16 +1367,49 @@ Grid: for entities that might want to snap to a grid.
   });
 
   Crafty.scene('SelectMap', function() {
-    var curry, idx;
+    var curry, idx, mapCallback, selectArrow, titleText;
     Crafty.background('#2B281D');
-    Crafty.c('MapSelectScrollable');
+    Crafty.e('TitleText').text('Select a map:').attr({
+      y: 30
+    });
+    titleText = Crafty.e('TitleText, Keyboard, LevelNameText').text(window.MapList[0][1]).attr({
+      y: 86,
+      titles: []
+    }).textColor('#FFFDE8').textFont({
+      size: '30px'
+    }).bind('EnterFrame', function() {
+      if (Crafty('SelectArrow').y > 284) {
+        return Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
+          return this.y -= 6;
+        });
+      } else if (Crafty('SelectArrow').y < 140 + Math.min(96, Crafty("SelectArrow").selectedIndex * 48)) {
+        return Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
+          return this.y += 6;
+        });
+      }
+    }).textColor('#FFFDE8');
     curry = 140;
+    selectArrow = Crafty.e('Canvas, SelectArrow').attr({
+      x: 200,
+      y: 140,
+      itemCount: window.MapList.length + 2,
+      lineHeight: 48
+    });
+    selectArrow.spaceIcon.attr({
+      x: 404
+    });
+    mapCallback = function() {
+      return $.getJSON(window.MapList[Crafty('SelectArrow').selectedIndex][0], function(data) {
+        window.selectedMap = data;
+        return Crafty.scene('PlayGame');
+      });
+    };
     for (idx in window.MapList) {
       Crafty.e('2D, Canvas, spr_selectstn').attr({
         x: 250,
         y: curry
       });
-      Crafty.e('2D, Canvas, Text, aaa').attr({
+      Crafty.e('2D, Canvas, Text, _MenuElement').attr({
         x: 280,
         y: curry,
         w: 200
@@ -1358,12 +1422,14 @@ Grid: for entities that might want to snap to a grid.
         y: curry + 24
       });
       curry += 48;
+      selectArrow.callbacks.push(mapCallback);
+      titleText.titles.push(window.MapList[idx][1]);
     }
     Crafty.e('2D, Canvas, spr_selectstn').attr({
       x: 250,
       y: curry
     });
-    Crafty.e('2D, Canvas, Text, aaa').attr({
+    Crafty.e('2D, Canvas, Text, _MenuElement').attr({
       x: 280,
       y: curry,
       w: 200
@@ -1371,14 +1437,7 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').text("Load Map...");
-    Crafty.e('2D, Canvas, spr_selectarrow').attr({
-      x: 200,
-      y: 140
-    });
-    Crafty.e('2D, Canvas, spr_space').attr({
-      x: 420,
-      y: 130
-    });
+    titleText.titles.push("Load Map...");
     Crafty.e('2D, Canvas, spr_selectline').attr({
       x: 250,
       y: curry + 24
@@ -1387,7 +1446,7 @@ Grid: for entities that might want to snap to a grid.
       x: 250,
       y: curry + 48
     });
-    Crafty.e('2D, Canvas, Text, aaa').attr({
+    Crafty.e('2D, Canvas, Text, _MenuElement').attr({
       x: 280,
       y: curry + 48,
       w: 200
@@ -1395,6 +1454,23 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#E23228').text("Back to Title");
+    titleText.titles.push("Back to Title");
+    selectArrow.callbacks.push(function() {
+      try {
+        window.selectedMap = JSON.parse($("#custom-level-data").val());
+        return Crafty.scene('PlayGame');
+      } catch (_error) {
+        if (!($('#display-design:visible').length)) {
+          $('#display-manual').hide();
+          $('#display-credits').hide();
+          $('#display-design').show();
+          return window.dontGoAway = true;
+        }
+      }
+    });
+    selectArrow.callbacks.push(function() {
+      return Crafty.scene('Title');
+    });
     Crafty.e('2D, Canvas, Color').color('#2B281D').attr({
       y: 0,
       x: 0,
@@ -1406,82 +1482,6 @@ Grid: for entities that might want to snap to a grid.
       x: 0,
       w: 1000,
       h: 150
-    });
-    Crafty.e('TitleText').text('Select a map:').attr({
-      y: 30
-    }).textColor('#FFFDE8');
-    Crafty.e('TitleText, Keyboard').text(window.MapList[0][1]).attr({
-      y: 86,
-      selection: 0
-    }).textColor('#FFFDE8').textFont({
-      size: '30px'
-    }).bind('KeyDown', function(e) {
-      if (e.keyCode === Crafty.keys.SPACE) {
-        Crafty.audio.play("select");
-        if (this.selection === window.MapList.length) {
-          try {
-            window.selectedMap = JSON.parse($("#custom-level-data").val());
-            Crafty.scene('PlayGame');
-          } catch (_error) {
-            if (!($('#display-design:visible').length)) {
-              $('#display-manual').hide();
-              $('#display-credits').hide();
-              $('#display-design').show();
-              window.dontGoAway = true;
-            }
-          }
-        } else if (this.selection < window.MapList.length) {
-          $.getJSON(window.MapList[this.selection][0], function(data) {
-            window.selectedMap = data;
-            return Crafty.scene('PlayGame');
-          });
-        } else {
-          Crafty.scene('Title');
-        }
-      }
-      if (e.keyCode === Crafty.keys.Q) {
-        Crafty.audio.play("arrowtick");
-        this.selection -= 1;
-        if (this.selection === -1) {
-          this.selection = window.MapList.length + 1;
-          Crafty('spr_selectarrow, spr_space').each(function() {
-            return this.attr('y', this._y + 48 * (window.MapList.length + 2));
-          });
-        }
-        Crafty('spr_selectarrow, spr_space').each(function() {
-          return this.attr('y', this._y - 48);
-        });
-      }
-      if (e.keyCode === Crafty.keys.P) {
-        Crafty.audio.play("arrowtick");
-        this.selection += 1;
-        if (this.selection === window.MapList.length + 2) {
-          this.selection = 0;
-          Crafty('spr_selectarrow, spr_space').each(function() {
-            return this.attr('y', this._y - 48 * (window.MapList.length + 2));
-          });
-        }
-        Crafty('spr_selectarrow, spr_space').each(function() {
-          return this.attr('y', this._y + 48);
-        });
-      }
-      if (this.selection < window.MapList.length) {
-        return this.text(window.MapList[this.selection][1]);
-      } else if (this.selection === window.MapList.length) {
-        return this.text("Load Map...");
-      } else {
-        return this.text("Back to Title");
-      }
-    }).bind('EnterFrame', function() {
-      if (Crafty('spr_selectarrow').y > 284) {
-        return Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(function() {
-          return this.y -= 6;
-        });
-      } else if (Crafty('spr_selectarrow').y < 140 + Math.min(96, this.selection * 48)) {
-        return Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(function() {
-          return this.y += 6;
-        });
-      }
     });
     Crafty.e('2D, Canvas, spr_keyq').attr({
       x: 230,
@@ -1495,9 +1495,12 @@ Grid: for entities that might want to snap to a grid.
       x: 230,
       y: 480
     });
-    return Crafty.e('2D, Canvas, spr_arrowl').attr({
+    Crafty.e('2D, Canvas, spr_arrowl').attr({
       x: 338,
       y: 480
+    });
+    return selectArrow.bind('KeyDown', function() {
+      return Crafty("LevelNameText").text(Crafty("LevelNameText").titles[Crafty("SelectArrow").selectedIndex]);
     });
   });
 

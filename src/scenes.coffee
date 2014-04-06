@@ -166,22 +166,66 @@ Crafty.scene('Loading', () ->
 
 Crafty.scene('SelectMap', () ->
   Crafty.background('#2B281D')
-  Crafty.c('MapSelectScrollable')
-  
+  Crafty.e('TitleText').text('Select a map:')
+  .attr(
+    y: 30
+  )
+  titleText = Crafty.e('TitleText, Keyboard, LevelNameText').text(window.MapList[0][1]).attr(
+    y: 86
+    titles: []
+  )
+  .textColor('#FFFDE8')
+  .textFont(
+    size: '30px'
+  ).bind('EnterFrame', () ->
+    if Crafty('SelectArrow').y > 284
+      Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
+        this.y -= 6;
+      )
+    else if Crafty('SelectArrow').y < 140 + Math.min(96, Crafty("SelectArrow").selectedIndex * 48)
+      Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
+        this.y += 6;
+      )
+  )
+  .textColor('#FFFDE8')
   curry = 140
+  selectArrow = Crafty.e('Canvas, SelectArrow').attr({x: 200, y: 140, itemCount: window.MapList.length + 2, lineHeight: 48})
+  selectArrow.spaceIcon.attr({x: 404})
+  mapCallback = () ->
+    $.getJSON(window.MapList[Crafty('SelectArrow').selectedIndex][0], (data) ->
+      window.selectedMap = data
+      Crafty.scene('PlayGame')
+    )
   for idx of window.MapList
     Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-    Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1])
+    Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1])
     Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
     curry+=48
+    selectArrow.callbacks.push(mapCallback)
+    titleText.titles.push(window.MapList[idx][1])
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load Map...")
-  Crafty.e('2D, Canvas, spr_selectarrow').attr({x: 200, y: 140})
-  Crafty.e('2D, Canvas, spr_space').attr({x: 420, y: 130})
+  Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load Map...")
+  titleText.titles.push("Load Map...")
   Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry+48})
-  Crafty.e('2D, Canvas, Text, aaa').attr({x: 280, y: curry+48,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title")
-  
+  Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry+48,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title")
+  titleText.titles.push("Back to Title")
+  selectArrow.callbacks.push(
+    () ->
+      try
+        window.selectedMap = JSON.parse($("#custom-level-data").val())
+        Crafty.scene('PlayGame')
+      catch
+        if !($('#display-design:visible').length)
+          $('#display-manual').hide()
+          $('#display-credits').hide()
+          $('#display-design').show()
+          window.dontGoAway = true
+  )
+  selectArrow.callbacks.push(
+    () ->
+      Crafty.scene('Title')
+  )
   
   Crafty.e('2D, Canvas, Color').color('#2B281D')
   .attr(
@@ -197,82 +241,15 @@ Crafty.scene('SelectMap', () ->
     w: 1000
     h: 150
   )
-  Crafty.e('TitleText').text('Select a map:')
-  .attr(
-    y: 30
-  )
-  .textColor('#FFFDE8')
-  Crafty.e('TitleText, Keyboard').text(window.MapList[0][1]).attr(
-    y: 86
-    selection: 0
-  )
-  .textColor('#FFFDE8')
-  .textFont(
-    size: '30px'
-  )
-  .bind('KeyDown', (e) ->
-    if e.keyCode == Crafty.keys.SPACE
-      Crafty.audio.play("select")
-      if (this.selection == window.MapList.length)
-        try
-          window.selectedMap = JSON.parse($("#custom-level-data").val())
-          Crafty.scene('PlayGame')
-        catch
-          if !($('#display-design:visible').length)
-            $('#display-manual').hide()
-            $('#display-credits').hide()
-            $('#display-design').show()
-            window.dontGoAway = true
-      else if (this.selection < window.MapList.length)
-        $.getJSON(window.MapList[this.selection][0], (data) ->
-          window.selectedMap = data
-          Crafty.scene('PlayGame')
-        )
-      else
-        Crafty.scene('Title')
-    if e.keyCode == Crafty.keys.Q
-      Crafty.audio.play("arrowtick")
-      this.selection-=1
-      if this.selection == -1
-        this.selection = window.MapList.length + 1
-        Crafty('spr_selectarrow, spr_space').each(() ->
-          this.attr('y', this._y + 48 * (window.MapList.length + 2))
-        )
-      Crafty('spr_selectarrow, spr_space').each(() ->
-        this.attr('y', this._y - 48)
-      )
-    if e.keyCode == Crafty.keys.P
-      Crafty.audio.play("arrowtick")
-      this.selection+=1
-      if this.selection == window.MapList.length + 2
-        this.selection = 0
-        Crafty('spr_selectarrow, spr_space').each(() ->
-          this.attr('y', this._y - 48 * (window.MapList.length + 2))
-        )
-      Crafty('spr_selectarrow, spr_space').each(() ->
-        this.attr('y', this._y + 48)
-      )
-    if (this.selection < window.MapList.length)
-      this.text(window.MapList[this.selection][1])
-    else if (this.selection == window.MapList.length)
-      this.text("Load Map...")
-    else
-      this.text("Back to Title")
-  ).bind('EnterFrame', () ->
-    if Crafty('spr_selectarrow').y > 284
-      Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(() ->
-        this.y -= 6;
-      )
-    else if Crafty('spr_selectarrow').y < 140 + Math.min(96, this.selection * 48)
-      Crafty('spr_selectarrow, spr_space, spr_selectstn, spr_selectline, aaa').each(() ->
-        this.y += 6;
-      )
-  )
   
   Crafty.e('2D, Canvas, spr_keyq').attr({x: 230, y: 430})
   Crafty.e('2D, Canvas, spr_keyp').attr({x: 338, y: 430})
   Crafty.e('2D, Canvas, spr_arrowr').attr({x: 230, y: 480})
   Crafty.e('2D, Canvas, spr_arrowl').attr({x: 338, y: 480})
+  
+  selectArrow.bind('KeyDown', () ->
+    Crafty("LevelNameText").text(Crafty("LevelNameText").titles[Crafty("SelectArrow").selectedIndex])
+  )
 )
 
 Crafty.scene('SelectMode', () ->
