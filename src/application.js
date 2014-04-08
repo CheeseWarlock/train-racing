@@ -1087,8 +1087,26 @@ Grid: for entities that might want to snap to a grid.
     }
   });
 
+  Crafty.c("CheckBox", {
+    init: function() {
+      this.requires("2D, Canvas, spr_checkbox");
+      return this.callback = function() {};
+    },
+    _setChecked: function(checked) {
+      if (this.has('spr_checkbox' + (checked ? '' : 'checked'))) {
+        this.removeComponent('spr_checkbox' + (checked ? '' : 'checked'), false);
+      }
+      return this.addComponent('spr_checkbox' + (checked ? 'checked' : ''));
+    },
+    refresh: function() {
+      return this._setChecked(this.callback());
+    }
+  });
+
   $(document).ready(function() {
     window.singlePlayerMode = false;
+    window.Brakes = true;
+    window.SwapColours = true;
     $(window).keydown(function(e) {
       if (!window.dontGoAway && !($(e.target).is("textarea, a"))) {
         $('#display-manual').hide();
@@ -1644,7 +1662,24 @@ Grid: for entities that might want to snap to a grid.
     selectArrow = Crafty.e('Canvas, SelectArrow').attr({
       x: 190,
       y: 280,
-      itemCount: 4
+      itemCount: 4,
+      callbacks: [
+        function() {
+          Crafty.audio.toggleMute();
+          return Crafty('CheckBox').get(0).refresh();
+        }, function() {
+          window.SwapColours = !window.SwapColours;
+          return Crafty('CheckBox').get(1).refresh();
+        }, function() {
+          window.Brakes = !window.Brakes;
+          return Crafty('CheckBox').get(2).refresh();
+        }, function() {
+          return Crafty.scene('Title');
+        }
+      ]
+    });
+    selectArrow.spaceIcon.attr({
+      x: 378
     });
     Crafty.e('TitleText').attr({
       y: 100
@@ -1678,7 +1713,7 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').text("Brakes");
-    return Crafty.e('2D, DOM, Text').attr({
+    Crafty.e('2D, DOM, Text').attr({
       x: 230,
       y: 370,
       w: 200,
@@ -1687,6 +1722,27 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').textColor('#E23228').text("Back to Title");
+    Crafty.e('2D, Canvas, CheckBox').attr({
+      x: 346,
+      y: 280,
+      callback: function() {
+        return !Crafty.audio.muted;
+      }
+    }).refresh();
+    Crafty.e('2D, Canvas, CheckBox').attr({
+      x: 346,
+      y: 310,
+      callback: function() {
+        return window.SwapColours;
+      }
+    }).refresh();
+    return Crafty.e('2D, Canvas, CheckBox').attr({
+      x: 346,
+      y: 340,
+      callback: function() {
+        return window.Brakes;
+      }
+    }).refresh();
   });
 
   window.Util = {

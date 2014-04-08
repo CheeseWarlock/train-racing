@@ -1,5 +1,7 @@
 $(document).ready(() ->
   window.singlePlayerMode = false
+  window.Brakes = true
+  window.SwapColours = true
   
   $(window).keydown((e) ->
     if (!(window.dontGoAway) && !($(e.target).is("textarea, a")))

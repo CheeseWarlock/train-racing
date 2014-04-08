@@ -897,3 +897,13 @@ Crafty.c "SelectArrow",
           @callbacks[@selectedIndex]()
       @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
       return
+      
+Crafty.c "CheckBox",
+  init: ->
+    @requires("2D, Canvas, spr_checkbox")
+    @callback = () ->
+  _setChecked: (checked) ->
+    if @has('spr_checkbox' + (if checked then '' else 'checked')) then @removeComponent('spr_checkbox' + (if checked then '' else 'checked'), false)
+    @addComponent('spr_checkbox' + (if checked then 'checked' else ''))
+  refresh: () ->
+    @_setChecked(@callback())
