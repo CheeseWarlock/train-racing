@@ -1164,45 +1164,81 @@ Grid: for entities that might want to snap to a grid.
       x: 220
     });
     Crafty.e('TitleText').attr({
-      y: 173
-    }).text('Compete to deliver more passengers by 10:00 AM!');
+      y: 178
+    }).text('Compete to deliver more passengers by 10:00 AM.');
     Crafty.e('TitleText').attr({
       y: 228
-    }).text('Hold your key to slow down and turn at junctions:');
+    }).text('But if the trains collide, nobody wins!');
     Crafty.e('2D, Canvas, spr_keyq').attr({
-      x: 194,
-      y: 280
+      x: 230,
+      y: 430
+    });
+    Crafty.e('2D, Canvas, spr_keyp').attr({
+      x: 338,
+      y: 430
+    });
+    Crafty.e('2D, Canvas, spr_arrowr').attr({
+      x: 230,
+      y: 480
+    });
+    Crafty.e('2D, Canvas, spr_arrowl').attr({
+      x: 338,
+      y: 480
+    });
+    Crafty.e('Canvas, SelectArrow').attr({
+      x: 190,
+      y: 280,
+      itemCount: 4,
+      callbacks: [
+        function() {
+          window.singlePlayerMode = true;
+          return Crafty.scene('SelectMap');
+        }, function() {
+          window.singlePlayerMode = false;
+          return Crafty.scene('SelectMap');
+        }, function() {
+          return Crafty.scene('SelectMode');
+        }, function() {
+          return Crafty.scene('Options');
+        }
+      ]
     });
     Crafty.e('2D, DOM, Text').attr({
-      x: 161,
-      y: 328,
-      w: 200
-    }).text('Red Train').textFont({
-      size: '26px',
+      x: 230,
+      y: 280,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
       family: 'Aller'
-    }).textColor('#E23228');
-    Crafty.e('2D, Canvas, spr_keyp, nobots').attr({
-      x: 375,
-      y: 280
-    });
-    Crafty.e('2D, DOM, Text, nobots').attr({
-      x: 338,
-      y: 328,
-      w: 200
-    }).text('Blue Train').textFont({
-      size: '26px',
+    }).textColor('#5CC64C').text("1-Player Start");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 310,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
       family: 'Aller'
-    }).textColor('#4956FF');
-    Crafty.e('TitleText').attr({
-      y: 376
-    }).text('Your passengers\' destinations are shown at the bottom.');
-    Crafty.e('TitleText').attr({
-      y: 431
-    }).text('Avoid collisions at all costs!');
-    Crafty.e('2D, Canvas, spr_space').attr({
-      x: 264,
-      y: 483
-    });
+    }).textColor('#5CC64C').text("2-Player Start");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 340,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').text("Instructions");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 370,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').text("Options");
     return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
       if (e.keyCode === Crafty.keys.SPACE) {
         Crafty.audio.play("select");
@@ -1603,8 +1639,54 @@ Grid: for entities that might want to snap to a grid.
     return Util.assignStations();
   });
 
-  Crafty.scene('GameOver', function() {
-    return Crafty.e('GameOverText');
+  Crafty.scene('Options', function() {
+    var selectArrow;
+    selectArrow = Crafty.e('Canvas, SelectArrow').attr({
+      x: 190,
+      y: 280,
+      itemCount: 4
+    });
+    Crafty.e('TitleText').attr({
+      y: 100
+    }).text("Options").textFont({
+      size: '30px'
+    });
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 280,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').text("Sound On");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 310,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').text("Swap Colours");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 340,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').text("Brakes");
+    return Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 370,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').textColor('#E23228').text("Back to Title");
   });
 
   window.Util = {

@@ -1,15 +1,35 @@
 Crafty.scene('Title', () ->
   this.letters = ""
   Crafty.e('2D, Canvas, spr_title').attr({x:220})
-  Crafty.e('TitleText').attr({y: 173}).text('Compete to deliver more passengers by 10:00 AM!')
-  Crafty.e('TitleText').attr({y: 228}).text('Hold your key to slow down and turn at junctions:')
-  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 280})
-  Crafty.e('2D, DOM, Text').attr({x: 161, y: 328, w: 200}).text('Red Train').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 280})
-  Crafty.e('2D, DOM, Text, nobots').attr({x: 338, y: 328, w: 200}).text('Blue Train').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
-  Crafty.e('TitleText').attr({y: 376}).text('Your passengers\' destinations are shown at the bottom.')
-  Crafty.e('TitleText').attr({y: 431}).text('Avoid collisions at all costs!')
-  Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 483})
+  Crafty.e('TitleText').attr({y: 178}).text('Compete to deliver more passengers by 10:00 AM.')
+  Crafty.e('TitleText').attr({y: 228}).text('But if the trains collide, nobody wins!')
+  Crafty.e('2D, Canvas, spr_keyq').attr({x: 230, y: 430})
+  Crafty.e('2D, Canvas, spr_keyp').attr({x: 338, y: 430})
+  Crafty.e('2D, Canvas, spr_arrowr').attr({x: 230, y: 480})
+  Crafty.e('2D, Canvas, spr_arrowl').attr({x: 338, y: 480})
+  
+  Crafty.e('Canvas, SelectArrow').attr(
+    x: 190
+    y: 280
+    itemCount: 4
+    callbacks: [
+      () ->
+        window.singlePlayerMode = true
+        Crafty.scene('SelectMap')
+      , () ->
+        window.singlePlayerMode = false
+        Crafty.scene('SelectMap')        
+      , () ->
+        Crafty.scene('SelectMode')
+      , () ->
+        Crafty.scene('Options')
+    ]
+  )
+  
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("1-Player Start")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("2-Player Start")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options")
   
   Crafty.e('2D, Keyboard').bind('KeyDown', (e) ->
     if e.keyCode == Crafty.keys.SPACE
@@ -295,6 +315,19 @@ Crafty.scene('PlayGame', () ->
   
 )
 
-Crafty.scene('GameOver', () ->
-  Crafty.e('GameOverText');
+Crafty.scene('Options', () ->
+  selectArrow = Crafty.e('Canvas, SelectArrow').attr(
+    x: 190
+    y: 280
+    itemCount: 4
+  )
+  Crafty.e('TitleText').attr({y: 100}).text("Options").textFont(
+    size: '30px'
+  )
+  
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Sound On")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Swap Colours")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title")
+  
 )
