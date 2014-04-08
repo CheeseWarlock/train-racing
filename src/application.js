@@ -225,11 +225,13 @@ Grid: for entities that might want to snap to a grid.
       }
       this.curveCommandEnabled = braking;
       playerOne = this.playerOne;
-      Crafty("Train").each(function() {
-        if (this.playerOne === playerOne) {
-          this.speed = (braking ? Constants.REDUCED_SPEED : Constants.FULL_SPEED);
-        }
-      });
+      if (window.Brakes) {
+        return Crafty("Train").each(function() {
+          if (this.playerOne === playerOne) {
+            return this.speed = (braking ? Constants.REDUCED_SPEED : Constants.FULL_SPEED);
+          }
+        });
+      }
     }
   });
 
@@ -1884,7 +1886,8 @@ Grid: for entities that might want to snap to a grid.
       return train;
     },
     setupFromTiled: function(tiledmap) {
-      var firstTrain, prop, secondTrain, tile, tilecode, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
+      var actuallySwapColours, firstTrain, prop, secondTrain, tile, tilecode, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
+      actuallySwapColours = window.SwapColours && Math.random() > 0.5;
       _ref = tiledmap.getEntitiesInLayer('Tracks');
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         tile = _ref[_i];
@@ -1979,28 +1982,28 @@ Grid: for entities that might want to snap to a grid.
             tilecode = prop.substring(4);
             switch (tilecode) {
               case '9':
-                firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 'e');
+                firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 'e');
                 break;
               case '10':
-                firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 'n');
+                firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 'n');
                 break;
               case '11':
-                firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 'w');
+                firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 'w');
                 break;
               case '12':
-                firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 's');
+                firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 's');
                 break;
               case '21':
-                secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 'e');
+                secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 'e');
                 break;
               case '22':
-                secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 'n');
+                secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 'n');
                 break;
               case '23':
-                secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 'w');
+                secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 'w');
                 break;
               case '24':
-                secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 's');
+                secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 's');
             }
             tile.destroy();
           }

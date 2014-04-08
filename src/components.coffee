@@ -200,10 +200,9 @@ Crafty.c "TrainHead",
         @arrow = null
     @curveCommandEnabled = braking
     playerOne = @playerOne
-    Crafty("Train").each ->
-      @speed = ((if braking then Constants.REDUCED_SPEED else Constants.FULL_SPEED))  if @playerOne is playerOne
-      return
-    return
+    if window.Brakes
+      Crafty("Train").each ->
+        @speed = ((if braking then Constants.REDUCED_SPEED else Constants.FULL_SPEED))  if @playerOne is playerOne
 
   
 ###

@@ -103,6 +103,7 @@ window.Util =
     
       
   setupFromTiled: (tiledmap) ->
+    actuallySwapColours = (window.SwapColours and Math.random() > 0.5)
     for tile in tiledmap.getEntitiesInLayer('Tracks')
       tile.addComponent('TrackSection')
       for prop of tile.__c
@@ -142,21 +143,21 @@ window.Util =
           tilecode = prop.substring(4)
           switch tilecode
             when '9'
-              firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 'e')
+              firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 'e')
             when '10'
-              firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 'n')
+              firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 'n')
             when '11'
-              firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 'w')
+              firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 'w')
             when '12'
-              firstTrain = Util.createTrain(tile.at().x, tile.at().y, true, 's')
+              firstTrain = Util.createTrain(tile.at().x, tile.at().y, !actuallySwapColours, 's')
             when '21'
-              secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 'e')
+              secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 'e')
             when '22'
-              secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 'n')
+              secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 'n')
             when '23'
-              secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 'w')
+              secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 'w')
             when '24'
-              secondTrain = Util.createTrain(tile.at().x, tile.at().y, false, 's')
+              secondTrain = Util.createTrain(tile.at().x, tile.at().y, actuallySwapColours, 's')
           tile.destroy()
     if tiledmap.getEntitiesInLayer('Props')
       for tile in tiledmap.getEntitiesInLayer('Props')
