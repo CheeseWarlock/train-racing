@@ -20,7 +20,7 @@ Crafty.scene('Title', () ->
         window.singlePlayerMode = false
         Crafty.scene('SelectMap')        
       , () ->
-        Crafty.scene('SelectMode')
+        Crafty.scene('Instructions')
       , () ->
         Crafty.scene('Options')
     ]
@@ -30,12 +30,6 @@ Crafty.scene('Title', () ->
   Crafty.e('2D, DOM, Text').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("2-Player Start")
   Crafty.e('2D, DOM, Text').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions")
   Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options")
-  
-  Crafty.e('2D, Keyboard').bind('KeyDown', (e) ->
-    if e.keyCode == Crafty.keys.SPACE
-      Crafty.audio.play("select")
-      Crafty.scene('SelectMode')
-  )
 )
 
 Crafty.scene('Loading', () ->
@@ -272,36 +266,6 @@ Crafty.scene('SelectMap', () ->
   )
 )
 
-Crafty.scene('SelectMode', () ->
-  Crafty.e('TitleText').attr({y: 198}).text('Select a mode:')
-  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 250})
-  Crafty.e('2D, DOM, Text').attr({x: 153, y: 298, w: 200}).text('One Player').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, Canvas, spr_keyp').attr({x: 375, y: 250})
-  Crafty.e('2D, DOM, Text').attr({x: 327, y: 298, w: 200}).text('Two Pl').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
-  Crafty.e('2D, DOM, Text').attr({x: 407, y: 298, w: 200}).text('ayers').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
-
-  Crafty.e('2D, Keyboard').bind('KeyDown', (e) ->
-    if e.keyCode == Crafty.keys.P
-      Crafty.audio.play("select")
-      Crafty.scene('SelectMap')
-    if e.keyCode == Crafty.keys.Q
-      Crafty.audio.play("select")
-      window.singlePlayerMode = true
-      Crafty.scene('SelectMap')
-    if e.keyCode == Crafty.keys.SPACE
-      if (Crafty.audio.muted)
-        Crafty('checkybox').removeComponent('spr_checkbox', false).addComponent('spr_checkboxchecked')
-      else
-        Crafty('checkybox').removeComponent('spr_checkboxchecked', false).addComponent('spr_checkbox')
-      Crafty.audio.toggleMute()
-      Crafty.audio.play('arrowtick')
-  )
-  Crafty.e('2D, Canvas, Text').attr({x: 214, y: 440,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text("Sound")
-  Crafty.e('2D, Canvas, spr_space').attr({x: 308, y: 430})
-  Crafty.e('2D, Canvas, checkybox, spr_checkbox' + (if Crafty.audio.muted then '' else 'checked')).attr({x: 278, y: 440})
-  
-)
-
 Crafty.scene('PlayGame', () ->
   Crafty.background('rgb(80, 160, 40)')
   builder = Crafty.e((if window.HEADLESS_MODE then "" else "2D, Canvas, ")+"TiledMapBuilder")
@@ -353,4 +317,21 @@ Crafty.scene('Options', () ->
     window.Brakes
   }).refresh()
   
+)
+
+Crafty.scene('Instructions', () ->
+  Crafty.e('2D, Canvas, spr_keyq').attr({x: 194, y: 180})
+  Crafty.e('2D, DOM, Text').attr({x: 161, y: 228, w: 200}).text('Red Train').textFont({size: '26px', family: 'Aller'}).textColor('#E23228')
+  Crafty.e('2D, Canvas, spr_keyp, nobots').attr({x: 375, y: 180})
+  Crafty.e('2D, DOM, Text, nobots').attr({x: 338, y: 228, w: 200}).text('Blue Train').textFont({size: '26px', family: 'Aller'}).textColor('#4956FF')
+
+  Crafty.e('TitleText').attr({y: 136}).text('Hold your key to slow down and turn at junctions:')
+  Crafty.e('TitleText').attr({y: 280}).text('Pick up and drop off passengers by driving through stations.')
+  Crafty.e('TitleText').attr({y: 310}).text('Passenger destinations are shown at the bottom.')
+  Crafty.e('TitleText').attr({y: 340}).text('Be aware of your opponent\'s position to avoid collisions.')
+  Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 400}).bind('KeyDown', (e) ->
+    if e.keyCode is Crafty.keys.SPACE
+      Crafty.audio.play('select')
+      Crafty.scene('Title')
+  )
 )

@@ -1217,7 +1217,7 @@ Grid: for entities that might want to snap to a grid.
           window.singlePlayerMode = false;
           return Crafty.scene('SelectMap');
         }, function() {
-          return Crafty.scene('SelectMode');
+          return Crafty.scene('Instructions');
         }, function() {
           return Crafty.scene('Options');
         }
@@ -1250,7 +1250,7 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').text("Instructions");
-    Crafty.e('2D, DOM, Text').attr({
+    return Crafty.e('2D, DOM, Text').attr({
       x: 230,
       y: 370,
       w: 200,
@@ -1259,12 +1259,6 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').text("Options");
-    return Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
-      if (e.keyCode === Crafty.keys.SPACE) {
-        Crafty.audio.play("select");
-        return Crafty.scene('SelectMode');
-      }
-    });
   });
 
   Crafty.scene('Loading', function() {
@@ -1560,80 +1554,6 @@ Grid: for entities that might want to snap to a grid.
     });
   });
 
-  Crafty.scene('SelectMode', function() {
-    Crafty.e('TitleText').attr({
-      y: 198
-    }).text('Select a mode:');
-    Crafty.e('2D, Canvas, spr_keyq').attr({
-      x: 194,
-      y: 250
-    });
-    Crafty.e('2D, DOM, Text').attr({
-      x: 153,
-      y: 298,
-      w: 200
-    }).text('One Player').textFont({
-      size: '26px',
-      family: 'Aller'
-    }).textColor('#E23228');
-    Crafty.e('2D, Canvas, spr_keyp').attr({
-      x: 375,
-      y: 250
-    });
-    Crafty.e('2D, DOM, Text').attr({
-      x: 327,
-      y: 298,
-      w: 200
-    }).text('Two Pl').textFont({
-      size: '26px',
-      family: 'Aller'
-    }).textColor('#E23228');
-    Crafty.e('2D, DOM, Text').attr({
-      x: 407,
-      y: 298,
-      w: 200
-    }).text('ayers').textFont({
-      size: '26px',
-      family: 'Aller'
-    }).textColor('#4956FF');
-    Crafty.e('2D, Keyboard').bind('KeyDown', function(e) {
-      if (e.keyCode === Crafty.keys.P) {
-        Crafty.audio.play("select");
-        Crafty.scene('SelectMap');
-      }
-      if (e.keyCode === Crafty.keys.Q) {
-        Crafty.audio.play("select");
-        window.singlePlayerMode = true;
-        Crafty.scene('SelectMap');
-      }
-      if (e.keyCode === Crafty.keys.SPACE) {
-        if (Crafty.audio.muted) {
-          Crafty('checkybox').removeComponent('spr_checkbox', false).addComponent('spr_checkboxchecked');
-        } else {
-          Crafty('checkybox').removeComponent('spr_checkboxchecked', false).addComponent('spr_checkbox');
-        }
-        Crafty.audio.toggleMute();
-        return Crafty.audio.play('arrowtick');
-      }
-    });
-    Crafty.e('2D, Canvas, Text').attr({
-      x: 214,
-      y: 440,
-      w: 200
-    }).textFont({
-      size: '17px',
-      family: 'Aller'
-    }).textColor('#FFFDE8').text("Sound");
-    Crafty.e('2D, Canvas, spr_space').attr({
-      x: 308,
-      y: 430
-    });
-    return Crafty.e('2D, Canvas, checkybox, spr_checkbox' + (Crafty.audio.muted ? '' : 'checked')).attr({
-      x: 278,
-      y: 440
-    });
-  });
-
   Crafty.scene('PlayGame', function() {
     var builder;
     Crafty.background('rgb(80, 160, 40)');
@@ -1745,6 +1665,54 @@ Grid: for entities that might want to snap to a grid.
         return window.Brakes;
       }
     }).refresh();
+  });
+
+  Crafty.scene('Instructions', function() {
+    Crafty.e('2D, Canvas, spr_keyq').attr({
+      x: 194,
+      y: 180
+    });
+    Crafty.e('2D, DOM, Text').attr({
+      x: 161,
+      y: 228,
+      w: 200
+    }).text('Red Train').textFont({
+      size: '26px',
+      family: 'Aller'
+    }).textColor('#E23228');
+    Crafty.e('2D, Canvas, spr_keyp, nobots').attr({
+      x: 375,
+      y: 180
+    });
+    Crafty.e('2D, DOM, Text, nobots').attr({
+      x: 338,
+      y: 228,
+      w: 200
+    }).text('Blue Train').textFont({
+      size: '26px',
+      family: 'Aller'
+    }).textColor('#4956FF');
+    Crafty.e('TitleText').attr({
+      y: 136
+    }).text('Hold your key to slow down and turn at junctions:');
+    Crafty.e('TitleText').attr({
+      y: 280
+    }).text('Pick up and drop off passengers by driving through stations.');
+    Crafty.e('TitleText').attr({
+      y: 310
+    }).text('Passenger destinations are shown at the bottom.');
+    Crafty.e('TitleText').attr({
+      y: 340
+    }).text('Be aware of your opponent\'s position to avoid collisions.');
+    return Crafty.e('2D, Canvas, spr_space').attr({
+      x: 264,
+      y: 400
+    }).bind('KeyDown', function(e) {
+      if (e.keyCode === Crafty.keys.SPACE) {
+        Crafty.audio.play('select');
+        return Crafty.scene('Title');
+      }
+    });
   });
 
   window.Util = {
