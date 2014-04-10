@@ -283,7 +283,7 @@ Crafty.scene('Options', () ->
   selectArrow = Crafty.e('Canvas, SelectArrow').attr(
     x: 190
     y: 280
-    itemCount: 4
+    itemCount: 5
     callbacks: [
       () ->
         Crafty.audio.toggleMute()
@@ -294,6 +294,9 @@ Crafty.scene('Options', () ->
       , () ->
         window.Brakes = !window.Brakes
         Crafty('CheckBox').get(2).refresh()
+      , () ->
+        window.StationStop = !window.StationStop
+        Crafty('CheckBox').get(3).refresh()
       , () ->
         Crafty.scene('Title')
     ]
@@ -306,7 +309,8 @@ Crafty.scene('Options', () ->
   Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Sound On")
   Crafty.e('2D, DOM, Text').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Swap Colours")
   Crafty.e('2D, DOM, Text').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Station Stop")
+  Crafty.e('2D, DOM, Text').attr({x: 230, y: 400,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title")
   Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 280, callback: () ->
     !Crafty.audio.muted
   }).refresh()
@@ -315,6 +319,9 @@ Crafty.scene('Options', () ->
   }).refresh()
   Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 340, callback: () ->
     window.Brakes
+  }).refresh()
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 370, callback: () ->
+    window.StationStop
   }).refresh()
   
 )

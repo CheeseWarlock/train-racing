@@ -230,7 +230,7 @@ Crafty.c "CarryingTrain",
           when x > 40 then Crafty.audio.play("get3")
           when x > 20 then Crafty.audio.play("get2")
           when x > 2 then Crafty.audio.play("get1")
-        @head.stayDelay = 60
+        if (window.StationStop) then @head.stayDelay = 60
         @inStation = false
       else
         @inStation = true

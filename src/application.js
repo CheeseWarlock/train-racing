@@ -269,7 +269,9 @@ Grid: for entities that might want to snap to a grid.
             case !(x > 2):
               Crafty.audio.play("get1");
           }
-          this.head.stayDelay = 60;
+          if (window.StationStop) {
+            this.head.stayDelay = 60;
+          }
           this.inStation = false;
         } else {
           this.inStation = true;
@@ -1140,6 +1142,7 @@ Grid: for entities that might want to snap to a grid.
     window.singlePlayerMode = false;
     window.Brakes = true;
     window.SwapColours = true;
+    window.StationStop = true;
     $(window).keydown(function(e) {
       if (!window.dontGoAway && !($(e.target).is("textarea, a"))) {
         $('#display-manual').hide();
@@ -1615,7 +1618,7 @@ Grid: for entities that might want to snap to a grid.
     selectArrow = Crafty.e('Canvas, SelectArrow').attr({
       x: 190,
       y: 280,
-      itemCount: 4,
+      itemCount: 5,
       callbacks: [
         function() {
           Crafty.audio.toggleMute();
@@ -1626,6 +1629,9 @@ Grid: for entities that might want to snap to a grid.
         }, function() {
           window.Brakes = !window.Brakes;
           return Crafty('CheckBox').get(2).refresh();
+        }, function() {
+          window.StationStop = !window.StationStop;
+          return Crafty('CheckBox').get(3).refresh();
         }, function() {
           return Crafty.scene('Title');
         }
@@ -1674,6 +1680,15 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
+    }).textColor('#5CC64C').text("Station Stop");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 230,
+      y: 400,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
     }).textColor('#5CC64C').textColor('#E23228').text("Back to Title");
     Crafty.e('2D, Canvas, CheckBox').attr({
       x: 346,
@@ -1689,11 +1704,18 @@ Grid: for entities that might want to snap to a grid.
         return window.SwapColours;
       }
     }).refresh();
-    return Crafty.e('2D, Canvas, CheckBox').attr({
+    Crafty.e('2D, Canvas, CheckBox').attr({
       x: 346,
       y: 340,
       callback: function() {
         return window.Brakes;
+      }
+    }).refresh();
+    return Crafty.e('2D, Canvas, CheckBox').attr({
+      x: 346,
+      y: 370,
+      callback: function() {
+        return window.StationStop;
       }
     }).refresh();
   });
