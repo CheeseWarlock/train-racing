@@ -242,7 +242,8 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("CarryingTrain", {
     init: function() {
-      return this.requires("Train");
+      this.requires("Train");
+      return this.trans = [];
     },
     _arriveAtStation: function() {
       var droppedOff, passengersGained, station, x;
@@ -253,6 +254,10 @@ Grid: for entities that might want to snap to a grid.
         this._assignDestinations(passengersGained, station, this.playerOne);
         this._updateStationSprites();
         x = droppedOff + passengersGained;
+        if (window.GameClock.hour) {
+          this.trans.push([((window.GameClock.hour - 6) * 60) + window.GameClock.minute, passengersGained, droppedOff]);
+          console.log([((window.GameClock.hour - 6) * 60) + window.GameClock.minute, passengersGained, droppedOff]);
+        }
         switch (false) {
           case !(x > 40):
             Crafty.audio.play("get3");
@@ -823,7 +828,6 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("EndingText", {
     init: function() {
-      var arrow;
       this.requires("Dialog").textFont({
         size: "20px"
       });
@@ -834,7 +838,7 @@ Grid: for entities that might want to snap to a grid.
         w: 268,
         h: 160
       });
-      Crafty.e('2D, DOM, Text').attr({
+      this.firstText = Crafty.e('2D, DOM, Text').attr({
         x: 230,
         y: 250,
         w: 200,
@@ -843,7 +847,7 @@ Grid: for entities that might want to snap to a grid.
         size: '17px',
         family: 'Aller'
       }).textColor('#5CC64C').text("Try Again");
-      Crafty.e('2D, DOM, Text').attr({
+      this.secondText = Crafty.e('2D, DOM, Text').attr({
         x: 230,
         y: 280,
         w: 200,
@@ -852,7 +856,7 @@ Grid: for entities that might want to snap to a grid.
         size: '17px',
         family: 'Aller'
       }).textColor('#5CC64C').text("Select Map");
-      arrow = Crafty.e('DOM, SelectArrow').attr({
+      this.arrow = Crafty.e('DOM, SelectArrow').attr({
         x: 190,
         y: 250,
         z: 50,
@@ -906,6 +910,22 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       var p1score, p2score;
       this.requires("EndingText");
+      this.attr({
+        y: 24,
+        h: 380
+      });
+      this.css({
+        height: '350px'
+      });
+      this.arrow.attr({
+        y: 380
+      });
+      this.firstText.attr({
+        y: 380
+      });
+      this.secondText.attr({
+        y: 410
+      });
       p1score = 0;
       p2score = 0;
       Crafty("TrainHead").each(function() {
@@ -922,6 +942,7 @@ Grid: for entities that might want to snap to a grid.
           borderBottom: "4px solid #" + (p1score > p2score ? "B71607" : "1E2DCE")
         });
       }
+      GraphTools.placeGraph(p1score === p2score ? Math.random() > 0.5 : (p1score > p2score ? true : false));
       this.text("The morning rush is over!<br/>Passengers delivered:<br/>Red: " + p1score + ", Blue: " + p2score + "<br/>" + (p1score === p2score ? "It's a Draw!" : (p1score > p2score ? "Red" : "Blue") + " Line wins!"));
     }
   });
@@ -2028,7 +2049,6 @@ Grid: for entities that might want to snap to a grid.
 
   window.Constants = {
     DIR_PREFIXES: ['n', 'e', 'w', 's'],
-    MINUTE_DELAY: 99,
     COLLISION_SIZE: 22,
     TILE_HALF: 14,
     CURVE_QUARTER: 28 * Math.PI / 4,
@@ -2104,6 +2124,154 @@ Grid: for entities that might want to snap to a grid.
         stations: stations
       };
     }
+  };
+
+  window.GraphTools = {
+    drawGraph: function(data, target, options) {
+      var c2, count, dataCopy, i, tickPoint, tr, y;
+      dataCopy = data.slice();
+      data.unshift([0, 0, 0]);
+      dataCopy.push([240, 0, 0]);
+      c2 = target.getContext("2d");
+      c2.strokeStyle = options.color;
+      c2.fillStyle = "rgba" + options.color.slice(3, -1) + ",0.5)";
+      c2.lineWidth = 2;
+      c2.beginPath();
+      y = 100;
+      c2.moveTo(0, y);
+      count = 0;
+      tr = void 0;
+      for (i in dataCopy) {
+        tr = dataCopy[i];
+        count += tr[1] - tr[2];
+        y -= tr[1] * options.y;
+        c2.lineTo(tr[0] * options.x, y);
+      }
+      y += count * options.y;
+      c2.lineTo(tr[0] * options.x, y);
+      tickPoint = [tr[0] * options.x, y];
+      dataCopy.reverse();
+      for (i in dataCopy) {
+        tr = dataCopy[i];
+        y += tr[2] * options.y;
+        if (dataCopy[parseInt(i) + 1]) {
+          c2.lineTo(dataCopy[parseInt(i) + 1][0] * options.x, y);
+        }
+      }
+      c2.closePath();
+      c2.fill();
+      c2.beginPath();
+      c2.moveTo(tickPoint[0], tickPoint[1]);
+      y = tickPoint[1];
+      for (i in dataCopy) {
+        tr = dataCopy[i];
+        y += tr[2] * options.y;
+        if (dataCopy[parseInt(i) + 1]) {
+          c2.lineTo(dataCopy[parseInt(i) + 1][0] * options.x, y);
+        }
+      }
+      c2.stroke();
+      c2.beginPath();
+      c2.moveTo(tickPoint[0], tickPoint[1]);
+      c2.lineTo(tickPoint[0] + 8, tickPoint[1]);
+      c2.closePath();
+      c2.stroke();
+    },
+    drawHourLines: function(target, options) {
+      var c2, i;
+      c2 = target.getContext("2d");
+      c2.translate(2, 0);
+      c2.strokeStyle = "rgba(255,253,232,0.5)";
+      c2.lineWidth = 1;
+      i = 0;
+      while (i <= 4) {
+        c2.beginPath();
+        c2.moveTo(60 * i * options.x, 0);
+        c2.lineTo(60 * i * options.x, 500 * options.y);
+        c2.closePath();
+        c2.stroke();
+        i++;
+      }
+    },
+    drawPixelated: function(img, context, zoom, x, y) {
+      var a, b, ctx, g, i, idata, r, x2, y2;
+      if (!zoom) {
+        zoom = 4;
+      }
+      if (!x) {
+        x = 0;
+      }
+      if (!y) {
+        y = 0;
+      }
+      if (!img.id) {
+        img.id = "__img" + (this.lastImageId++);
+      }
+      idata = this.idataById[img.id];
+      if (!idata) {
+        ctx = document.createElement("canvas").getContext("2d");
+        ctx.width = img.width;
+        ctx.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        idata = this.idataById[img.id] = ctx.getImageData(0, 0, img.width, img.height).data;
+        context.fillStyle = "#2B281D";
+        context.fillRect(-10, -10, 1000, 1000);
+      }
+      x2 = 0;
+      while (x2 < img.width) {
+        y2 = 0;
+        while (y2 < img.height) {
+          i = (y2 * img.width + x2) * 4;
+          r = idata[i];
+          g = idata[i + 1];
+          b = idata[i + 2];
+          a = idata[i + 3];
+          context.fillStyle = "rgba(" + r + "," + g + "," + b + "," + (a / 255) + ")";
+          context.fillRect(x + x2 * zoom, y + y2 * zoom, zoom, zoom);
+          ++y2;
+        }
+        ++x2;
+      }
+    },
+    drawGraphContents: function(target, p1wins) {
+      var blueT, c2, redT;
+      c2 = target.getContext("2d");
+      redT = void 0;
+      blueT = void 0;
+      Crafty("CarryingTrain").each(function() {
+        if (this.playerOne) {
+          redT = this.trans;
+        } else {
+          blueT = this.trans;
+        }
+      });
+      this.drawHourLines(target, {
+        x: 0.4,
+        y: 0.2
+      });
+      console.log(p1wins);
+      this.drawGraph((p1wins ? blueT : redT), target, {
+        color: (p1wins ? "rgb(73,86,255)" : "rgb(226,50,40)"),
+        x: 0.4,
+        y: 0.2
+      });
+      this.drawGraph((p1wins ? redT : blueT), target, {
+        color: (p1wins ? "rgb(226,50,40)" : "rgb(73,86,255)"),
+        x: 0.4,
+        y: 0.2
+      });
+      this.drawPixelated(target, target.getContext("2d"), 2);
+    },
+    placeGraph: function(p1wins) {
+      setTimeout((function() {
+        var fff;
+        fff = $(".VictoryText");
+        $("<canvas id=\"graph\" height=220 width=220></canvas>").appendTo(fff);
+        GraphTools.drawGraphContents(document.getElementById("graph"), p1wins);
+      }), 50);
+    },
+    idataById: {},
+    lastImageId: 0
   };
 
   $.getJSON('./maps.json', function(mapListSource) {

@@ -211,6 +211,7 @@ CarryingTrain: a train that "carries" passengers. Data is still stored in the Tr
 Crafty.c "CarryingTrain",
   init: () ->
     @requires("Train")
+    @trans = []
     
   _arriveAtStation: ->
     if @currentTrack.station
@@ -220,6 +221,10 @@ Crafty.c "CarryingTrain",
       @_assignDestinations passengersGained, station, @playerOne
       @_updateStationSprites()
       x = (droppedOff + passengersGained)
+      
+      if window.GameClock.hour
+        @trans.push([(((window.GameClock.hour-6) * 60) + window.GameClock.minute), passengersGained, droppedOff])
+        console.log([(((window.GameClock.hour-6) * 60) + window.GameClock.minute), passengersGained, droppedOff])
       switch 
         when x > 40 then Crafty.audio.play("get3")
         when x > 20 then Crafty.audio.play("get2")
@@ -701,9 +706,9 @@ Crafty.c "EndingText",
       y: 112
       w: 268
       h: 160
-    Crafty.e('2D, DOM, Text').attr({x: 230, y: 250,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Try Again")
-    Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Select Map")
-    arrow = Crafty.e('DOM, SelectArrow').attr({x: 190, y: 250, z: 50, callbacks: [
+    @firstText = Crafty.e('2D, DOM, Text').attr({x: 230, y: 250,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Try Again")
+    @secondText = Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Select Map")
+    @arrow = Crafty.e('DOM, SelectArrow').attr({x: 190, y: 250, z: 50, callbacks: [
       () ->
         Crafty("TrainController").destroy() # Because of the 2D issue
         Crafty.scene("PlayGame")
@@ -750,6 +755,22 @@ Crafty.c "PauseText",
 Crafty.c "VictoryText",
   init: ->
     @requires "EndingText"
+    @attr(
+      y: 24
+      h: 380
+    )
+    @css(
+      height: '350px'
+    )
+    @arrow.attr(
+      y: 380
+    )
+    @firstText.attr(
+      y: 380
+    )
+    @secondText.attr(
+      y: 410
+    )
     p1score = 0
     p2score = 0
     Crafty("TrainHead").each ->
@@ -764,7 +785,8 @@ Crafty.c "VictoryText",
         border: "4px solid #" + ((if p1score > p2score then "E23228" else "4956FF"))
         borderTop: "4px solid #" + ((if p1score > p2score then "FF817C" else "848EFF"))
         borderBottom: "4px solid #" + ((if p1score > p2score then "B71607" else "1E2DCE"))
-
+        
+    GraphTools.placeGraph(if p1score is p2score then (Math.random() > 0.5) else (if p1score > p2score then true else false))
     @text "The morning rush is over!<br/>Passengers delivered:<br/>Red: " + p1score + ", Blue: " + p2score + "<br/>" + ((if p1score is p2score then "It's a Draw!" else (((if p1score > p2score then "Red" else "Blue")) + " Line wins!")))
     return
 

@@ -191,7 +191,6 @@ window.Util =
      
 window.Constants =
   DIR_PREFIXES: ['n','e','w','s']
-  MINUTE_DELAY: 99
   COLLISION_SIZE: 22
   TILE_HALF: 14
   CURVE_QUARTER: 28 * Math.PI / 4
@@ -265,6 +264,149 @@ window.AI =
       trainPresences
     stations:
       stations
+      
+window.GraphTools =
+  drawGraph: (data, target, options) ->
+    dataCopy = data.slice()
+    data.unshift [
+      0
+      0
+      0
+    ]
+    dataCopy.push [
+      240
+      0
+      0
+    ]
+    c2 = target.getContext("2d")
+    c2.strokeStyle = options.color
+    c2.fillStyle = "rgba" + options.color.slice(3, -1) + ",0.5)"
+    c2.lineWidth = 2
+    c2.beginPath()
+    y = 100
+    c2.moveTo 0, y
+    count = 0
+    tr = undefined
+    for i of dataCopy
+      tr = dataCopy[i]
+      count += tr[1] - tr[2]
+      y -= tr[1] * options.y
+      c2.lineTo tr[0] * options.x, y
+    y += count * options.y
+    c2.lineTo tr[0] * options.x, y
+    tickPoint = [
+      tr[0] * options.x
+      y
+    ]
+    dataCopy.reverse()
+    for i of dataCopy
+      tr = dataCopy[i]
+      y += tr[2] * options.y
+      c2.lineTo dataCopy[parseInt(i) + 1][0] * options.x, y  if dataCopy[parseInt(i) + 1]
+    c2.closePath()
+    c2.fill()
+    c2.beginPath()
+    c2.moveTo(tickPoint[0], tickPoint[1])
+    y = tickPoint[1]
+    for i of dataCopy
+      tr = dataCopy[i]
+      y += tr[2] * options.y
+      c2.lineTo dataCopy[parseInt(i) + 1][0] * options.x, y  if dataCopy[parseInt(i) + 1]
+    c2.stroke()
+    c2.beginPath()
+    c2.moveTo tickPoint[0], tickPoint[1]
+    c2.lineTo tickPoint[0] + 8, tickPoint[1]
+    c2.closePath()
+    c2.stroke()
+    return
+
+  drawHourLines: (target, options) ->
+    c2 = target.getContext("2d")
+    c2.translate 2, 0
+    c2.strokeStyle = "rgba(255,253,232,0.5)"
+    c2.lineWidth = 1
+    i = 0
+
+    while i <= 4
+      c2.beginPath()
+      c2.moveTo 60 * i * options.x, 0
+      c2.lineTo 60 * i * options.x, 500 * options.y
+      c2.closePath()
+      c2.stroke()
+      i++
+    return
+
+  drawPixelated: (img, context, zoom, x, y) ->
+    zoom = 4  unless zoom
+    x = 0  unless x
+    y = 0  unless y
+    img.id = "__img" + (@lastImageId++)  unless img.id
+    idata = @idataById[img.id]
+    unless idata
+      ctx = document.createElement("canvas").getContext("2d")
+      ctx.width = img.width
+      ctx.height = img.height
+      ctx.drawImage img, 0, 0
+      idata = @idataById[img.id] = ctx.getImageData(0, 0, img.width, img.height).data
+      context.fillStyle = "#2B281D"
+      context.fillRect -10, -10, 1000, 1000
+    x2 = 0
+
+    while x2 < img.width
+      y2 = 0
+
+      while y2 < img.height
+        i = (y2 * img.width + x2) * 4
+        r = idata[i]
+        g = idata[i + 1]
+        b = idata[i + 2]
+        a = idata[i + 3]
+        context.fillStyle = "rgba(" + r + "," + g + "," + b + "," + (a / 255) + ")"
+        context.fillRect x + x2 * zoom, y + y2 * zoom, zoom, zoom
+        ++y2
+      ++x2
+    return
+
+  drawGraphContents: (target, p1wins) ->
+    c2 = target.getContext("2d")
+    redT = undefined
+    blueT = undefined
+    Crafty("CarryingTrain").each ->
+      if @playerOne
+        redT = @trans
+      else
+        blueT = @trans
+      return
+
+    @drawHourLines target,
+      x: 0.4
+      y: 0.2
+      
+    console.log p1wins
+    @drawGraph (if p1wins then blueT else redT), target,
+      color: (if p1wins then "rgb(73,86,255)" else "rgb(226,50,40)")
+      x: 0.4
+      y: 0.2
+
+    @drawGraph (if p1wins then redT else blueT), target,
+      color: (if p1wins then "rgb(226,50,40)" else "rgb(73,86,255)")
+      x: 0.4
+      y: 0.2
+
+    @drawPixelated target, target.getContext("2d"), 2
+    return
+
+  placeGraph: (p1wins)->
+    setTimeout (->
+      fff = $(".VictoryText")
+      $("<canvas id=\"graph\" height=220 width=220></canvas>").appendTo fff
+      GraphTools.drawGraphContents(document.getElementById("graph"), p1wins)
+      return
+    ), 50
+    return
+
+  idataById: {}
+  lastImageId: 0
       
 $.getJSON('./maps.json', (mapListSource) ->
   window.MapList = mapListSource
