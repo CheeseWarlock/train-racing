@@ -210,7 +210,7 @@ window.Constants =
   FULL_SPEED: 1.75
   REDUCED_SPEED: 0.875
   TILE_JUMP_LIMIT: 5
-  MINUTE_LENGTH: 22
+  MINUTE_LENGTH: 24
   
 window.GameState =
   running: false  

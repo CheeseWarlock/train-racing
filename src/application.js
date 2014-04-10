@@ -243,30 +243,36 @@ Grid: for entities that might want to snap to a grid.
   Crafty.c("CarryingTrain", {
     init: function() {
       this.requires("Train");
-      return this.trans = [];
+      this.trans = [];
+      return this.inStation = false;
     },
     _arriveAtStation: function() {
       var droppedOff, passengersGained, station, x;
+      station = this.currentTrack.station;
       if (this.currentTrack.station) {
-        station = this.currentTrack.station;
-        droppedOff = this._dropoff(station);
-        passengersGained = this._pickup(station);
-        this._assignDestinations(passengersGained, station, this.playerOne);
-        this._updateStationSprites();
-        x = droppedOff + passengersGained;
-        if (window.GameClock.hour) {
-          this.trans.push([((window.GameClock.hour - 6) * 60) + window.GameClock.minute, passengersGained, droppedOff]);
-          console.log([((window.GameClock.hour - 6) * 60) + window.GameClock.minute, passengersGained, droppedOff]);
-        }
-        switch (false) {
-          case !(x > 40):
-            Crafty.audio.play("get3");
-            break;
-          case !(x > 20):
-            Crafty.audio.play("get2");
-            break;
-          case !(x > 2):
-            Crafty.audio.play("get1");
+        if (this.inStation) {
+          droppedOff = this._dropoff(station);
+          passengersGained = this._pickup(station);
+          this._assignDestinations(passengersGained, station, this.playerOne);
+          this._updateStationSprites();
+          x = droppedOff + passengersGained;
+          if (window.GameClock.hour) {
+            this.trans.push([((window.GameClock.hour - 6) * 60) + window.GameClock.minute, passengersGained, droppedOff]);
+          }
+          switch (false) {
+            case !(x > 40):
+              Crafty.audio.play("get3");
+              break;
+            case !(x > 20):
+              Crafty.audio.play("get2");
+              break;
+            case !(x > 2):
+              Crafty.audio.play("get1");
+          }
+          this.head.stayDelay = 60;
+          this.inStation = false;
+        } else {
+          this.inStation = true;
         }
       }
     },
@@ -812,7 +818,11 @@ Grid: for entities that might want to snap to a grid.
       this.bind("EnterFrame", function(data) {
         if (GameState.running && GameClock.hour > 5) {
           Crafty("Train").each(function() {
-            this.moveAlongTrack(this.speed * data.dt / 20);
+            if (this.head.stayDelay > 0) {
+              this.head.stayDelay -= 1;
+            } else {
+              this.moveAlongTrack(this.speed * data.dt / 20);
+            }
           });
           Crafty("Train").each(function() {
             this.attr("z", Math.floor(this.y));
@@ -2057,7 +2067,7 @@ Grid: for entities that might want to snap to a grid.
     FULL_SPEED: 1.75,
     REDUCED_SPEED: 0.875,
     TILE_JUMP_LIMIT: 5,
-    MINUTE_LENGTH: 22
+    MINUTE_LENGTH: 24
   };
 
   window.GameState = {

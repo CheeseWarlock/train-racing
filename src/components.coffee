@@ -212,23 +212,28 @@ Crafty.c "CarryingTrain",
   init: () ->
     @requires("Train")
     @trans = []
+    @inStation = false
     
   _arriveAtStation: ->
+    station = @currentTrack.station
     if @currentTrack.station
-      station = @currentTrack.station
-      droppedOff = @_dropoff station
-      passengersGained = @_pickup station
-      @_assignDestinations passengersGained, station, @playerOne
-      @_updateStationSprites()
-      x = (droppedOff + passengersGained)
-      
-      if window.GameClock.hour
-        @trans.push([(((window.GameClock.hour-6) * 60) + window.GameClock.minute), passengersGained, droppedOff])
-        console.log([(((window.GameClock.hour-6) * 60) + window.GameClock.minute), passengersGained, droppedOff])
-      switch 
-        when x > 40 then Crafty.audio.play("get3")
-        when x > 20 then Crafty.audio.play("get2")
-        when x > 2 then Crafty.audio.play("get1")
+      if @inStation
+        droppedOff = @_dropoff station
+        passengersGained = @_pickup station
+        @_assignDestinations passengersGained, station, @playerOne
+        @_updateStationSprites()
+        x = (droppedOff + passengersGained)
+        
+        if window.GameClock.hour
+          @trans.push([(((window.GameClock.hour-6) * 60) + window.GameClock.minute), passengersGained, droppedOff])
+        switch 
+          when x > 40 then Crafty.audio.play("get3")
+          when x > 20 then Crafty.audio.play("get2")
+          when x > 2 then Crafty.audio.play("get1")
+        @head.stayDelay = 60
+        @inStation = false
+      else
+        @inStation = true
     return
 
   _dropoff: (station) ->
@@ -683,7 +688,10 @@ Crafty.c "TrainController",
     @bind "EnterFrame", (data) ->
       if GameState.running and GameClock.hour > 5
         Crafty("Train").each ->
-          @moveAlongTrack @speed * data.dt / 20
+          if (@head.stayDelay > 0)
+            @head.stayDelay -= 1
+          else
+            @moveAlongTrack @speed * data.dt / 20
           return
 
         Crafty("Train").each ->
