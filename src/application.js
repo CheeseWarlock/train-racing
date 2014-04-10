@@ -2002,7 +2002,7 @@ Grid: for entities that might want to snap to a grid.
             "x": 0,
             "y": 512
           }).attr({
-            train: firstTrain,
+            train: (actuallySwapColours ? secondTrain : firstTrain),
             playerOne: true
           }).setup();
         }
@@ -2010,7 +2010,10 @@ Grid: for entities that might want to snap to a grid.
           return Crafty.e('PlayerScore').attr({
             "x": 392,
             "y": 512
-          }).attr("train", secondTrain).setup();
+          }).attr({
+            train: (actuallySwapColours ? firstTrain : secondTrain),
+            playerOne: false
+          }).setup();
         }
       }
     },

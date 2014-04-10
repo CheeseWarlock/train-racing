@@ -172,12 +172,14 @@ window.Util =
         Crafty.e('PlayerScore').attr(
           "x":0,"y":512
         ).attr(
-          train: firstTrain, playerOne: true
+          train: (if actuallySwapColours then secondTrain else firstTrain), playerOne: true
         ).setup()
       if secondTrain
         Crafty.e('PlayerScore').attr(
           "x":392,"y":512
-        ).attr("train", secondTrain).setup()
+        ).attr(
+          train: (if actuallySwapColours then firstTrain else secondTrain), playerOne: false
+        ).setup()
     
   
   sunrise: (percent) ->
