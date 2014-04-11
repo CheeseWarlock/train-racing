@@ -43,7 +43,7 @@ Crafty.scene('Loading', () ->
   Crafty.audio.create("brakeson", "assets/brakeson.wav")
   Crafty.audio.create("brakesoff", "assets/brakesoff.wav")
   Crafty.audio.toggleMute()
-  Crafty.load(['img/ul.png', 'img/ppl.png', 'img/news.png'], () ->
+  Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
       spr_rtrain: [2,0]
       spr_rtrainside: [3,0]
@@ -64,15 +64,6 @@ Crafty.scene('Loading', () ->
       spr_platforml: [4,5,1,2]
       spr_platformr: [5,5,1,2]
     )
-    spritenames = {}
-    test = () ->
-      for a in [0..5]
-        for b in [0..5]
-          spritenames['spr_person'+a+b] = [a,b]
-    test()
-    Crafty.sprite(8,12,'img/ppl.png', 
-      spritenames
-    )
     Crafty.sprite(4,12, 'img/bars.png',
       spr_rbarl: [0,0]
       spr_rbar: [1,0]
@@ -90,6 +81,7 @@ Crafty.scene('Loading', () ->
       spr_stopd: [3,0]
       spr_stope: [4,0]
       spr_stopf: [5,0]
+      spr_person00: [6,0]
       spr_pstopa: [0,1]
       spr_pstopb: [1,1]
       spr_pstopc: [2,1]
@@ -97,9 +89,9 @@ Crafty.scene('Loading', () ->
       spr_pstope: [4,1]
       spr_pstopf: [5,1]
     )
-    Crafty.sprite(88, 48, 'img/space.png',
+    Crafty.sprite(88, 40, 'img/keys.png',
       spr_space: [0,0]
-    )
+    , 0, 80, true)
     Crafty.sprite(48, 40, 'img/keys.png',
       spr_keyp: [0,0]
       spr_keyq: [0,1]
@@ -109,9 +101,12 @@ Crafty.scene('Loading', () ->
     Crafty.sprite(200, 12, 'img/barback.png',
       spr_barback: [0,0]
     )
-    Crafty.sprite(176, 176, 'img/title.png',
+    Crafty.sprite(176, 176, 'img/wordart.png',
       spr_title: [0,0]
     )
+    Crafty.sprite(134, 68, 'img/wordart.png',
+      spr_coffee: [0,0]
+    , 0, 176, true)
     Crafty.sprite(616, 84, 'img/brushed.png',
       spr_brushed: [0,0]
     )
@@ -122,9 +117,6 @@ Crafty.scene('Loading', () ->
       spr_selectstn2: [1,1]
       spr_checkbox: [0,2]
       spr_checkboxchecked: [1,2]
-    )
-    Crafty.sprite(134, 68, 'img/coffee.png',
-      spr_coffee: [0,0]
     )
     Crafty.sprite(28, 28, 'img/ullight.png',
       spr_rtrainlight: [2,0]
