@@ -340,16 +340,13 @@ window.GraphTools =
     zoom = 4  unless zoom
     x = 0  unless x
     y = 0  unless y
-    img.id = "__img" + (@lastImageId++)  unless img.id
-    idata = @idataById[img.id]
-    unless idata
-      ctx = document.createElement("canvas").getContext("2d")
-      ctx.width = img.width
-      ctx.height = img.height
-      ctx.drawImage img, 0, 0
-      idata = @idataById[img.id] = ctx.getImageData(0, 0, img.width, img.height).data
-      context.fillStyle = "#2B281D"
-      context.fillRect -10, -10, 1000, 1000
+    ctx = document.createElement("canvas").getContext("2d")
+    ctx.width = img.width
+    ctx.height = img.height
+    ctx.drawImage img, 0, 0
+    idata = ctx.getImageData(0, 0, img.width, img.height).data
+    context.fillStyle = "#2B281D"
+    context.fillRect -10, -10, 1000, 1000
     x2 = 0
 
     while x2 < img.width

@@ -2239,19 +2239,13 @@ Grid: for entities that might want to snap to a grid.
       if (!y) {
         y = 0;
       }
-      if (!img.id) {
-        img.id = "__img" + (this.lastImageId++);
-      }
-      idata = this.idataById[img.id];
-      if (!idata) {
-        ctx = document.createElement("canvas").getContext("2d");
-        ctx.width = img.width;
-        ctx.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        idata = this.idataById[img.id] = ctx.getImageData(0, 0, img.width, img.height).data;
-        context.fillStyle = "#2B281D";
-        context.fillRect(-10, -10, 1000, 1000);
-      }
+      ctx = document.createElement("canvas").getContext("2d");
+      ctx.width = img.width;
+      ctx.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      idata = ctx.getImageData(0, 0, img.width, img.height).data;
+      context.fillStyle = "#2B281D";
+      context.fillRect(-10, -10, 1000, 1000);
       x2 = 0;
       while (x2 < img.width) {
         y2 = 0;
