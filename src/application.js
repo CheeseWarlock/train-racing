@@ -276,6 +276,8 @@ Grid: for entities that might want to snap to a grid.
         } else {
           this.inStation = true;
         }
+      } else {
+        this.inStation = false;
       }
     },
     _dropoff: function(station) {

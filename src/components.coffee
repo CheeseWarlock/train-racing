@@ -234,6 +234,8 @@ Crafty.c "CarryingTrain",
         @inStation = false
       else
         @inStation = true
+    else
+      @inStation = false
     return
 
   _dropoff: (station) ->
