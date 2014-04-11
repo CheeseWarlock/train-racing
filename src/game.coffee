@@ -3,35 +3,6 @@ $(document).ready(() ->
   window.Brakes = true
   window.SwapColours = true
   window.StationStop = true
-  
-  $(window).keydown((e) ->
-    if (!(window.dontGoAway) && !($(e.target).is("textarea, a")))
-      $('#display-manual').hide()
-      $('#display-design').hide()
-    window.dontGoAway = false
-    true
-  )
-  $("body").click((e) ->
-    if !($(e.target).is("textarea, a"))
-      $('#display-manual').hide()
-      $('#display-design').hide()
-  )
-  $('.linkbar a:nth-child(1)').click(() ->
-    if $('#display-manual:visible').length
-      $('#display-manual').hide()
-    else
-      $('#display-design').hide()
-      $('#display-manual').show()
-    false
-  )
-  $('.linkbar a:nth-child(2)').click(() ->
-    if $('#display-design:visible').length
-      $('#display-design').hide()
-    else
-      $('#display-manual').hide()
-      $('#display-design').show()
-    false
-  )
 )
 
 window.Game =

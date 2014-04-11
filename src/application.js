@@ -1144,39 +1144,7 @@ Grid: for entities that might want to snap to a grid.
     window.singlePlayerMode = false;
     window.Brakes = true;
     window.SwapColours = true;
-    window.StationStop = true;
-    $(window).keydown(function(e) {
-      if (!window.dontGoAway && !($(e.target).is("textarea, a"))) {
-        $('#display-manual').hide();
-        $('#display-design').hide();
-      }
-      window.dontGoAway = false;
-      return true;
-    });
-    $("body").click(function(e) {
-      if (!($(e.target).is("textarea, a"))) {
-        $('#display-manual').hide();
-        return $('#display-design').hide();
-      }
-    });
-    $('.linkbar a:nth-child(1)').click(function() {
-      if ($('#display-manual:visible').length) {
-        $('#display-manual').hide();
-      } else {
-        $('#display-design').hide();
-        $('#display-manual').show();
-      }
-      return false;
-    });
-    return $('.linkbar a:nth-child(2)').click(function() {
-      if ($('#display-design:visible').length) {
-        $('#display-design').hide();
-      } else {
-        $('#display-manual').hide();
-        $('#display-design').show();
-      }
-      return false;
-    });
+    return window.StationStop = true;
   });
 
   window.Game = {
@@ -1461,7 +1429,7 @@ Grid: for entities that might want to snap to a grid.
     selectArrow = Crafty.e('Canvas, SelectArrow').attr({
       x: 200,
       y: 140,
-      itemCount: window.MapList.length + 2,
+      itemCount: window.MapList.length + 1,
       lineHeight: 48
     });
     selectArrow.spaceIcon.attr({
@@ -1505,38 +1473,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Load Map...");
-    titleText.titles.push("Load Map...");
-    Crafty.e('2D, Canvas, spr_selectline').attr({
-      x: 250,
-      y: curry + 24
-    });
-    Crafty.e('2D, Canvas, spr_selectstn').attr({
-      x: 250,
-      y: curry + 48
-    });
-    Crafty.e('2D, Canvas, Text, _MenuElement').attr({
-      x: 280,
-      y: curry + 48,
-      w: 200
-    }).textFont({
-      size: '17px',
-      family: 'Aller'
     }).textColor('#E23228').text("Back to Title");
     titleText.titles.push("Back to Title");
-    selectArrow.callbacks.push(function() {
-      try {
-        window.selectedMap = JSON.parse($("#custom-level-data").val());
-        return Crafty.scene('PlayGame');
-      } catch (_error) {
-        if (!($('#display-design:visible').length)) {
-          $('#display-manual').hide();
-          $('#display-credits').hide();
-          $('#display-design').show();
-          return window.dontGoAway = true;
-        }
-      }
-    });
     selectArrow.callbacks.push(function() {
       return Crafty.scene('Title');
     });

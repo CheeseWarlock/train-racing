@@ -196,7 +196,7 @@ Crafty.scene('SelectMap', () ->
   )
   .textColor('#FFFDE8')
   curry = 140
-  selectArrow = Crafty.e('Canvas, SelectArrow').attr({x: 200, y: 140, itemCount: window.MapList.length + 2, lineHeight: 48})
+  selectArrow = Crafty.e('Canvas, SelectArrow').attr({x: 200, y: 140, itemCount: window.MapList.length + 1, lineHeight: 48})
   selectArrow.spaceIcon.attr({x: 404})
   mapCallback = () ->
     $.getJSON(window.MapList[Crafty('SelectArrow').selectedIndex][0], (data) ->
@@ -211,24 +211,8 @@ Crafty.scene('SelectMap', () ->
     selectArrow.callbacks.push(mapCallback)
     titleText.titles.push(window.MapList[idx][1])
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-  Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Load Map...")
-  titleText.titles.push("Load Map...")
-  Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
-  Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry+48})
-  Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry+48,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title")
+  Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title")
   titleText.titles.push("Back to Title")
-  selectArrow.callbacks.push(
-    () ->
-      try
-        window.selectedMap = JSON.parse($("#custom-level-data").val())
-        Crafty.scene('PlayGame')
-      catch
-        if !($('#display-design:visible').length)
-          $('#display-manual').hide()
-          $('#display-credits').hide()
-          $('#display-design').show()
-          window.dontGoAway = true
-  )
   selectArrow.callbacks.push(
     () ->
       Crafty.scene('Title')
