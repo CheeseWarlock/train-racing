@@ -1,4 +1,5 @@
 Crafty.scene('Title', () ->
+  self.focus()
   this.letters = ""
   Crafty.e('2D, Canvas, spr_title').attr({x:220})
   Crafty.e('TitleText').attr({y: 178}).text('Compete to deliver more passengers by 10:00 AM.')

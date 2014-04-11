@@ -1215,6 +1215,7 @@ Grid: for entities that might want to snap to a grid.
   };
 
   Crafty.scene('Title', function() {
+    self.focus();
     this.letters = "";
     Crafty.e('2D, Canvas, spr_title').attr({
       x: 220
