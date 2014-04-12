@@ -431,7 +431,7 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       return this.requires("TrainHead");
     },
-    _getSegmentPriority: function(depth, x, y, dir) {
+    _getSegmentPriority: function(depth, x, y, dir, distance) {
       var cdir, curvedPriority, dropoffPlayer, newx, newy, priority, results, sdir, searchPlayer, station, straightPriority, _i, _len, _ref;
       searchPlayer = (this.playerOne ? "playerTwo" : "playerOne");
       dropoffPlayer = (this.playerOne ? "dropoffP1" : "dropoffP2");
@@ -441,8 +441,8 @@ Grid: for entities that might want to snap to a grid.
       newx = results.endpoint.at().x;
       newy = results.endpoint.at().y;
       if (depth > 0) {
-        straightPriority = this._getSegmentPriority(depth - 1, newx + Util.dirx(sdir), newy + Util.diry(sdir), sdir);
-        curvedPriority = this._getSegmentPriority(depth - 1, newx + Util.dirx(cdir), newy + Util.diry(cdir), cdir);
+        straightPriority = this._getSegmentPriority(depth - 1, newx + Util.dirx(sdir), newy + Util.diry(sdir), sdir, results.distance);
+        curvedPriority = this._getSegmentPriority(depth - 1, newx + Util.dirx(cdir), newy + Util.diry(cdir), cdir, results.distance);
       } else {
         straightPriority = 0;
         curvedPriority = 0;
@@ -453,7 +453,19 @@ Grid: for entities that might want to snap to a grid.
         station = _ref[_i];
         priority += Math.min(station.population, 100 - this.passengers) + station[dropoffPlayer];
       }
-      priority += (results.trainsFound[searchPlayer] ? (results.trainsFound[searchPlayer] === "c" ? -100 : -5) : 0);
+      if (results.trainsFound[searchPlayer]) {
+        if (results.trainsFound[searchPlayer].oncoming) {
+          priority -= 100;
+        } else {
+          if (distance < 4) {
+            priority -= 50;
+          } else if (distance < 8) {
+            priority -= 10;
+          } else {
+            priority -= 5;
+          }
+        }
+      }
       return priority + Math.max(straightPriority + curvedPriority);
     },
     _updateCurrentTrack: function(dir) {
@@ -473,8 +485,8 @@ Grid: for entities that might want to snap to a grid.
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
       if (straight && curve) {
-        straightPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection);
-        curvedPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection));
+        straightPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection, 0);
+        curvedPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection), 0);
         straightPriority += Math.random() * 20 - 10;
         decision = curvedPriority > straightPriority;
       }
@@ -2065,7 +2077,10 @@ Grid: for entities that might want to snap to a grid.
         for (_i = 0, _len = trainPositions.length; _i < _len; _i++) {
           trainPosition = trainPositions[_i];
           if (trainPosition[0] === x && trainPosition[1] === y) {
-            trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = (trainPosition[3] === Util.opposite(heading) ? "c" : "f");
+            trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = {
+              oncoming: trainPosition[3] === Util.opposite(heading),
+              distance: dist
+            };
           }
         }
         track = Util.trackAt(x, y);
