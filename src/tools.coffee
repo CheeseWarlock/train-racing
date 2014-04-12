@@ -252,9 +252,8 @@ window.AI =
       y += Util.diry(heading)
       for trainPosition in trainPositions
         if trainPosition[0] == x and trainPosition[1] == y
-          if (trainPosition[3] == Util.opposite(heading))
-            # This train is on the path!
-            trainPresences[(if trainPosition[2] then "playerOne" else "playerTwo")] = true
+          # Determine whether this train is on the path!
+          trainPresences[(if trainPosition[2] then "playerOne" else "playerTwo")] = (if trainPosition[3] == Util.opposite(heading) then "c" else "f")
       track = Util.trackAt(x, y)
     distance:
       dist

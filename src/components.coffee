@@ -365,10 +365,9 @@ Crafty.c "AITrain",
       curvedPriority = 0
     priority = 0
     for station in results.stations
-        priority += (station.population + station[dropoffPlayer])
-    priority += (if results.trainsFound[searchPlayer] then -100 else 0)
+        priority += (Math.min(station.population, 100 - @passengers) + station[dropoffPlayer])
+    priority += (if results.trainsFound[searchPlayer] then (if results.trainsFound[searchPlayer] is "c" then -100 else -5) else 0)
     priority + Math.max(straightPriority + curvedPriority)
-    
   
   _updateCurrentTrack: (dir) ->
     # AI decision-making process

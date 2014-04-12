@@ -451,9 +451,9 @@ Grid: for entities that might want to snap to a grid.
       _ref = results.stations;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         station = _ref[_i];
-        priority += station.population + station[dropoffPlayer];
+        priority += Math.min(station.population, 100 - this.passengers) + station[dropoffPlayer];
       }
-      priority += (results.trainsFound[searchPlayer] ? -100 : 0);
+      priority += (results.trainsFound[searchPlayer] ? (results.trainsFound[searchPlayer] === "c" ? -100 : -5) : 0);
       return priority + Math.max(straightPriority + curvedPriority);
     },
     _updateCurrentTrack: function(dir) {
@@ -2065,9 +2065,7 @@ Grid: for entities that might want to snap to a grid.
         for (_i = 0, _len = trainPositions.length; _i < _len; _i++) {
           trainPosition = trainPositions[_i];
           if (trainPosition[0] === x && trainPosition[1] === y) {
-            if (trainPosition[3] === Util.opposite(heading)) {
-              trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = true;
-            }
+            trainPresences[(trainPosition[2] ? "playerOne" : "playerTwo")] = (trainPosition[3] === Util.opposite(heading) ? "c" : "f");
           }
         }
         track = Util.trackAt(x, y);
