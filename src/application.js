@@ -432,7 +432,7 @@ Grid: for entities that might want to snap to a grid.
       return this.requires("TrainHead");
     },
     _getSegmentPriority: function(depth, x, y, dir, distance) {
-      var cdir, curvedPriority, dropoffPlayer, newx, newy, priority, results, sdir, searchPlayer, station, straightPriority, _i, _len, _ref;
+      var cdir, curvedPriority, dropoffPlayer, newx, newy, otherDist, priority, results, sdir, searchPlayer, station, straightPriority, _i, _len, _ref;
       searchPlayer = (this.playerOne ? "playerTwo" : "playerOne");
       dropoffPlayer = (this.playerOne ? "dropoffP1" : "dropoffP2");
       results = AI.checkAlongSegment(x, y, dir);
@@ -455,7 +455,10 @@ Grid: for entities that might want to snap to a grid.
       }
       if (results.trainsFound[searchPlayer]) {
         if (results.trainsFound[searchPlayer].oncoming) {
-          priority -= 100;
+          otherDist = AI.checkAlongSegment(x, y, Util.opposite(dir)).distance;
+          if (otherDist >= distance) {
+            priority -= 100;
+          }
         } else {
           if (distance < 4) {
             priority -= 50;
@@ -485,8 +488,8 @@ Grid: for entities that might want to snap to a grid.
       straight = this._hasStraightOption();
       curve = this._hasCurveOption();
       if (straight && curve) {
-        straightPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection, 0);
-        curvedPriority = this._getSegmentPriority(1, this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection), 0);
+        straightPriority = this._getSegmentPriority(2, this.currentTrack.at().x + Util.dirx(this.sourceDirection), this.currentTrack.at().y + Util.diry(this.sourceDirection), this.sourceDirection, 0);
+        curvedPriority = this._getSegmentPriority(2, this.currentTrack.at().x + Util.dirx(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), this.currentTrack.at().y + Util.diry(Util.getTargetDirection(this.currentTrack, this.sourceDirection)), Util.getTargetDirection(this.currentTrack, this.sourceDirection), 0);
         straightPriority += Math.random() * 20 - 10;
         decision = curvedPriority > straightPriority;
       }
@@ -2211,7 +2214,6 @@ Grid: for entities that might want to snap to a grid.
         x: 0.4,
         y: 0.2
       });
-      console.log(p1wins);
       this.drawGraph((p1wins ? blueT : redT), target, {
         color: (p1wins ? "rgb(73,86,255)" : "rgb(226,50,40)"),
         x: 0.4,

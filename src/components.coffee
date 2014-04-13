@@ -368,7 +368,10 @@ Crafty.c "AITrain",
       priority += (Math.min(station.population, 100 - @passengers) + station[dropoffPlayer])
     if results.trainsFound[searchPlayer]
       if results.trainsFound[searchPlayer].oncoming
-        priority -= 100
+        # check OTHER train's distance to junction
+        otherDist = AI.checkAlongSegment(x, y, Util.opposite(dir)).distance
+        if (otherDist >= distance)
+          priority -= 100
       else
         if distance < 4
           priority -= 50
@@ -392,8 +395,8 @@ Crafty.c "AITrain",
     curve = @_hasCurveOption()
     if (straight and curve)
       # Fancy AI stuff goes here!
-      straightPriority = @_getSegmentPriority(1, @currentTrack.at().x+Util.dirx(@sourceDirection), @currentTrack.at().y+Util.diry(@sourceDirection), @sourceDirection, 0)
-      curvedPriority = @_getSegmentPriority(1, @currentTrack.at().x+Util.dirx(Util.getTargetDirection(@currentTrack, @sourceDirection)), @currentTrack.at().y+Util.diry(Util.getTargetDirection(@currentTrack, @sourceDirection)), Util.getTargetDirection(@currentTrack, @sourceDirection), 0)
+      straightPriority = @_getSegmentPriority(2, @currentTrack.at().x+Util.dirx(@sourceDirection), @currentTrack.at().y+Util.diry(@sourceDirection), @sourceDirection, 0)
+      curvedPriority = @_getSegmentPriority(2, @currentTrack.at().x+Util.dirx(Util.getTargetDirection(@currentTrack, @sourceDirection)), @currentTrack.at().y+Util.diry(Util.getTargetDirection(@currentTrack, @sourceDirection)), Util.getTargetDirection(@currentTrack, @sourceDirection), 0)
       straightPriority += Math.random() * 20 - 10
       # Pick the proper path or a random one
       decision = (curvedPriority > straightPriority)

@@ -380,7 +380,6 @@ window.GraphTools =
       x: 0.4
       y: 0.2
       
-    console.log p1wins
     @drawGraph (if p1wins then blueT else redT), target,
       color: (if p1wins then "rgb(73,86,255)" else "rgb(226,50,40)")
       x: 0.4
