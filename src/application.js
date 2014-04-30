@@ -1127,24 +1127,37 @@ Grid: for entities that might want to snap to a grid.
         var zeroPosition;
         zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
         if (e.keyCode === Crafty.keys.P) {
-          Crafty.audio.play("arrowtick");
-          if (++this.selectedIndex >= this.itemCount) {
-            this.selectedIndex = 0;
-          }
+          this.moveDown();
         } else if (e.keyCode === Crafty.keys.Q) {
-          Crafty.audio.play("arrowtick");
-          if (--this.selectedIndex < 0) {
-            this.selectedIndex = this.itemCount - 1;
-          }
+          this.moveUp();
         } else if (e.keyCode === Crafty.keys.SPACE) {
           Crafty.audio.play("select");
           if (this.callbacks[this.selectedIndex]) {
             this.callbacks[this.selectedIndex]();
           }
         }
-        this.attr({
-          y: zeroPosition + (this.selectedIndex * this.lineHeight)
-        });
+      });
+    },
+    moveDown: function() {
+      var zeroPosition;
+      zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
+      Crafty.audio.play("arrowtick");
+      if (++this.selectedIndex >= this.itemCount) {
+        this.selectedIndex = 0;
+      }
+      return this.attr({
+        y: zeroPosition + (this.selectedIndex * this.lineHeight)
+      });
+    },
+    moveUp: function() {
+      var zeroPosition;
+      zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
+      Crafty.audio.play("arrowtick");
+      if (--this.selectedIndex < 0) {
+        this.selectedIndex = this.itemCount - 1;
+      }
+      return this.attr({
+        y: zeroPosition + (this.selectedIndex * this.lineHeight)
       });
     }
   });
@@ -1162,6 +1175,16 @@ Grid: for entities that might want to snap to a grid.
     },
     refresh: function() {
       return this._setChecked(this.callback());
+    }
+  });
+
+  Crafty.c("SelectableText", {
+    init: function() {
+      this.requires("Text, Mouse");
+      return this.bind('MouseDown', function() {
+        Crafty.audio.play("select");
+        return Crafty("SelectArrow").callbacks[this.idx]();
+      });
     }
   });
 
@@ -1253,7 +1276,7 @@ Grid: for entities that might want to snap to a grid.
         }
       ]
     });
-    Crafty.e('2D, DOM, Text').attr({
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 230,
       y: 280,
       w: 200,
@@ -1261,8 +1284,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("1-Player Start");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("1-Player Start").attr('idx', 0);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 230,
       y: 310,
       w: 200,
@@ -1270,8 +1293,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("2-Player Start");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("2-Player Start").attr('idx', 1);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 230,
       y: 340,
       w: 200,
@@ -1279,8 +1302,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Instructions");
-    return Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("Instructions").attr('idx', 2);
+    return Crafty.e('2D, Canvas, SelectableText').attr({
       x: 230,
       y: 370,
       w: 200,
@@ -1288,7 +1311,7 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Options");
+    }).textColor('#5CC64C').text("Options").attr('idx', 3);
   });
 
   Crafty.scene('Loading', function() {
@@ -1435,6 +1458,38 @@ Grid: for entities that might want to snap to a grid.
   Crafty.scene('SelectMap', function() {
     var curry, idx, mapCallback, selectArrow, titleText;
     Crafty.background('#2B281D');
+    Crafty.e('2D, Canvas, Mouse').attr({
+      x: 0,
+      y: 0,
+      w: 1000,
+      h: 1000
+    }).bind('MouseDown', function(e) {
+      this.moving = true;
+      return this.lasty = e.y;
+    }).bind('MouseUp', function() {
+      return this.moving = false;
+    }).bind('MouseMove', function(e) {
+      var arrow;
+      if (this.moving) {
+        console.log('from ' + this.lasty + ' to ' + e.y + ": y changed by " + (e.y - this.lasty));
+        window.AAA = this.lasty - e.y;
+        Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
+          return this.y -= window.AAA;
+        });
+        this.lasty = e.y;
+      }
+      arrow = Crafty("SelectArrow");
+      if (arrow.y > 284) {
+        arrow.moveUp();
+        console.log('up');
+      }
+      if (arrow.y < 140 + Math.min(96, arrow.selectedIndex * 48)) {
+        arrow.moveDown();
+        return console.log('down');
+      }
+    }).bind('MouseOut', function() {
+      return this.moving = false;
+    });
     Crafty.e('TitleText').text('Select a map:').attr({
       y: 30
     });
@@ -1475,14 +1530,14 @@ Grid: for entities that might want to snap to a grid.
         x: 250,
         y: curry
       });
-      Crafty.e('2D, Canvas, Text, _MenuElement').attr({
+      Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({
         x: 280,
         y: curry,
         w: 200
       }).textFont({
         size: '17px',
         family: 'Aller'
-      }).textColor('#FFFDE8').text(window.MapList[idx][1]);
+      }).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx', idx);
       Crafty.e('2D, Canvas, spr_selectline').attr({
         x: 250,
         y: curry + 24
@@ -1651,7 +1706,7 @@ Grid: for entities that might want to snap to a grid.
     }).text("Options").textFont({
       size: '30px'
     });
-    Crafty.e('2D, DOM, Text').attr({
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 210,
       y: 280,
       w: 200,
@@ -1659,8 +1714,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Sound On");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("Sound On").attr('idx', 0);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 210,
       y: 310,
       w: 200,
@@ -1668,8 +1723,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Randomize Colours");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("Randomize Colours").attr('idx', 1);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 210,
       y: 340,
       w: 200,
@@ -1677,8 +1732,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Brakes");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("Brakes").attr('idx', 2);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 210,
       y: 370,
       w: 200,
@@ -1686,8 +1741,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Station Stop");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("Station Stop").attr('idx', 3);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 210,
       y: 400,
       w: 200,
@@ -1695,8 +1750,8 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Tablet Controls");
-    Crafty.e('2D, DOM, Text').attr({
+    }).textColor('#5CC64C').text("Tablet Controls").attr('idx', 4);
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 210,
       y: 430,
       w: 200,
@@ -1704,7 +1759,7 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').textColor('#E23228').text("Back to Title");
+    }).textColor('#5CC64C').textColor('#E23228').text("Back to Title").attr('idx', 5);
     Crafty.e('2D, Canvas, CheckBox').attr({
       x: 366,
       y: 280,
@@ -1779,7 +1834,7 @@ Grid: for entities that might want to snap to a grid.
     Crafty.e('TitleText').attr({
       y: 340
     }).text('Be aware of your opponent\'s position to avoid collisions.');
-    return Crafty.e('2D, Canvas, spr_space').attr({
+    Crafty.e('2D, Canvas, Mouse, spr_space').attr({
       x: 264,
       y: 400
     }).bind('KeyDown', function(e) {
@@ -1787,7 +1842,13 @@ Grid: for entities that might want to snap to a grid.
         Crafty.audio.play('select');
         return Crafty.scene('Title');
       }
+    }).bind('MouseDown', function(e) {
+      Crafty.audio.play('select');
+      return Crafty.scene('Title');
     });
+    return Crafty.e('TitleText').attr({
+      y: 444
+    }).text('Back');
   });
 
   window.Util = {

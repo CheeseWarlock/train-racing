@@ -27,10 +27,10 @@ Crafty.scene('Title', () ->
     ]
   )
   
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("1-Player Start")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("2-Player Start")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options")
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("1-Player Start").attr('idx',0)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("2-Player Start").attr('idx',1)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions").attr('idx',2)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options").attr('idx',3)
 )
 
 Crafty.scene('Loading', () ->
@@ -177,6 +177,36 @@ Crafty.scene('Loading', () ->
 
 Crafty.scene('SelectMap', () ->
   Crafty.background('#2B281D')
+  
+  Crafty.e('2D, Canvas, Mouse').attr(
+    x: 0
+    y: 0
+    w: 1000
+    h: 1000
+  ).bind('MouseDown', (e) ->
+    @moving = true
+    @lasty = e.y
+  ).bind('MouseUp', () ->
+    @moving = false
+  ).bind('MouseMove', (e) ->
+    if @moving
+      console.log('from ' + @lasty + ' to ' + e.y + ": y changed by " + (e.y - @lasty))
+      window.AAA = @lasty - e.y
+      Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
+        this.y -= window.AAA;
+      )
+      @lasty = e.y
+    arrow = Crafty("SelectArrow")
+    if arrow.y > 284
+      arrow.moveUp()
+      console.log('up')
+    if arrow.y < 140 + Math.min(96, arrow.selectedIndex * 48)
+      arrow.moveDown()
+      console.log('down')
+  ).bind('MouseOut', () ->
+    @moving = false
+  )
+  
   Crafty.e('TitleText').text('Select a map:')
   .attr(
     y: 30
@@ -209,7 +239,7 @@ Crafty.scene('SelectMap', () ->
     )
   for idx of window.MapList
     Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-    Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1])
+    Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx',idx)
     Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
     curry+=48
     selectArrow.callbacks.push(mapCallback)
@@ -330,12 +360,12 @@ Crafty.scene('Options', () ->
     size: '30px'
   )
   
-  Crafty.e('2D, DOM, Text').attr({x: 210, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Sound On")
-  Crafty.e('2D, DOM, Text').attr({x: 210, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Randomize Colours")
-  Crafty.e('2D, DOM, Text').attr({x: 210, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes")
-  Crafty.e('2D, DOM, Text').attr({x: 210, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Station Stop")
-  Crafty.e('2D, DOM, Text').attr({x: 210, y: 400,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Tablet Controls")
-  Crafty.e('2D, DOM, Text').attr({x: 210, y: 430,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title")
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Sound On").attr('idx',0)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Randomize Colours").attr('idx',1)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes").attr('idx',2)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Station Stop").attr('idx',3)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 400,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Tablet Controls").attr('idx',4)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 430,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title").attr('idx',5)
   Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 280, callback: () ->
     !Crafty.audio.muted
   }).refresh()
@@ -363,9 +393,13 @@ Crafty.scene('Instructions', () ->
   Crafty.e('TitleText').attr({y: 280}).text('Pick up and drop off passengers by driving through stations.')
   Crafty.e('TitleText').attr({y: 310}).text('Passenger destinations are shown at the bottom.')
   Crafty.e('TitleText').attr({y: 340}).text('Be aware of your opponent\'s position to avoid collisions.')
-  Crafty.e('2D, Canvas, spr_space').attr({x: 264, y: 400}).bind('KeyDown', (e) ->
+  Crafty.e('2D, Canvas, Mouse, spr_space').attr({x: 264, y: 400}).bind('KeyDown', (e) ->
     if e.keyCode is Crafty.keys.SPACE
       Crafty.audio.play('select')
       Crafty.scene('Title')
+  ).bind('MouseDown', (e) ->
+    Crafty.audio.play('select')
+    Crafty.scene('Title')
   )
+  Crafty.e('TitleText').attr({y: 444}).text('Back')
 )

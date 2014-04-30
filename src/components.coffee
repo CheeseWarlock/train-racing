@@ -935,20 +935,28 @@ Crafty.c "SelectArrow",
     @bind "KeyDown", (e) ->
       zeroPosition = @_y - (@selectedIndex * @lineHeight)
       if e.keyCode is Crafty.keys.P 
-        Crafty.audio.play("arrowtick")
-        if (++@selectedIndex >= @itemCount)
-          @selectedIndex = 0
+        @moveDown()
       else if e.keyCode is Crafty.keys.Q
-        Crafty.audio.play("arrowtick")
-        if (--@selectedIndex < 0)
-          @selectedIndex = @itemCount - 1
+        @moveUp()
       else if e.keyCode is Crafty.keys.SPACE
         Crafty.audio.play("select")
         if @callbacks[@selectedIndex]
           @callbacks[@selectedIndex]()
-      @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
       return
-      
+  
+  moveDown: ->
+    zeroPosition = @_y - (@selectedIndex * @lineHeight)
+    Crafty.audio.play("arrowtick")
+    if (++@selectedIndex >= @itemCount)
+      @selectedIndex = 0
+    @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
+          
+  moveUp: ->
+    zeroPosition = @_y - (@selectedIndex * @lineHeight)
+    Crafty.audio.play("arrowtick")
+    if (--@selectedIndex < 0)
+      @selectedIndex = @itemCount - 1
+    @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
 Crafty.c "CheckBox",
   init: ->
     @requires("2D, Canvas, spr_checkbox")
@@ -958,3 +966,11 @@ Crafty.c "CheckBox",
     @addComponent('spr_checkbox' + (if checked then 'checked' else ''))
   refresh: () ->
     @_setChecked(@callback())
+
+Crafty.c "SelectableText",
+  init: ()->
+    @requires("Text, Mouse")
+    @bind('MouseDown', () ->
+      Crafty.audio.play("select")
+      Crafty("SelectArrow").callbacks[@idx]()
+    )
