@@ -203,6 +203,9 @@ Crafty.c "TrainHead",
     if window.Brakes
       Crafty("Train").each ->
         @speed = ((if braking then Constants.REDUCED_SPEED else Constants.FULL_SPEED))  if @playerOne is playerOne
+        
+  isBraking: () ->
+    @speed == Constants.REDUCED_SPEED
 
   
 ###
@@ -558,11 +561,13 @@ Crafty.c "PlayerScore",
     @requires("2D, DOM, Text").textFont
       size: "20px"
       family: "Aller"
-
+    @css(
+      textAlign: "center"
+    )
     @display = 0
     @attr
       h: 47
-      w: 270
+      w: 200
 
     @css
       padding: 5
@@ -581,6 +586,7 @@ Crafty.c "PlayerScore",
       x: @x + 10
       y: @y
     ).attr(playerOne: @playerOne).setup().update()
+    @attach(@bar)
     @attr z: 800
     return
 
@@ -828,11 +834,11 @@ Crafty.c "BarController",
       w: 20
 
     c = ((if @playerOne then "r" else "b"))
-    Crafty.e("2D, Canvas, spr_barback").attr
+    @attach(Crafty.e("2D, Canvas, spr_barback").attr
       x: @x
       y: @y
       z: 801
-
+    )
     @l = Crafty.e("2D, Canvas, spr_" + c + "barl").attr(
       x: @x
       y: @y
@@ -849,6 +855,9 @@ Crafty.c "BarController",
       y: @y
       z: 801
     )
+    @attach(@l)
+    @attach(@b)
+    @attach(@r)
     this
 
   update: (fullness, ticks) ->

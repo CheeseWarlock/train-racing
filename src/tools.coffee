@@ -76,7 +76,7 @@ window.Util =
   createTrain: (x, y, playerOne, dir, cars=3) ->
     letter = (if playerOne then 'r' else 'b')
     
-    train = Crafty.e((if playerOne or !(window.singlePlayerMode) then 'PlayerTrain' else 'AITrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
+    train = Crafty.e((if playerOne or !(window.singlePlayerMode) then 'PlayerTrain' else 'AITrain') + (if playerOne then ', RedTrain' else ', BlueTrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
     .attr('targetDirection', dir)
     .findTrack()
     
@@ -88,7 +88,7 @@ window.Util =
     front = train
     train.attr('head', train)
     for i in (if cars > 1 then [2..Math.max(2,cars)] else [])
-      temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
+      temp = Crafty.e('FollowTrain' + (if playerOne then ', RedTrain' else ', BlueTrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir)
       .attr('targetDirection', dir)
       .findTrack().attr('front', front)
       .attr('head', train)

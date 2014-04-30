@@ -118,6 +118,10 @@ Crafty.scene('Loading', () ->
       spr_checkbox: [0,2]
       spr_checkboxchecked: [1,2]
     )
+    Crafty.sprite(44, 44, 'img/tabletbuttons.png',
+      spr_redbutton: [0,0]
+      spr_bluebutton: [1,0]
+    )
     Crafty.sprite(28, 28, 'img/ullight.png',
       spr_rtrainlight: [2,0]
       spr_rtrainsidelight: [3,0]
@@ -253,14 +257,54 @@ Crafty.scene('PlayGame', () ->
     Crafty.e('2D, Canvas, spr_brushed').attr({w: 616, h: 84, y: 476, z: 800})
     Crafty.e('2D, Canvas, Color, AmbientLayer').attr({x:0,y:0,z:600,h:1000,w:1000}).color('rgba(3,29,51,0.5)')
   Util.assignStations()
-  
+  if (window.TabletControls)
+    Crafty.e('2D, Canvas, Mouse, spr_redbutton').bind('MouseDown', () ->
+      if GameState.running
+        Crafty.audio.play('brakeson')
+        Crafty("PlayerTrain RedTrain")._setBraking true  
+    ).bind('MouseUp', () ->
+      if GameState.running
+        Crafty.audio.play('brakesoff')
+        Crafty("PlayerTrain RedTrain")._setBraking false  
+    ).bind('MouseOut', () ->
+      if GameState.running
+        if Crafty("PlayerTrain RedTrain").isBraking()
+          Crafty.audio.play('brakesoff')
+        Crafty("PlayerTrain RedTrain")._setBraking false  
+    ).attr(
+      x: 4
+      y: 512
+      z: 810
+    )
+    if (!window.singlePlayerMode)
+      Crafty.e('2D, Canvas, Mouse, spr_bluebutton').bind('MouseDown', () ->
+        if GameState.running
+          Crafty.audio.play('brakeson')
+          Crafty("PlayerTrain BlueTrain")._setBraking true  
+      ).bind('MouseUp', () ->
+        if GameState.running
+          Crafty.audio.play('brakesoff')
+          Crafty("PlayerTrain BlueTrain")._setBraking false  
+      ).bind('MouseOut', () ->
+        if GameState.running
+          if Crafty("PlayerTrain BlueTrain").isBraking()
+            Crafty.audio.play('brakesoff')
+          Crafty("PlayerTrain BlueTrain")._setBraking false  
+      ).attr(
+        x: 568
+        y: 512
+        z: 810
+      )
+    Crafty("PlayerScore").each( ()->
+      @attr('y', 490)
+    )
 )
 
 Crafty.scene('Options', () ->
   selectArrow = Crafty.e('Canvas, SelectArrow').attr(
-    x: 190
+    x: 170
     y: 280
-    itemCount: 5
+    itemCount: 6
     callbacks: [
       () ->
         Crafty.audio.toggleMute()
@@ -275,32 +319,38 @@ Crafty.scene('Options', () ->
         window.StationStop = !window.StationStop
         Crafty('CheckBox').get(3).refresh()
       , () ->
+        window.TabletControls = !window.TabletControls
+        Crafty('CheckBox').get(4).refresh()
+      , () ->
         Crafty.scene('Title')
     ]
   )
-  selectArrow.spaceIcon.attr({x: 378})
+  selectArrow.spaceIcon.attr({x: 398})
   Crafty.e('TitleText').attr({y: 100}).text("Options").textFont(
     size: '30px'
   )
   
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Sound On")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Swap Colours")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Station Stop")
-  Crafty.e('2D, DOM, Text').attr({x: 230, y: 400,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title")
-  Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 280, callback: () ->
+  Crafty.e('2D, DOM, Text').attr({x: 210, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Sound On")
+  Crafty.e('2D, DOM, Text').attr({x: 210, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Randomize Colours")
+  Crafty.e('2D, DOM, Text').attr({x: 210, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes")
+  Crafty.e('2D, DOM, Text').attr({x: 210, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Station Stop")
+  Crafty.e('2D, DOM, Text').attr({x: 210, y: 400,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Tablet Controls")
+  Crafty.e('2D, DOM, Text').attr({x: 210, y: 430,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title")
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 280, callback: () ->
     !Crafty.audio.muted
   }).refresh()
-  Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 310, callback: () ->
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 310, callback: () ->
     window.SwapColours
   }).refresh()
-  Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 340, callback: () ->
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 340, callback: () ->
     window.Brakes
   }).refresh()
-  Crafty.e('2D, Canvas, CheckBox').attr({x: 346, y: 370, callback: () ->
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 370, callback: () ->
     window.StationStop
   }).refresh()
-  
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 400, callback: () ->
+    window.TabletControls
+  }).refresh()
 )
 
 Crafty.scene('Instructions', () ->

@@ -232,6 +232,9 @@ Grid: for entities that might want to snap to a grid.
           }
         });
       }
+    },
+    isBraking: function() {
+      return this.speed === Constants.REDUCED_SPEED;
     }
   });
 
@@ -676,10 +679,13 @@ Grid: for entities that might want to snap to a grid.
         size: "20px",
         family: "Aller"
       });
+      this.css({
+        textAlign: "center"
+      });
       this.display = 0;
       this.attr({
         h: 47,
-        w: 270
+        w: 200
       });
       this.css({
         padding: 5,
@@ -704,6 +710,7 @@ Grid: for entities that might want to snap to a grid.
       }).attr({
         playerOne: this.playerOne
       }).setup().update();
+      this.attach(this.bar);
       this.attr({
         z: 800
       });
@@ -996,11 +1003,11 @@ Grid: for entities that might want to snap to a grid.
         w: 20
       });
       c = (this.playerOne ? "r" : "b");
-      Crafty.e("2D, Canvas, spr_barback").attr({
+      this.attach(Crafty.e("2D, Canvas, spr_barback").attr({
         x: this.x,
         y: this.y,
         z: 801
-      });
+      }));
       this.l = Crafty.e("2D, Canvas, spr_" + c + "barl").attr({
         x: this.x,
         y: this.y,
@@ -1017,6 +1024,9 @@ Grid: for entities that might want to snap to a grid.
         y: this.y,
         z: 801
       });
+      this.attach(this.l);
+      this.attach(this.b);
+      this.attach(this.r);
       return this;
     },
     update: function(fullness, ticks) {
@@ -1366,6 +1376,10 @@ Grid: for entities that might want to snap to a grid.
         spr_checkbox: [0, 2],
         spr_checkboxchecked: [1, 2]
       });
+      Crafty.sprite(44, 44, 'img/tabletbuttons.png', {
+        spr_redbutton: [0, 0],
+        spr_bluebutton: [1, 0]
+      });
       Crafty.sprite(28, 28, 'img/ullight.png', {
         spr_rtrainlight: [2, 0],
         spr_rtrainsidelight: [3, 0],
@@ -1548,15 +1562,66 @@ Grid: for entities that might want to snap to a grid.
         w: 1000
       }).color('rgba(3,29,51,0.5)');
     }
-    return Util.assignStations();
+    Util.assignStations();
+    if (window.TabletControls) {
+      Crafty.e('2D, Canvas, Mouse, spr_redbutton').bind('MouseDown', function() {
+        if (GameState.running) {
+          Crafty.audio.play('brakeson');
+          return Crafty("PlayerTrain RedTrain")._setBraking(true);
+        }
+      }).bind('MouseUp', function() {
+        if (GameState.running) {
+          Crafty.audio.play('brakesoff');
+          return Crafty("PlayerTrain RedTrain")._setBraking(false);
+        }
+      }).bind('MouseOut', function() {
+        if (GameState.running) {
+          if (Crafty("PlayerTrain RedTrain").isBraking()) {
+            Crafty.audio.play('brakesoff');
+          }
+          return Crafty("PlayerTrain RedTrain")._setBraking(false);
+        }
+      }).attr({
+        x: 4,
+        y: 512,
+        z: 810
+      });
+      if (!window.singlePlayerMode) {
+        Crafty.e('2D, Canvas, Mouse, spr_bluebutton').bind('MouseDown', function() {
+          if (GameState.running) {
+            Crafty.audio.play('brakeson');
+            return Crafty("PlayerTrain BlueTrain")._setBraking(true);
+          }
+        }).bind('MouseUp', function() {
+          if (GameState.running) {
+            Crafty.audio.play('brakesoff');
+            return Crafty("PlayerTrain BlueTrain")._setBraking(false);
+          }
+        }).bind('MouseOut', function() {
+          if (GameState.running) {
+            if (Crafty("PlayerTrain BlueTrain").isBraking()) {
+              Crafty.audio.play('brakesoff');
+            }
+            return Crafty("PlayerTrain BlueTrain")._setBraking(false);
+          }
+        }).attr({
+          x: 568,
+          y: 512,
+          z: 810
+        });
+      }
+      return Crafty("PlayerScore").each(function() {
+        return this.attr('y', 490);
+      });
+    }
   });
 
   Crafty.scene('Options', function() {
     var selectArrow;
     selectArrow = Crafty.e('Canvas, SelectArrow').attr({
-      x: 190,
+      x: 170,
       y: 280,
-      itemCount: 5,
+      itemCount: 6,
       callbacks: [
         function() {
           Crafty.audio.toggleMute();
@@ -1571,12 +1636,15 @@ Grid: for entities that might want to snap to a grid.
           window.StationStop = !window.StationStop;
           return Crafty('CheckBox').get(3).refresh();
         }, function() {
+          window.TabletControls = !window.TabletControls;
+          return Crafty('CheckBox').get(4).refresh();
+        }, function() {
           return Crafty.scene('Title');
         }
       ]
     });
     selectArrow.spaceIcon.attr({
-      x: 378
+      x: 398
     });
     Crafty.e('TitleText').attr({
       y: 100
@@ -1584,7 +1652,7 @@ Grid: for entities that might want to snap to a grid.
       size: '30px'
     });
     Crafty.e('2D, DOM, Text').attr({
-      x: 230,
+      x: 210,
       y: 280,
       w: 200,
       z: 50
@@ -1593,16 +1661,16 @@ Grid: for entities that might want to snap to a grid.
       family: 'Aller'
     }).textColor('#5CC64C').text("Sound On");
     Crafty.e('2D, DOM, Text').attr({
-      x: 230,
+      x: 210,
       y: 310,
       w: 200,
       z: 50
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#5CC64C').text("Swap Colours");
+    }).textColor('#5CC64C').text("Randomize Colours");
     Crafty.e('2D, DOM, Text').attr({
-      x: 230,
+      x: 210,
       y: 340,
       w: 200,
       z: 50
@@ -1611,7 +1679,7 @@ Grid: for entities that might want to snap to a grid.
       family: 'Aller'
     }).textColor('#5CC64C').text("Brakes");
     Crafty.e('2D, DOM, Text').attr({
-      x: 230,
+      x: 210,
       y: 370,
       w: 200,
       z: 50
@@ -1620,8 +1688,17 @@ Grid: for entities that might want to snap to a grid.
       family: 'Aller'
     }).textColor('#5CC64C').text("Station Stop");
     Crafty.e('2D, DOM, Text').attr({
-      x: 230,
+      x: 210,
       y: 400,
+      w: 200,
+      z: 50
+    }).textFont({
+      size: '17px',
+      family: 'Aller'
+    }).textColor('#5CC64C').text("Tablet Controls");
+    Crafty.e('2D, DOM, Text').attr({
+      x: 210,
+      y: 430,
       w: 200,
       z: 50
     }).textFont({
@@ -1629,31 +1706,38 @@ Grid: for entities that might want to snap to a grid.
       family: 'Aller'
     }).textColor('#5CC64C').textColor('#E23228').text("Back to Title");
     Crafty.e('2D, Canvas, CheckBox').attr({
-      x: 346,
+      x: 366,
       y: 280,
       callback: function() {
         return !Crafty.audio.muted;
       }
     }).refresh();
     Crafty.e('2D, Canvas, CheckBox').attr({
-      x: 346,
+      x: 366,
       y: 310,
       callback: function() {
         return window.SwapColours;
       }
     }).refresh();
     Crafty.e('2D, Canvas, CheckBox').attr({
-      x: 346,
+      x: 366,
       y: 340,
       callback: function() {
         return window.Brakes;
       }
     }).refresh();
-    return Crafty.e('2D, Canvas, CheckBox').attr({
-      x: 346,
+    Crafty.e('2D, Canvas, CheckBox').attr({
+      x: 366,
       y: 370,
       callback: function() {
         return window.StationStop;
+      }
+    }).refresh();
+    return Crafty.e('2D, Canvas, CheckBox').attr({
+      x: 366,
+      y: 400,
+      callback: function() {
+        return window.TabletControls;
       }
     }).refresh();
   });
@@ -1818,7 +1902,7 @@ Grid: for entities that might want to snap to a grid.
         cars = 3;
       }
       letter = (playerOne ? 'r' : 'b');
-      train = Crafty.e((playerOne || !window.singlePlayerMode ? 'PlayerTrain' : 'AITrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack();
+      train = Crafty.e((playerOne || !window.singlePlayerMode ? 'PlayerTrain' : 'AITrain') + (playerOne ? ', RedTrain' : ', BlueTrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack();
       if (playerOne || !window.singlePlayerMode) {
         train.bindKeyboardTurn((playerOne ? Crafty.keys.Q : Crafty.keys.P));
       }
@@ -1833,7 +1917,7 @@ Grid: for entities that might want to snap to a grid.
       }).apply(this) : []);
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         i = _ref1[_i];
-        temp = Crafty.e('FollowTrain').at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', front).attr('head', train);
+        temp = Crafty.e('FollowTrain' + (playerOne ? ', RedTrain' : ', BlueTrain')).at(x, y).attr('playerOne', playerOne).attr('sourceDirection', dir).attr('targetDirection', dir).findTrack().attr('front', front).attr('head', train);
         if (i === 2) {
           temp.addComponent("CarryingTrain");
         }
