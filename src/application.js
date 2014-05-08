@@ -1138,23 +1138,27 @@ Grid: for entities that might want to snap to a grid.
         }
       });
     },
-    moveDown: function() {
-      var zeroPosition;
-      zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
+    moveDown: function(n) {
+      var count, zeroPosition;
+      count = (n ? n : 1);
+      zeroPosition = this._y - (this.selectedIndex * this.lineHeight * count);
       Crafty.audio.play("arrowtick");
-      if (++this.selectedIndex >= this.itemCount) {
-        this.selectedIndex = 0;
+      this.selectedIndex += count;
+      if (this.selectedIndex >= this.itemCount) {
+        this.selectedIndex -= this.itemCount;
       }
       return this.attr({
         y: zeroPosition + (this.selectedIndex * this.lineHeight)
       });
     },
-    moveUp: function() {
-      var zeroPosition;
-      zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
+    moveUp: function(n) {
+      var count, zeroPosition;
+      count = (n ? n : 1);
+      zeroPosition = this._y - (this.selectedIndex * this.lineHeight * count);
       Crafty.audio.play("arrowtick");
-      if (--this.selectedIndex < 0) {
-        this.selectedIndex = this.itemCount - 1;
+      this.selectedIndex -= count;
+      if (this.selectedIndex < 0) {
+        this.selectedIndex += this.itemCount;
       }
       return this.attr({
         y: zeroPosition + (this.selectedIndex * this.lineHeight)
@@ -1181,10 +1185,75 @@ Grid: for entities that might want to snap to a grid.
   Crafty.c("SelectableText", {
     init: function() {
       this.requires("Text, Mouse");
-      return this.bind('MouseDown', function() {
+      return this.bind('Click', function() {
         Crafty.audio.play("select");
+        console.log('activating #' + this.idx);
         return Crafty("SelectArrow").callbacks[this.idx]();
       });
+    }
+  });
+
+  Crafty.c("Scroller", {
+    init: function() {
+      this.requires("2D, Canvas, Mouse");
+      this.attr({
+        x: 0,
+        y: 0,
+        w: 1000,
+        h: 1000,
+        offset: 0,
+        moving: false,
+        firstScroll: false,
+        initScroll: 96
+      });
+      this.bind('MouseDown', function(e) {
+        return this.startScroll(e);
+      });
+      this.bind('MouseMove', function(e) {
+        return this.moveScroll(e);
+      });
+      return this.bind('MouseUp', function(e) {
+        return this.endScroll(e);
+      });
+    },
+    startScroll: function(e) {
+      this.didMovement = false;
+      this.moving = true;
+      return this.lasty = e.y;
+    },
+    moveScroll: function(e) {
+      var arrow, _ref;
+      this.didMovement = true;
+      if (this.moving) {
+        window.AAA = this.lasty - e.y;
+        this.offset += window.AAA;
+        if ((-20 < (_ref = this.offset) && _ref < 410)) {
+          Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
+            return this.y -= window.AAA;
+          });
+        }
+        this.lasty = e.y;
+        arrow = Crafty("SelectArrow");
+        if (arrow.y > 284) {
+          arrow.moveUp();
+        }
+        console.log(arrow.y);
+        if (arrow.y < 236.) {
+          arrow.moveDown();
+          if (this.initScroll > 0) {
+            return this.initScroll -= 40;
+          }
+        }
+      }
+    },
+    endScroll: function() {
+      if (this.offset > 410) {
+        this.offset = 410;
+      }
+      if (this.offset < -20) {
+        this.offset = -20;
+      }
+      return this.moving = false;
     }
   });
 
@@ -1456,40 +1525,9 @@ Grid: for entities that might want to snap to a grid.
   });
 
   Crafty.scene('SelectMap', function() {
-    var curry, idx, mapCallback, selectArrow, titleText;
+    var curry, idx, mapCallbackMaker, selectArrow, titleText;
     Crafty.background('#2B281D');
-    Crafty.e('2D, Canvas, Mouse').attr({
-      x: 0,
-      y: 0,
-      w: 1000,
-      h: 1000
-    }).bind('MouseDown', function(e) {
-      this.moving = true;
-      return this.lasty = e.y;
-    }).bind('MouseUp', function() {
-      return this.moving = false;
-    }).bind('MouseMove', function(e) {
-      var arrow;
-      if (this.moving) {
-        console.log('from ' + this.lasty + ' to ' + e.y + ": y changed by " + (e.y - this.lasty));
-        window.AAA = this.lasty - e.y;
-        Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
-          return this.y -= window.AAA;
-        });
-        this.lasty = e.y;
-      }
-      arrow = Crafty("SelectArrow");
-      if (arrow.y > 284) {
-        arrow.moveUp();
-        console.log('up');
-      }
-      if (arrow.y < 140 + Math.min(96, arrow.selectedIndex * 48)) {
-        arrow.moveDown();
-        return console.log('down');
-      }
-    }).bind('MouseOut', function() {
-      return this.moving = false;
-    });
+    Crafty.e('Scroller');
     Crafty.e('TitleText').text('Select a map:').attr({
       y: 30
     });
@@ -1500,30 +1538,40 @@ Grid: for entities that might want to snap to a grid.
       size: '30px'
     }).bind('EnterFrame', function() {
       if (Crafty('SelectArrow').y > 284) {
-        return Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
+        Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
           return this.y -= 6;
         });
-      } else if (Crafty('SelectArrow').y < 140 + Math.min(96, Crafty("SelectArrow").selectedIndex * 48)) {
-        return Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
+        return Crafty("Scroller").each(function() {
+          return this.offset += 6;
+        });
+      } else if (Crafty('SelectArrow').y < 236) {
+        Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(function() {
           return this.y += 6;
+        });
+        return Crafty("Scroller").each(function() {
+          return this.offset -= 6;
         });
       }
     }).textColor('#FFFDE8');
-    curry = 140;
+    curry = 236;
     selectArrow = Crafty.e('Canvas, SelectArrow').attr({
       x: 200,
-      y: 140,
+      y: 236,
       itemCount: window.MapList.length + 1,
       lineHeight: 48
     });
     selectArrow.spaceIcon.attr({
       x: 404
     });
-    mapCallback = function() {
-      return $.getJSON(window.MapList[Crafty('SelectArrow').selectedIndex][0], function(data) {
-        window.selectedMap = data;
-        return Crafty.scene('PlayGame');
-      });
+    mapCallbackMaker = function(i) {
+      return function() {
+        if (!Crafty("Scroller").didMovement) {
+          return $.getJSON(window.MapList[i][0], function(data) {
+            window.selectedMap = data;
+            return Crafty.scene('PlayGame');
+          });
+        }
+      };
     };
     for (idx in window.MapList) {
       Crafty.e('2D, Canvas, spr_selectstn').attr({
@@ -1543,21 +1591,21 @@ Grid: for entities that might want to snap to a grid.
         y: curry + 24
       });
       curry += 48;
-      selectArrow.callbacks.push(mapCallback);
+      selectArrow.callbacks.push(mapCallbackMaker(idx));
       titleText.titles.push(window.MapList[idx][1]);
     }
     Crafty.e('2D, Canvas, spr_selectstn').attr({
       x: 250,
       y: curry
     });
-    Crafty.e('2D, Canvas, Text, _MenuElement').attr({
+    Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({
       x: 280,
       y: curry,
       w: 200
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#E23228').text("Back to Title");
+    }).textColor('#E23228').text("Back to Title").attr('idx', ++idx);
     titleText.titles.push("Back to Title");
     selectArrow.callbacks.push(function() {
       return Crafty.scene('Title');
@@ -1590,8 +1638,16 @@ Grid: for entities that might want to snap to a grid.
       x: 338,
       y: 480
     });
-    return selectArrow.bind('KeyDown', function() {
-      return Crafty("LevelNameText").text(Crafty("LevelNameText").titles[Crafty("SelectArrow").selectedIndex]);
+    return Crafty("SelectableText").each(function() {
+      this.bind('MouseDown', function(e) {
+        return Crafty("Scroller").startScroll(e);
+      });
+      this.bind('MouseMove', function(e) {
+        return Crafty("Scroller").moveScroll(e);
+      });
+      return this.bind('MouseUp', function(e) {
+        return Crafty("Scroller").endScroll(e);
+      });
     });
   });
 

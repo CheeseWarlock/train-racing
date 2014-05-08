@@ -944,18 +944,22 @@ Crafty.c "SelectArrow",
           @callbacks[@selectedIndex]()
       return
   
-  moveDown: ->
-    zeroPosition = @_y - (@selectedIndex * @lineHeight)
+  moveDown: (n)->
+    count = (if n then n else 1)
+    zeroPosition = @_y - (@selectedIndex * @lineHeight * count)
     Crafty.audio.play("arrowtick")
-    if (++@selectedIndex >= @itemCount)
-      @selectedIndex = 0
+    @selectedIndex += count
+    if (@selectedIndex >= @itemCount)
+      @selectedIndex -= @itemCount
     @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
           
-  moveUp: ->
-    zeroPosition = @_y - (@selectedIndex * @lineHeight)
+  moveUp: (n)->
+    count = (if n then n else 1)
+    zeroPosition = @_y - (@selectedIndex * @lineHeight * count)
     Crafty.audio.play("arrowtick")
-    if (--@selectedIndex < 0)
-      @selectedIndex = @itemCount - 1
+    @selectedIndex -= count
+    if (@selectedIndex < 0)
+      @selectedIndex += @itemCount
     @attr({y: zeroPosition + (@selectedIndex * @lineHeight)})
 Crafty.c "CheckBox",
   init: ->
@@ -970,7 +974,62 @@ Crafty.c "CheckBox",
 Crafty.c "SelectableText",
   init: ()->
     @requires("Text, Mouse")
-    @bind('MouseDown', () ->
+    @bind('Click', () ->
       Crafty.audio.play("select")
+      console.log('activating #'+@idx)
       Crafty("SelectArrow").callbacks[@idx]()
     )
+
+Crafty.c "Scroller",
+  init: ()->
+    @requires("2D, Canvas, Mouse")
+    @attr(
+      x: 0
+      y: 0
+      w: 1000
+      h: 1000
+      offset: 0
+      moving: false
+      firstScroll: false
+      initScroll: 96
+    )
+    @bind('MouseDown', (e)->
+      @startScroll(e)
+    )
+    @bind('MouseMove', (e)->
+      @moveScroll(e)
+    )
+    @bind('MouseUp', (e)->
+      @endScroll(e)
+    )
+    
+  startScroll: (e)->
+    @didMovement = false
+    @moving = true
+    @lasty = e.y
+    
+  moveScroll: (e)->
+    @didMovement = true
+    if @moving
+      window.AAA = @lasty - e.y
+      this.offset += window.AAA;
+      if (-20 < @offset < 410)
+        Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
+          this.y -= window.AAA;
+        )
+      @lasty = e.y
+      arrow = Crafty("SelectArrow")
+      if arrow.y > 284
+        arrow.moveUp()
+      console.log(arrow.y)
+      if arrow.y < (236)
+        arrow.moveDown()
+        if (@initScroll > 0)
+          @initScroll -= 40
+    
+  endScroll: ()->
+    if (@offset > 410) 
+      @offset = 410
+    if (@offset < -20)
+      @offset = -20
+    @moving = false

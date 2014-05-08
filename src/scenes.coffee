@@ -178,34 +178,7 @@ Crafty.scene('Loading', () ->
 Crafty.scene('SelectMap', () ->
   Crafty.background('#2B281D')
   
-  Crafty.e('2D, Canvas, Mouse').attr(
-    x: 0
-    y: 0
-    w: 1000
-    h: 1000
-  ).bind('MouseDown', (e) ->
-    @moving = true
-    @lasty = e.y
-  ).bind('MouseUp', () ->
-    @moving = false
-  ).bind('MouseMove', (e) ->
-    if @moving
-      console.log('from ' + @lasty + ' to ' + e.y + ": y changed by " + (e.y - @lasty))
-      window.AAA = @lasty - e.y
-      Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
-        this.y -= window.AAA;
-      )
-      @lasty = e.y
-    arrow = Crafty("SelectArrow")
-    if arrow.y > 284
-      arrow.moveUp()
-      console.log('up')
-    if arrow.y < 140 + Math.min(96, arrow.selectedIndex * 48)
-      arrow.moveDown()
-      console.log('down')
-  ).bind('MouseOut', () ->
-    @moving = false
-  )
+  Crafty.e('Scroller')
   
   Crafty.e('TitleText').text('Select a map:')
   .attr(
@@ -223,29 +196,37 @@ Crafty.scene('SelectMap', () ->
       Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
         this.y -= 6;
       )
-    else if Crafty('SelectArrow').y < 140 + Math.min(96, Crafty("SelectArrow").selectedIndex * 48)
+      Crafty("Scroller").each(() ->
+        @offset += 6
+      )
+    else if Crafty('SelectArrow').y < 236
       Crafty('SelectArrow, spr_selectstn, spr_selectline, _MenuElement').each(() ->
         this.y += 6;
       )
+      Crafty("Scroller").each(() ->
+        @offset -= 6
+      )
   )
   .textColor('#FFFDE8')
-  curry = 140
-  selectArrow = Crafty.e('Canvas, SelectArrow').attr({x: 200, y: 140, itemCount: window.MapList.length + 1, lineHeight: 48})
+  curry = 236
+  selectArrow = Crafty.e('Canvas, SelectArrow').attr({x: 200, y: 236, itemCount: window.MapList.length + 1, lineHeight: 48})
   selectArrow.spaceIcon.attr({x: 404})
-  mapCallback = () ->
-    $.getJSON(window.MapList[Crafty('SelectArrow').selectedIndex][0], (data) ->
-      window.selectedMap = data
-      Crafty.scene('PlayGame')
-    )
+  mapCallbackMaker = (i) ->
+    () ->
+      if (!Crafty("Scroller").didMovement)
+        $.getJSON(window.MapList[i][0], (data) ->
+          window.selectedMap = data
+          Crafty.scene('PlayGame')
+        )
   for idx of window.MapList
     Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
     Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx',idx)
     Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
     curry+=48
-    selectArrow.callbacks.push(mapCallback)
+    selectArrow.callbacks.push(mapCallbackMaker(idx))
     titleText.titles.push(window.MapList[idx][1])
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-  Crafty.e('2D, Canvas, Text, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title")
+  Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title").attr('idx',++idx)
   titleText.titles.push("Back to Title")
   selectArrow.callbacks.push(
     () ->
@@ -272,8 +253,16 @@ Crafty.scene('SelectMap', () ->
   Crafty.e('2D, Canvas, spr_arrowr').attr({x: 230, y: 480})
   Crafty.e('2D, Canvas, spr_arrowl').attr({x: 338, y: 480})
   
-  selectArrow.bind('KeyDown', () ->
-    Crafty("LevelNameText").text(Crafty("LevelNameText").titles[Crafty("SelectArrow").selectedIndex])
+  Crafty("SelectableText").each( ()->
+    @bind('MouseDown', (e)->
+      Crafty("Scroller").startScroll(e)
+    )  
+    @bind('MouseMove', (e)->
+      Crafty("Scroller").moveScroll(e)
+    )
+    @bind('MouseUp', (e)->
+      Crafty("Scroller").endScroll(e)
+    )
   )
 )
 
