@@ -17,13 +17,17 @@ Crafty.scene('Title', () ->
       () ->
         window.singlePlayerMode = true
         Crafty.scene('SelectMap')
+        true
       , () ->
         window.singlePlayerMode = false
-        Crafty.scene('SelectMap')        
+        Crafty.scene('SelectMap')   
+        true     
       , () ->
         Crafty.scene('Instructions')
+        true
       , () ->
         Crafty.scene('Options')
+        true
     ]
   )
   
@@ -178,6 +182,21 @@ Crafty.scene('Loading', () ->
 Crafty.scene('SelectMap', () ->
   Crafty.background('#2B281D')
   
+  Crafty.e('2D, DOM, Color').color('#2B281D')
+  .attr(
+    y: 0
+    x: 0
+    w: 1000
+    h: 130
+  )
+  Crafty.e('2D, DOM, Color').color('#2B281D')
+  .attr(
+    y: 410
+    x: 0
+    w: 1000
+    h: 150
+  )
+  
   Crafty.e('Scroller')
   
   Crafty.e('TitleText').text('Select a map:')
@@ -218,6 +237,8 @@ Crafty.scene('SelectMap', () ->
           window.selectedMap = data
           Crafty.scene('PlayGame')
         )
+        return true
+      false
   for idx of window.MapList
     Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
     Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx',idx)
@@ -231,27 +252,13 @@ Crafty.scene('SelectMap', () ->
   selectArrow.callbacks.push(
     () ->
       Crafty.scene('Title')
+      true
   )
   
-  Crafty.e('2D, Canvas, Color').color('#2B281D')
-  .attr(
-    y: 0
-    x: 0
-    w: 1000
-    h: 130
-  )
-  Crafty.e('2D, Canvas, Color').color('#2B281D')
-  .attr(
-    y: 410
-    x: 0
-    w: 1000
-    h: 150
-  )
-  
-  Crafty.e('2D, Canvas, spr_keyq').attr({x: 230, y: 430})
-  Crafty.e('2D, Canvas, spr_keyp').attr({x: 338, y: 430})
-  Crafty.e('2D, Canvas, spr_arrowr').attr({x: 230, y: 480})
-  Crafty.e('2D, Canvas, spr_arrowl').attr({x: 338, y: 480})
+  Crafty.e('2D, DOM, spr_keyq').attr({x: 230, y: 430})
+  Crafty.e('2D, DOM, spr_keyp').attr({x: 338, y: 430})
+  Crafty.e('2D, DOM, spr_arrowr').attr({x: 230, y: 480})
+  Crafty.e('2D, DOM, spr_arrowl').attr({x: 338, y: 480})
   
   Crafty("SelectableText").each( ()->
     @bind('MouseDown', (e)->
@@ -328,20 +335,26 @@ Crafty.scene('Options', () ->
       () ->
         Crafty.audio.toggleMute()
         Crafty('CheckBox').get(0).refresh()
+        true
       , () ->
         window.SwapColours = !window.SwapColours
         Crafty('CheckBox').get(1).refresh()
+        true
       , () ->
         window.Brakes = !window.Brakes
         Crafty('CheckBox').get(2).refresh()
+        true
       , () ->
         window.StationStop = !window.StationStop
         Crafty('CheckBox').get(3).refresh()
+        true
       , () ->
         window.TabletControls = !window.TabletControls
         Crafty('CheckBox').get(4).refresh()
+        true
       , () ->
         Crafty.scene('Title')
+        true
     ]
   )
   selectArrow.spaceIcon.attr({x: 398})
@@ -390,5 +403,8 @@ Crafty.scene('Instructions', () ->
     Crafty.audio.play('select')
     Crafty.scene('Title')
   )
-  Crafty.e('TitleText').attr({y: 444}).text('Back')
+  Crafty.e('TitleText, Mouse').attr({y: 444, h: 30}).text('Back').bind('MouseDown', (e) ->
+    Crafty.audio.play('select')
+    Crafty.scene('Title')
+  )
 )

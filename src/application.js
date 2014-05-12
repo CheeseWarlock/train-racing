@@ -874,24 +874,26 @@ Grid: for entities that might want to snap to a grid.
         w: 268,
         h: 160
       });
-      this.firstText = Crafty.e('2D, DOM, Text').attr({
+      this.firstText = Crafty.e('DOM, SelectableText').attr({
         x: 230,
         y: 250,
         w: 200,
+        h: 30,
         z: 50
       }).textFont({
         size: '17px',
         family: 'Aller'
-      }).textColor('#5CC64C').text("Try Again");
-      this.secondText = Crafty.e('2D, DOM, Text').attr({
+      }).textColor('#5CC64C').text("Try Again").attr('idx', 0).unselectable();
+      this.secondText = Crafty.e('DOM, SelectableText').attr({
         x: 230,
         y: 280,
         w: 200,
+        h: 30,
         z: 50
       }).textFont({
         size: '17px',
         family: 'Aller'
-      }).textColor('#5CC64C').text("Select Map");
+      }).textColor('#5CC64C').text("Select Map").attr('idx', 1).unselectable();
       this.arrow = Crafty.e('DOM, SelectArrow').attr({
         x: 190,
         y: 250,
@@ -899,10 +901,12 @@ Grid: for entities that might want to snap to a grid.
         callbacks: [
           function() {
             Crafty("TrainController").destroy();
-            return Crafty.scene("PlayGame");
+            Crafty.scene("PlayGame");
+            return true;
           }, function() {
             Crafty("TrainController").destroy();
-            return Crafty.scene("SelectMap");
+            Crafty.scene("SelectMap");
+            return true;
           }
         ]
       });
@@ -1131,9 +1135,10 @@ Grid: for entities that might want to snap to a grid.
         } else if (e.keyCode === Crafty.keys.Q) {
           this.moveUp();
         } else if (e.keyCode === Crafty.keys.SPACE) {
-          Crafty.audio.play("select");
           if (this.callbacks[this.selectedIndex]) {
-            this.callbacks[this.selectedIndex]();
+            if (this.callbacks[this.selectedIndex]()) {
+              Crafty.audio.play("select");
+            }
           }
         }
       });
@@ -1186,9 +1191,12 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       this.requires("Text, Mouse");
       return this.bind('Click', function() {
-        Crafty.audio.play("select");
         console.log('activating #' + this.idx);
-        return Crafty("SelectArrow").callbacks[this.idx]();
+        if (Crafty("SelectArrow").callbacks[this.idx]) {
+          if (Crafty("SelectArrow").callbacks[this.idx]()) {
+            return Crafty.audio.play("select");
+          }
+        }
       });
     }
   });
@@ -1223,8 +1231,8 @@ Grid: for entities that might want to snap to a grid.
     },
     moveScroll: function(e) {
       var arrow, _ref;
-      this.didMovement = true;
       if (this.moving) {
+        this.didMovement = true;
         window.AAA = this.lasty - e.y;
         this.offset += window.AAA;
         if ((-20 < (_ref = this.offset) && _ref < 410)) {
@@ -1334,14 +1342,18 @@ Grid: for entities that might want to snap to a grid.
       callbacks: [
         function() {
           window.singlePlayerMode = true;
-          return Crafty.scene('SelectMap');
+          Crafty.scene('SelectMap');
+          return true;
         }, function() {
           window.singlePlayerMode = false;
-          return Crafty.scene('SelectMap');
+          Crafty.scene('SelectMap');
+          return true;
         }, function() {
-          return Crafty.scene('Instructions');
+          Crafty.scene('Instructions');
+          return true;
         }, function() {
-          return Crafty.scene('Options');
+          Crafty.scene('Options');
+          return true;
         }
       ]
     });
@@ -1527,6 +1539,18 @@ Grid: for entities that might want to snap to a grid.
   Crafty.scene('SelectMap', function() {
     var curry, idx, mapCallbackMaker, selectArrow, titleText;
     Crafty.background('#2B281D');
+    Crafty.e('2D, DOM, Color').color('#2B281D').attr({
+      y: 0,
+      x: 0,
+      w: 1000,
+      h: 130
+    });
+    Crafty.e('2D, DOM, Color').color('#2B281D').attr({
+      y: 410,
+      x: 0,
+      w: 1000,
+      h: 150
+    });
     Crafty.e('Scroller');
     Crafty.e('TitleText').text('Select a map:').attr({
       y: 30
@@ -1566,11 +1590,13 @@ Grid: for entities that might want to snap to a grid.
     mapCallbackMaker = function(i) {
       return function() {
         if (!Crafty("Scroller").didMovement) {
-          return $.getJSON(window.MapList[i][0], function(data) {
+          $.getJSON(window.MapList[i][0], function(data) {
             window.selectedMap = data;
             return Crafty.scene('PlayGame');
           });
+          return true;
         }
+        return false;
       };
     };
     for (idx in window.MapList) {
@@ -1608,33 +1634,22 @@ Grid: for entities that might want to snap to a grid.
     }).textColor('#E23228').text("Back to Title").attr('idx', ++idx);
     titleText.titles.push("Back to Title");
     selectArrow.callbacks.push(function() {
-      return Crafty.scene('Title');
+      Crafty.scene('Title');
+      return true;
     });
-    Crafty.e('2D, Canvas, Color').color('#2B281D').attr({
-      y: 0,
-      x: 0,
-      w: 1000,
-      h: 130
-    });
-    Crafty.e('2D, Canvas, Color').color('#2B281D').attr({
-      y: 410,
-      x: 0,
-      w: 1000,
-      h: 150
-    });
-    Crafty.e('2D, Canvas, spr_keyq').attr({
+    Crafty.e('2D, DOM, spr_keyq').attr({
       x: 230,
       y: 430
     });
-    Crafty.e('2D, Canvas, spr_keyp').attr({
+    Crafty.e('2D, DOM, spr_keyp').attr({
       x: 338,
       y: 430
     });
-    Crafty.e('2D, Canvas, spr_arrowr').attr({
+    Crafty.e('2D, DOM, spr_arrowr').attr({
       x: 230,
       y: 480
     });
-    Crafty.e('2D, Canvas, spr_arrowl').attr({
+    Crafty.e('2D, DOM, spr_arrowl').attr({
       x: 338,
       y: 480
     });
@@ -1736,21 +1751,27 @@ Grid: for entities that might want to snap to a grid.
       callbacks: [
         function() {
           Crafty.audio.toggleMute();
-          return Crafty('CheckBox').get(0).refresh();
+          Crafty('CheckBox').get(0).refresh();
+          return true;
         }, function() {
           window.SwapColours = !window.SwapColours;
-          return Crafty('CheckBox').get(1).refresh();
+          Crafty('CheckBox').get(1).refresh();
+          return true;
         }, function() {
           window.Brakes = !window.Brakes;
-          return Crafty('CheckBox').get(2).refresh();
+          Crafty('CheckBox').get(2).refresh();
+          return true;
         }, function() {
           window.StationStop = !window.StationStop;
-          return Crafty('CheckBox').get(3).refresh();
+          Crafty('CheckBox').get(3).refresh();
+          return true;
         }, function() {
           window.TabletControls = !window.TabletControls;
-          return Crafty('CheckBox').get(4).refresh();
+          Crafty('CheckBox').get(4).refresh();
+          return true;
         }, function() {
-          return Crafty.scene('Title');
+          Crafty.scene('Title');
+          return true;
         }
       ]
     });
@@ -1902,9 +1923,13 @@ Grid: for entities that might want to snap to a grid.
       Crafty.audio.play('select');
       return Crafty.scene('Title');
     });
-    return Crafty.e('TitleText').attr({
-      y: 444
-    }).text('Back');
+    return Crafty.e('TitleText, Mouse').attr({
+      y: 444,
+      h: 30
+    }).text('Back').bind('MouseDown', function(e) {
+      Crafty.audio.play('select');
+      return Crafty.scene('Title');
+    });
   });
 
   window.Util = {

@@ -733,15 +733,17 @@ Crafty.c "EndingText",
       y: 112
       w: 268
       h: 160
-    @firstText = Crafty.e('2D, DOM, Text').attr({x: 230, y: 250,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Try Again")
-    @secondText = Crafty.e('2D, DOM, Text').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Select Map")
+    @firstText = Crafty.e('DOM, SelectableText').attr({x: 230, y: 250,w: 200, h:30, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Try Again").attr('idx', 0).unselectable()
+    @secondText = Crafty.e('DOM, SelectableText').attr({x: 230, y: 280,w: 200, h: 30, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Select Map").attr('idx', 1).unselectable()
     @arrow = Crafty.e('DOM, SelectArrow').attr({x: 190, y: 250, z: 50, callbacks: [
       () ->
         Crafty("TrainController").destroy() # Because of the 2D issue
         Crafty.scene("PlayGame")
+        true
       , () ->
         Crafty("TrainController").destroy() # Because of the 2D issue
         Crafty.scene("SelectMap")
+        true
     ]})
 
     @css
@@ -939,9 +941,9 @@ Crafty.c "SelectArrow",
       else if e.keyCode is Crafty.keys.Q
         @moveUp()
       else if e.keyCode is Crafty.keys.SPACE
-        Crafty.audio.play("select")
         if @callbacks[@selectedIndex]
-          @callbacks[@selectedIndex]()
+          if @callbacks[@selectedIndex]()
+            Crafty.audio.play("select")
       return
   
   moveDown: (n)->
@@ -975,9 +977,10 @@ Crafty.c "SelectableText",
   init: ()->
     @requires("Text, Mouse")
     @bind('Click', () ->
-      Crafty.audio.play("select")
       console.log('activating #'+@idx)
-      Crafty("SelectArrow").callbacks[@idx]()
+      if Crafty("SelectArrow").callbacks[@idx]
+        if Crafty("SelectArrow").callbacks[@idx]()
+          Crafty.audio.play("select")
     )
 
 Crafty.c "Scroller",
@@ -1009,8 +1012,8 @@ Crafty.c "Scroller",
     @lasty = e.y
     
   moveScroll: (e)->
-    @didMovement = true
     if @moving
+      @didMovement = true
       window.AAA = @lasty - e.y
       this.offset += window.AAA;
       if (-20 < @offset < 410)
