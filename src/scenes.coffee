@@ -15,11 +15,11 @@ Crafty.scene('Title', () ->
     itemCount: 4
     callbacks: [
       () ->
-        window.singlePlayerMode = true
+        window.singlePlayerMode = false
         Crafty.scene('SelectMap')
         true
       , () ->
-        window.singlePlayerMode = false
+        window.singlePlayerMode = true
         Crafty.scene('SelectMap')   
         true     
       , () ->
@@ -31,8 +31,8 @@ Crafty.scene('Title', () ->
     ]
   )
   
-  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("1-Player Start").attr('idx',0)
-  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("2-Player Start").attr('idx',1)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 280,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Start 2-Player").attr('idx',0)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Start Vs. AI").attr('idx',1)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions").attr('idx',2)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options").attr('idx',3)
 )
@@ -330,7 +330,7 @@ Crafty.scene('Options', () ->
   selectArrow = Crafty.e('Canvas, SelectArrow').attr(
     x: 170
     y: 280
-    itemCount: 6
+    itemCount: 7
     callbacks: [
       () ->
         Crafty.audio.toggleMute()
@@ -353,6 +353,10 @@ Crafty.scene('Options', () ->
         Crafty('CheckBox').get(4).refresh()
         true
       , () ->
+        window.Blame = !window.Blame
+        Crafty('CheckBox').get(5).refresh()
+        true
+      , () ->
         Crafty.scene('Title')
         true
     ]
@@ -367,7 +371,8 @@ Crafty.scene('Options', () ->
   Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Brakes").attr('idx',2)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Station Stop").attr('idx',3)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 400,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Tablet Controls").attr('idx',4)
-  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 430,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title").attr('idx',5)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 430,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Assign Blame").attr('idx',5)
+  Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 460,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title").attr('idx',6)
   Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 280, callback: () ->
     !Crafty.audio.muted
   }).refresh()
@@ -382,6 +387,9 @@ Crafty.scene('Options', () ->
   }).refresh()
   Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 400, callback: () ->
     window.TabletControls
+  }).refresh()
+  Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 430, callback: () ->
+    window.Blame
   }).refresh()
 )
 
