@@ -205,7 +205,9 @@ window.Constants =
     'You know, this is really everyone\'s fault. Even the passengers.',
     'Some passengers were jostled, many more were late for work.',
     'Remember, you\'re supposed to AVOID each other.',
-    'What kind of urban planner designed this place, anyway?!']]
+    'What kind of urban planner designed this place, anyway?!'],
+    ['If only the red train had planned ahead a bit better...'],
+    ['This one\'s definitely the blue train\'s fault...']]
   MAX_PASSENGERS: 100
   FULL_SPEED: 1.75
   REDUCED_SPEED: 0.875

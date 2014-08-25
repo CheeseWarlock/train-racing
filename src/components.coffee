@@ -822,7 +822,14 @@ Crafty.c "VictoryText",
 Crafty.c "FailureText",
   init: ->
     @requires "EndingText"
-    @text Constants.ENDING_DIALOGS[0][Math.floor(Math.random() * Constants.ENDING_DIALOGS[0].length)] + "<br/>" + Constants.ENDING_DIALOGS[1][Math.floor(Math.random() * Constants.ENDING_DIALOGS[1].length)]
+    if (window.blame)
+      if (window.blamePlayerOne)
+        dialogList = Constants.ENDING_DIALOGS[2]
+      else
+        dialogList = Constants.ENDING_DIALOGS[3]
+    else
+      dialogList = Constants.ENDING_DIALOGS[1]
+    @text Constants.ENDING_DIALOGS[0][Math.floor(Math.random() * Constants.ENDING_DIALOGS[0].length)] + "<br/>" + dialogList[Math.floor(Math.random() * dialogList.length)]
     return
 
 Crafty.c "BarController",
