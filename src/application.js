@@ -993,8 +993,12 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       var dialogList;
       this.requires("EndingText");
-      if (window.Blame) {
-        dialogList = Constants.ENDING_DIALOGS[2];
+      if (window.blame) {
+        if (window.blamePlayerOne) {
+          dialogList = Constants.ENDING_DIALOGS[2];
+        } else {
+          dialogList = Constants.ENDING_DIALOGS[3];
+        }
       } else {
         dialogList = Constants.ENDING_DIALOGS[1];
       }
@@ -1138,9 +1142,9 @@ Grid: for entities that might want to snap to a grid.
       return this.bind("KeyDown", function(e) {
         var zeroPosition;
         zeroPosition = this._y - (this.selectedIndex * this.lineHeight);
-        if (e.keyCode === Crafty.keys.P) {
+        if (e.keyCode === Crafty.keys.P || e.keyCode === Crafty.keys.DOWN_ARROW) {
           this.moveDown();
-        } else if (e.keyCode === Crafty.keys.Q) {
+        } else if (e.keyCode === Crafty.keys.Q || e.keyCode === Crafty.keys.UP_ARROW) {
           this.moveUp();
         } else if (e.keyCode === Crafty.keys.SPACE) {
           if (this.callbacks[this.selectedIndex]) {

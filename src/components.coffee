@@ -943,9 +943,9 @@ Crafty.c "SelectArrow",
     @callbacks = []
     @bind "KeyDown", (e) ->
       zeroPosition = @_y - (@selectedIndex * @lineHeight)
-      if e.keyCode is Crafty.keys.P 
+      if e.keyCode is Crafty.keys.P or e.keyCode is Crafty.keys.DOWN_ARROW
         @moveDown()
-      else if e.keyCode is Crafty.keys.Q
+      else if e.keyCode is Crafty.keys.Q or e.keyCode is Crafty.keys.UP_ARROW
         @moveUp()
       else if e.keyCode is Crafty.keys.SPACE
         if @callbacks[@selectedIndex]
