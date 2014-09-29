@@ -414,7 +414,7 @@ window.BGMManager =
   _play: () ->
     createjs.Sound.play((if @songIndex == 0 then "cappuccino" else if @songIndex == 1 then "express" else "fiveoclock"))
   playNext: () ->
-    if (!@songIndex)
+    if (!@songIndex?)
       @songIndex = -1
     @stop()
     @songIndex = (++@songIndex %% 3)
@@ -422,7 +422,9 @@ window.BGMManager =
   stop: () ->
     if (@currentSong)
       @currentSong.stop()
-      
+  isPlaying: () ->
+    (@currentSong? && @currentSong.playState == createjs.Sound.PLAY_SUCCEEDED)
+
 $.getJSON('./maps.json', (mapListSource) ->
   window.MapList = mapListSource
 )

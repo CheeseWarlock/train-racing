@@ -290,6 +290,7 @@ Crafty.scene('SelectMap', () ->
 )
 
 Crafty.scene('PlayGame', () ->
+  window.BGMManager.stop()
   Crafty.background('rgb(80, 160, 40)')
   builder = Crafty.e((if window.HEADLESS_MODE then "" else "2D, Canvas, ")+"TiledMapBuilder")
   builder.setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled)

@@ -846,6 +846,11 @@ Grid: for entities that might want to snap to a grid.
   Crafty.c("TrainController", {
     init: function() {
       this.bind("EnterFrame", function(data) {
+        if (GameState.running && GameClock.hour === 6 && GameClock.minute === 0) {
+          if (!window.BGMManager.isPlaying()) {
+            window.BGMManager.playNext();
+          }
+        }
         if (GameState.running && GameClock.hour > 5) {
           Crafty("Train").each(function() {
             if (this.head.stayDelay > 0) {
@@ -1702,8 +1707,8 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.scene('PlayGame', function() {
     var builder;
+    window.BGMManager.stop();
     Crafty.background('rgb(80, 160, 40)');
-    window.BGMManager.playNext();
     builder = Crafty.e((window.HEADLESS_MODE ? "" : "2D, Canvas, ") + "TiledMapBuilder");
     builder.setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled);
     Crafty.e('TrainController');
@@ -2528,7 +2533,7 @@ Grid: for entities that might want to snap to a grid.
       return createjs.Sound.play((this.songIndex === 0 ? "cappuccino" : this.songIndex === 1 ? "express" : "fiveoclock"));
     },
     playNext: function() {
-      if (!this.songIndex) {
+      if (this.songIndex == null) {
         this.songIndex = -1;
       }
       this.stop();
@@ -2539,6 +2544,9 @@ Grid: for entities that might want to snap to a grid.
       if (this.currentSong) {
         return this.currentSong.stop();
       }
+    },
+    isPlaying: function() {
+      return (this.currentSong != null) && this.currentSong.playState === createjs.Sound.PLAY_SUCCEEDED;
     }
   };
 

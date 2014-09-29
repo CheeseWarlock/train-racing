@@ -705,6 +705,9 @@ Controls train movement. Makes sure all trains move before checking collision.
 Crafty.c "TrainController",
   init: ->
     @bind "EnterFrame", (data) ->
+      if GameState.running and GameClock.hour == 6 and GameClock.minute == 0
+        if !window.BGMManager.isPlaying()
+          window.BGMManager.playNext()
       if GameState.running and GameClock.hour > 5
         Crafty("Train").each ->
           if (@head.stayDelay > 0)
