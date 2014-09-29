@@ -406,6 +406,22 @@ window.GraphTools =
 
   idataById: {}
   lastImageId: 0
+  
+window.BGMManager =
+  playTitle: () ->
+    @stop()
+    createjs.Sound.play("title")
+  _play: () ->
+    createjs.Sound.play((if @songIndex == 0 then "cappuccino" else if @songIndex == 1 then "express" else "fiveoclock"))
+  playNext: () ->
+    if (!@songIndex)
+      @songIndex = -1
+    @stop()
+    @songIndex = (++@songIndex %% 3)
+    @currentSong = @_play()
+  stop: () ->
+    if (@currentSong)
+      @currentSong.stop()
       
 $.getJSON('./maps.json', (mapListSource) ->
   window.MapList = mapListSource

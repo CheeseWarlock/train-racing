@@ -5,6 +5,8 @@ Grid: for entities that might want to snap to a grid.
  */
 
 (function() {
+  var __modulo = function(a, b) { return (a % b + +b) % b; };
+
   Crafty.c("Grid", {
     init: function() {
       this.attr({
@@ -1416,6 +1418,26 @@ Grid: for entities that might want to snap to a grid.
     Crafty.audio.create("arrowtick", "assets/arrowtick.wav");
     Crafty.audio.create("brakeson", "assets/brakeson.wav");
     Crafty.audio.create("brakesoff", "assets/brakesoff.wav");
+    Crafty.audio.create("start", "assets/start.wav");
+    Crafty.audio.create("cappuccino", "assets/cappuccino.wav");
+    Crafty.audio.create("express", "assets/express.wav");
+    Crafty.audio.create("fiveoclock", "assets/fiveoclock.wav");
+    createjs.Sound.registerSound({
+      src: "assets/express.wav",
+      id: "express"
+    });
+    createjs.Sound.registerSound({
+      src: "assets/cappuccino.wav",
+      id: "cappuccino"
+    });
+    createjs.Sound.registerSound({
+      src: "assets/fiveoclock.wav",
+      id: "fiveoclock"
+    });
+    createjs.Sound.registerSound({
+      src: "assets/start.wav",
+      id: "start"
+    });
     Crafty.audio.toggleMute();
     return Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], function() {
       Crafty.sprite(28, 'img/ul.png', {
@@ -1681,6 +1703,7 @@ Grid: for entities that might want to snap to a grid.
   Crafty.scene('PlayGame', function() {
     var builder;
     Crafty.background('rgb(80, 160, 40)');
+    window.BGMManager.playNext();
     builder = Crafty.e((window.HEADLESS_MODE ? "" : "2D, Canvas, ") + "TiledMapBuilder");
     builder.setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled);
     Crafty.e('TrainController');
@@ -2494,6 +2517,29 @@ Grid: for entities that might want to snap to a grid.
     },
     idataById: {},
     lastImageId: 0
+  };
+
+  window.BGMManager = {
+    playTitle: function() {
+      this.stop();
+      return createjs.Sound.play("title");
+    },
+    _play: function() {
+      return createjs.Sound.play((this.songIndex === 0 ? "cappuccino" : this.songIndex === 1 ? "express" : "fiveoclock"));
+    },
+    playNext: function() {
+      if (!this.songIndex) {
+        this.songIndex = -1;
+      }
+      this.stop();
+      this.songIndex = __modulo(++this.songIndex, 3);
+      return this.currentSong = this._play();
+    },
+    stop: function() {
+      if (this.currentSong) {
+        return this.currentSong.stop();
+      }
+    }
   };
 
   $.getJSON('./maps.json', function(mapListSource) {

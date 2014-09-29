@@ -46,6 +46,22 @@ Crafty.scene('Loading', () ->
   Crafty.audio.create("arrowtick", "assets/arrowtick.wav")
   Crafty.audio.create("brakeson", "assets/brakeson.wav")
   Crafty.audio.create("brakesoff", "assets/brakesoff.wav")
+  Crafty.audio.create("start", "assets/start.wav")
+  Crafty.audio.create("cappuccino", "assets/cappuccino.wav")
+  Crafty.audio.create("express", "assets/express.wav")
+  Crafty.audio.create("fiveoclock", "assets/fiveoclock.wav")
+  createjs.Sound.registerSound
+    src: "assets/express.wav"
+    id: "express"
+  createjs.Sound.registerSound
+    src: "assets/cappuccino.wav"
+    id: "cappuccino"
+  createjs.Sound.registerSound
+    src: "assets/fiveoclock.wav"
+    id: "fiveoclock"
+  createjs.Sound.registerSound
+    src: "assets/start.wav"
+    id: "start"
   Crafty.audio.toggleMute()
   Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
