@@ -917,6 +917,8 @@ Grid: for entities that might want to snap to a grid.
           }, function() {
             Crafty("TrainController").destroy();
             Crafty.scene("SelectMap");
+            window.BGMManager.stop();
+            window.BGMManager.playTitle();
             return true;
           }
         ]
@@ -1158,6 +1160,9 @@ Grid: for entities that might want to snap to a grid.
         } else if (e.keyCode === Crafty.keys.SPACE) {
           if (this.callbacks[this.selectedIndex]) {
             if (this.callbacks[this.selectedIndex]()) {
+              if (Crafty.audio.muted) {
+                window.BGMManager.stop();
+              }
               Crafty.audio.play("select");
             }
           }
@@ -1330,6 +1335,10 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.scene('Title', function() {
     self.focus();
+    if (!window.gameAlreadyStarted) {
+      window.BGMManager.playTitle();
+      window.gameAlreadyStarted = true;
+    }
     this.letters = "";
     Crafty.e('2D, Canvas, spr_title').attr({
       x: 220
@@ -1445,7 +1454,6 @@ Grid: for entities that might want to snap to a grid.
       src: "assets/start.wav",
       id: "start"
     });
-    Crafty.audio.toggleMute();
     return Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], function() {
       Crafty.sprite(28, 'img/ul.png', {
         spr_rtrain: [2, 0],
@@ -2529,7 +2537,11 @@ Grid: for entities that might want to snap to a grid.
   window.BGMManager = {
     playTitle: function() {
       this.stop();
-      return createjs.Sound.play("title");
+      if (!Crafty.audio.muted) {
+        return this.currentSong = createjs.Sound.play("start", {
+          loop: -1
+        });
+      }
     },
     _play: function() {
       return createjs.Sound.play((this.songIndex === 0 ? "cappuccino" : this.songIndex === 1 ? "express" : "fiveoclock"));
@@ -2539,8 +2551,10 @@ Grid: for entities that might want to snap to a grid.
         this.songIndex = -1;
       }
       this.stop();
-      this.songIndex = __modulo(++this.songIndex, 3);
-      return this.currentSong = this._play();
+      if (!Crafty.audio.muted) {
+        this.songIndex = __modulo(++this.songIndex, 3);
+        return this.currentSong = this._play();
+      }
     },
     stop: function() {
       if (this.currentSong) {

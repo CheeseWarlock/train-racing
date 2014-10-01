@@ -748,6 +748,8 @@ Crafty.c "EndingText",
       , () ->
         Crafty("TrainController").destroy() # Because of the 2D issue
         Crafty.scene("SelectMap")
+        window.BGMManager.stop()
+        window.BGMManager.playTitle()
         true
     ]})
 
@@ -955,6 +957,8 @@ Crafty.c "SelectArrow",
       else if e.keyCode is Crafty.keys.SPACE
         if @callbacks[@selectedIndex]
           if @callbacks[@selectedIndex]()
+            if Crafty.audio.muted
+              window.BGMManager.stop()
             Crafty.audio.play("select")
       return
   

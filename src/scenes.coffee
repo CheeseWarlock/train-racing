@@ -1,5 +1,8 @@
 Crafty.scene('Title', () ->
   self.focus()
+  if !window.gameAlreadyStarted
+    window.BGMManager.playTitle()
+    window.gameAlreadyStarted = true
   this.letters = ""
   Crafty.e('2D, Canvas, spr_title').attr({x:220})
   Crafty.e('TitleText').attr({y: 178}).text('Compete to deliver more passengers by 10:00 AM.')
@@ -62,7 +65,6 @@ Crafty.scene('Loading', () ->
   createjs.Sound.registerSound
     src: "assets/start.wav"
     id: "start"
-  Crafty.audio.toggleMute()
   Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
       spr_rtrain: [2,0]

@@ -410,15 +410,17 @@ window.GraphTools =
 window.BGMManager =
   playTitle: () ->
     @stop()
-    createjs.Sound.play("title")
+    if !Crafty.audio.muted
+      @currentSong = createjs.Sound.play("start", {loop: -1})
   _play: () ->
     createjs.Sound.play((if @songIndex == 0 then "cappuccino" else if @songIndex == 1 then "express" else "fiveoclock"))
   playNext: () ->
     if (!@songIndex?)
       @songIndex = -1
     @stop()
-    @songIndex = (++@songIndex %% 3)
-    @currentSong = @_play()
+    if !Crafty.audio.muted
+      @songIndex = (++@songIndex %% 3)
+      @currentSong = @_play()
   stop: () ->
     if (@currentSong)
       @currentSong.stop()
