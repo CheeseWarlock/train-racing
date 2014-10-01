@@ -289,6 +289,7 @@ Crafty.c "PlayerTrain",
     curve = @_hasCurveOption()
     @targetDirection = ((if (straight and curve and @curveCommandEnabled) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
+      window.blamePlayerOne = @playerOne
       isCurving = @isCurving()
       for f in @followers
         f.curves.push isCurving
@@ -405,6 +406,7 @@ Crafty.c "AITrain",
       decision = (curvedPriority > straightPriority)
     @targetDirection = ((if (straight and curve and decision) or (curve and !straight) then Util.getTargetDirection(@currentTrack, @sourceDirection) else @sourceDirection))
     if straight and curve
+      window.blamePlayerOne = false
       isCurving = @isCurving()
       for f in @followers
         f.curves.push isCurving
@@ -825,7 +827,7 @@ Crafty.c "VictoryText",
 Crafty.c "FailureText",
   init: ->
     @requires "EndingText"
-    if (window.blame)
+    if (window.Blame)
       if (window.blamePlayerOne)
         dialogList = Constants.ENDING_DIALOGS[2]
       else

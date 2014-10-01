@@ -357,6 +357,7 @@ Grid: for entities that might want to snap to a grid.
       curve = this._hasCurveOption();
       this.targetDirection = ((straight && curve && this.curveCommandEnabled) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
+        window.blamePlayerOne = this.playerOne;
         isCurving = this.isCurving();
         _ref1 = this.followers;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
@@ -502,6 +503,7 @@ Grid: for entities that might want to snap to a grid.
       }
       this.targetDirection = ((straight && curve && decision) || (curve && !straight) ? Util.getTargetDirection(this.currentTrack, this.sourceDirection) : this.sourceDirection);
       if (straight && curve) {
+        window.blamePlayerOne = false;
         isCurving = this.isCurving();
         _ref1 = this.followers;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
@@ -1000,7 +1002,7 @@ Grid: for entities that might want to snap to a grid.
     init: function() {
       var dialogList;
       this.requires("EndingText");
-      if (window.blame) {
+      if (window.Blame) {
         if (window.blamePlayerOne) {
           dialogList = Constants.ENDING_DIALOGS[2];
         } else {
