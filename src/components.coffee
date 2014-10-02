@@ -731,6 +731,8 @@ Crafty.c "TrainController",
 
 Crafty.c "EndingText",
   init: ->
+    window.BGMManager.stop()
+    Crafty.audio.play("endlevel")
     @requires("Dialog").textFont size: "20px"
     @display = 0
     @attr

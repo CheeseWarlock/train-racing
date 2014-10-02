@@ -53,6 +53,8 @@ Crafty.scene('Loading', () ->
   Crafty.audio.create("cappuccino", "assets/cappuccino.wav")
   Crafty.audio.create("express", "assets/express.wav")
   Crafty.audio.create("fiveoclock", "assets/fiveoclock.wav")
+  Crafty.audio.create("startlevel", "assets/startlevel.wav")
+  Crafty.audio.create("endlevel", "assets/endlevel.wav")
   createjs.Sound.registerSound
     src: "assets/express.wav"
     id: "express"
@@ -293,6 +295,7 @@ Crafty.scene('SelectMap', () ->
 
 Crafty.scene('PlayGame', () ->
   window.BGMManager.stop()
+  Crafty.audio.play("startlevel")
   Crafty.background('rgb(80, 160, 40)')
   builder = Crafty.e((if window.HEADLESS_MODE then "" else "2D, Canvas, ")+"TiledMapBuilder")
   builder.setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled)

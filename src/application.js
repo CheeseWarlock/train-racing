@@ -875,6 +875,8 @@ Grid: for entities that might want to snap to a grid.
 
   Crafty.c("EndingText", {
     init: function() {
+      window.BGMManager.stop();
+      Crafty.audio.play("endlevel");
       this.requires("Dialog").textFont({
         size: "20px"
       });
@@ -1435,6 +1437,8 @@ Grid: for entities that might want to snap to a grid.
     Crafty.audio.create("cappuccino", "assets/cappuccino.wav");
     Crafty.audio.create("express", "assets/express.wav");
     Crafty.audio.create("fiveoclock", "assets/fiveoclock.wav");
+    Crafty.audio.create("startlevel", "assets/startlevel.wav");
+    Crafty.audio.create("endlevel", "assets/endlevel.wav");
     createjs.Sound.registerSound({
       src: "assets/express.wav",
       id: "express"
@@ -1715,6 +1719,7 @@ Grid: for entities that might want to snap to a grid.
   Crafty.scene('PlayGame', function() {
     var builder;
     window.BGMManager.stop();
+    Crafty.audio.play("startlevel");
     Crafty.background('rgb(80, 160, 40)');
     builder = Crafty.e((window.HEADLESS_MODE ? "" : "2D, Canvas, ") + "TiledMapBuilder");
     builder.setMapDataSource(window.selectedMap).createWorld(Util.setupFromTiled);
