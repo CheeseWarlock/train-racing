@@ -393,6 +393,11 @@ Crafty.scene('Options', () ->
   Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 430,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Assign Blame").attr('idx',5)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 210, y: 460,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').textColor('#E23228').text("Back to Title").attr('idx',6)
   Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 280, callback: () ->
+    if Crafty.audio.muted
+      window.BGMManager.stop()
+    else
+      if !window.BGMManager.isPlaying()
+        window.BGMManager.playTitle()
     !Crafty.audio.muted
   }).refresh()
   Crafty.e('2D, Canvas, CheckBox').attr({x: 366, y: 310, callback: () ->

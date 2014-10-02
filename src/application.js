@@ -1160,9 +1160,6 @@ Grid: for entities that might want to snap to a grid.
         } else if (e.keyCode === Crafty.keys.SPACE) {
           if (this.callbacks[this.selectedIndex]) {
             if (this.callbacks[this.selectedIndex]()) {
-              if (Crafty.audio.muted) {
-                window.BGMManager.stop();
-              }
               Crafty.audio.play("select");
             }
           }
@@ -1904,6 +1901,13 @@ Grid: for entities that might want to snap to a grid.
       x: 366,
       y: 280,
       callback: function() {
+        if (Crafty.audio.muted) {
+          window.BGMManager.stop();
+        } else {
+          if (!window.BGMManager.isPlaying()) {
+            window.BGMManager.playTitle();
+          }
+        }
         return !Crafty.audio.muted;
       }
     }).refresh();

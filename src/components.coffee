@@ -957,8 +957,6 @@ Crafty.c "SelectArrow",
       else if e.keyCode is Crafty.keys.SPACE
         if @callbacks[@selectedIndex]
           if @callbacks[@selectedIndex]()
-            if Crafty.audio.muted
-              window.BGMManager.stop()
             Crafty.audio.play("select")
       return
   
