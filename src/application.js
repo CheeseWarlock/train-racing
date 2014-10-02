@@ -2343,7 +2343,7 @@ Grid: for entities that might want to snap to a grid.
     elapsed: 0,
     newDay: function() {
       this.hour = 5;
-      return this.minute = 55;
+      return this.minute = 52;
     },
     update: function() {
       if (this.minute >= 59) {
