@@ -1333,10 +1333,23 @@ Grid: for entities that might want to snap to a grid.
   };
 
   Crafty.scene('Title', function() {
+    var xx;
     self.focus();
     if (!window.gameAlreadyStarted) {
-      window.BGMManager.playTitle();
-      window.gameAlreadyStarted = true;
+      xx = window.BGMManager.playTitle();
+      if (xx.playState !== "playFailed") {
+        window.gameAlreadyStarted = true;
+      } else {
+        window.itff = window.setInterval(function() {
+          xx = window.BGMManager.playTitle();
+          if (xx.playState !== "playFailed") {
+            window.gameAlreadyStarted = true;
+            return window.clearInterval(itff);
+          }
+        }, 500);
+      }
+    } else {
+
     }
     this.letters = "";
     Crafty.e('2D, Canvas, spr_title').attr({
@@ -1428,6 +1441,7 @@ Grid: for entities that might want to snap to a grid.
   });
 
   Crafty.scene('Loading', function() {
+    var queue;
     Crafty.audio.create("get1", "assets/get1.wav");
     Crafty.audio.create("get2", "assets/get2.wav");
     Crafty.audio.create("get3", "assets/get3.wav");
@@ -1436,27 +1450,25 @@ Grid: for entities that might want to snap to a grid.
     Crafty.audio.create("arrowtick", "assets/arrowtick.wav");
     Crafty.audio.create("brakeson", "assets/brakeson.wav");
     Crafty.audio.create("brakesoff", "assets/brakesoff.wav");
-    Crafty.audio.create("start", "assets/start.mp3");
-    Crafty.audio.create("cappuccino", "assets/cappuccino.mp3");
-    Crafty.audio.create("express", "assets/express.mp3");
-    Crafty.audio.create("fiveoclock", "assets/fiveoclock.mp3");
     Crafty.audio.create("startlevel", "assets/startlevel.wav");
     Crafty.audio.create("endlevel", "assets/endlevel.wav");
-    createjs.Sound.registerSound({
-      src: "assets/express.mp3",
-      id: "express"
+    queue = new createjs.LoadQueue(true);
+    queue.installPlugin(createjs.Sound);
+    queue.loadFile({
+      id: "start",
+      src: "assets/start.mp3"
     });
-    createjs.Sound.registerSound({
-      src: "assets/cappuccino.mp3",
-      id: "cappuccino"
+    queue.loadFile({
+      id: "cappuccino",
+      src: "assets/cappuccino.mp3"
     });
-    createjs.Sound.registerSound({
-      src: "assets/fiveoclock.mp3",
-      id: "fiveoclock"
+    queue.loadFile({
+      id: "express",
+      src: "assets/express.mp3"
     });
-    createjs.Sound.registerSound({
-      src: "assets/start.mp3",
-      id: "start"
+    queue.loadFile({
+      id: "fiveoclock",
+      src: "assets/fiveoclock.mp3"
     });
     return Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], function() {
       Crafty.sprite(28, 'img/ul.png', {

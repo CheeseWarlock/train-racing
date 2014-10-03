@@ -1,8 +1,17 @@
 Crafty.scene('Title', () ->
   self.focus()
   if !window.gameAlreadyStarted
-    window.BGMManager.playTitle()
-    window.gameAlreadyStarted = true
+    xx = window.BGMManager.playTitle()
+    if xx.playState != "playFailed"
+      window.gameAlreadyStarted = true
+    else
+      window.itff = window.setInterval(() ->
+        xx = window.BGMManager.playTitle()
+        if xx.playState != "playFailed"
+          window.gameAlreadyStarted = true
+          window.clearInterval(itff)
+      , 500)
+  else
   this.letters = ""
   Crafty.e('2D, Canvas, spr_title').attr({x:220})
   Crafty.e('TitleText').attr({y: 178}).text('Compete to deliver more passengers by 10:00 AM.')
@@ -51,24 +60,14 @@ Crafty.scene('Loading', () ->
   Crafty.audio.create("arrowtick", "assets/arrowtick.wav")
   Crafty.audio.create("brakeson", "assets/brakeson.wav")
   Crafty.audio.create("brakesoff", "assets/brakesoff.wav")
-  Crafty.audio.create("start", "assets/start.mp3")
-  Crafty.audio.create("cappuccino", "assets/cappuccino.mp3")
-  Crafty.audio.create("express", "assets/express.mp3")
-  Crafty.audio.create("fiveoclock", "assets/fiveoclock.mp3")
   Crafty.audio.create("startlevel", "assets/startlevel.wav")
   Crafty.audio.create("endlevel", "assets/endlevel.wav")
-  createjs.Sound.registerSound
-    src: "assets/express.mp3"
-    id: "express"
-  createjs.Sound.registerSound
-    src: "assets/cappuccino.mp3"
-    id: "cappuccino"
-  createjs.Sound.registerSound
-    src: "assets/fiveoclock.mp3"
-    id: "fiveoclock"
-  createjs.Sound.registerSound
-    src: "assets/start.mp3"
-    id: "start"
+  queue = new createjs.LoadQueue(true)
+  queue.installPlugin(createjs.Sound)
+  queue.loadFile({id:"start", src:"assets/start.mp3"})
+  queue.loadFile({id:"cappuccino", src:"assets/cappuccino.mp3"})
+  queue.loadFile({id:"express", src:"assets/express.mp3"})
+  queue.loadFile({id:"fiveoclock", src:"assets/fiveoclock.mp3"})
   Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
       spr_rtrain: [2,0]
