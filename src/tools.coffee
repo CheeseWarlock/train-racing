@@ -72,7 +72,7 @@ window.Util =
         else
           setTimeout(() ->
             Crafty.e('VictoryText')
-          , 800)
+          , 2500)
   createTrain: (x, y, playerOne, dir, cars=3) ->
     letter = (if playerOne then 'r' else 'b')
     

@@ -260,21 +260,21 @@ Crafty.scene('SelectMap', () ->
         )
         return true
       false
-  for idx of window.MapList
-    Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-    Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx',idx)
-    Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
-    curry+=48
-    selectArrow.callbacks.push(mapCallbackMaker(idx))
-    titleText.titles.push(window.MapList[idx][1])
   Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
-  Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title").attr('idx',++idx)
+  Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#E23228').text("Back to Title").attr('idx',0)
   titleText.titles.push("Back to Title")
   selectArrow.callbacks.push(
     () ->
       Crafty.scene('Title')
       true
   )
+  for idx of window.MapList
+    Crafty.e('2D, Canvas, spr_selectline').attr({x: 250, y: curry+24})
+    curry+=48
+    Crafty.e('2D, Canvas, spr_selectstn').attr({x: 250, y: curry})
+    Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({x: 280, y: curry,w: 200}).textFont({size: '17px', family: 'Aller'}).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx',parseInt(idx)+1)
+    selectArrow.callbacks.push(mapCallbackMaker(idx))
+    titleText.titles.push(window.MapList[idx][1])
   
   Crafty.e('2D, DOM, spr_keyq').attr({x: 230, y: 430})
   Crafty.e('2D, DOM, spr_keyp').attr({x: 338, y: 430})

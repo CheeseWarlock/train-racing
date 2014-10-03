@@ -1664,27 +1664,6 @@ Grid: for entities that might want to snap to a grid.
         return false;
       };
     };
-    for (idx in window.MapList) {
-      Crafty.e('2D, Canvas, spr_selectstn').attr({
-        x: 250,
-        y: curry
-      });
-      Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({
-        x: 280,
-        y: curry,
-        w: 200
-      }).textFont({
-        size: '17px',
-        family: 'Aller'
-      }).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx', idx);
-      Crafty.e('2D, Canvas, spr_selectline').attr({
-        x: 250,
-        y: curry + 24
-      });
-      curry += 48;
-      selectArrow.callbacks.push(mapCallbackMaker(idx));
-      titleText.titles.push(window.MapList[idx][1]);
-    }
     Crafty.e('2D, Canvas, spr_selectstn').attr({
       x: 250,
       y: curry
@@ -1696,12 +1675,33 @@ Grid: for entities that might want to snap to a grid.
     }).textFont({
       size: '17px',
       family: 'Aller'
-    }).textColor('#E23228').text("Back to Title").attr('idx', ++idx);
+    }).textColor('#E23228').text("Back to Title").attr('idx', 0);
     titleText.titles.push("Back to Title");
     selectArrow.callbacks.push(function() {
       Crafty.scene('Title');
       return true;
     });
+    for (idx in window.MapList) {
+      Crafty.e('2D, Canvas, spr_selectline').attr({
+        x: 250,
+        y: curry + 24
+      });
+      curry += 48;
+      Crafty.e('2D, Canvas, spr_selectstn').attr({
+        x: 250,
+        y: curry
+      });
+      Crafty.e('2D, Canvas, SelectableText, _MenuElement').attr({
+        x: 280,
+        y: curry,
+        w: 200
+      }).textFont({
+        size: '17px',
+        family: 'Aller'
+      }).textColor('#FFFDE8').text(window.MapList[idx][1]).attr('idx', parseInt(idx) + 1);
+      selectArrow.callbacks.push(mapCallbackMaker(idx));
+      titleText.titles.push(window.MapList[idx][1]);
+    }
     Crafty.e('2D, DOM, spr_keyq').attr({
       x: 230,
       y: 430
@@ -2128,7 +2128,7 @@ Grid: for entities that might want to snap to a grid.
         } else {
           return setTimeout(function() {
             return Crafty.e('VictoryText');
-          }, 800);
+          }, 2500);
         }
       }
     },
