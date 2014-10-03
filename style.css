@@ -25,6 +25,7 @@ body {
 
 a {
 	color: #5CC64C;
+	text-decoration: none;
 }
 
 span {
@@ -43,8 +44,8 @@ span {
 
 .linkbar {
 	text-align: center;
-	width: 400px;
-	margin: 0px auto;
+	width: 500px;
+	margin: 5px auto;
 }
 
 .display-holder {

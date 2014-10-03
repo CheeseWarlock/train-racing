@@ -1413,7 +1413,7 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').text("Instructions").attr('idx', 2);
-    return Crafty.e('2D, Canvas, SelectableText').attr({
+    Crafty.e('2D, Canvas, SelectableText').attr({
       x: 230,
       y: 370,
       w: 200,
@@ -1422,6 +1422,9 @@ Grid: for entities that might want to snap to a grid.
       size: '17px',
       family: 'Aller'
     }).textColor('#5CC64C').text("Options").attr('idx', 3);
+    return Crafty.e('TitleText').attr({
+      y: 528
+    }).text('Game: <a href="https://twitter.com/CheeseWarlock">@CheeseWarlock</a> - Music: <a href="https://twitter.com/FuzzyProxy">@FuzzyProxy</a> (<a href="https://soundcloud.com/fuzzy-proxy/sets/morning-commute-official-soundtrack">Album</a>)');
   });
 
   Crafty.scene('Loading', function() {
@@ -1433,26 +1436,26 @@ Grid: for entities that might want to snap to a grid.
     Crafty.audio.create("arrowtick", "assets/arrowtick.wav");
     Crafty.audio.create("brakeson", "assets/brakeson.wav");
     Crafty.audio.create("brakesoff", "assets/brakesoff.wav");
-    Crafty.audio.create("start", "assets/start.wav");
-    Crafty.audio.create("cappuccino", "assets/cappuccino.wav");
-    Crafty.audio.create("express", "assets/express.wav");
-    Crafty.audio.create("fiveoclock", "assets/fiveoclock.wav");
+    Crafty.audio.create("start", "assets/start.mp3");
+    Crafty.audio.create("cappuccino", "assets/cappuccino.mp3");
+    Crafty.audio.create("express", "assets/express.mp3");
+    Crafty.audio.create("fiveoclock", "assets/fiveoclock.mp3");
     Crafty.audio.create("startlevel", "assets/startlevel.wav");
     Crafty.audio.create("endlevel", "assets/endlevel.wav");
     createjs.Sound.registerSound({
-      src: "assets/express.wav",
+      src: "assets/express.mp3",
       id: "express"
     });
     createjs.Sound.registerSound({
-      src: "assets/cappuccino.wav",
+      src: "assets/cappuccino.mp3",
       id: "cappuccino"
     });
     createjs.Sound.registerSound({
-      src: "assets/fiveoclock.wav",
+      src: "assets/fiveoclock.mp3",
       id: "fiveoclock"
     });
     createjs.Sound.registerSound({
-      src: "assets/start.wav",
+      src: "assets/start.mp3",
       id: "start"
     });
     return Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], function() {

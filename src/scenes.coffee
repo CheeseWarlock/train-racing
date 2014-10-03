@@ -38,6 +38,8 @@ Crafty.scene('Title', () ->
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Start Vs. AI").attr('idx',1)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions").attr('idx',2)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options").attr('idx',3)
+  Crafty.e('TitleText').attr({y: 528}).text('Game: <a href="https://twitter.com/CheeseWarlock">@CheeseWarlock</a> - 
+      Music: <a href="https://twitter.com/FuzzyProxy">@FuzzyProxy</a> (<a href="https://soundcloud.com/fuzzy-proxy/sets/morning-commute-official-soundtrack">Album</a>)')
 )
 
 Crafty.scene('Loading', () ->
@@ -49,23 +51,23 @@ Crafty.scene('Loading', () ->
   Crafty.audio.create("arrowtick", "assets/arrowtick.wav")
   Crafty.audio.create("brakeson", "assets/brakeson.wav")
   Crafty.audio.create("brakesoff", "assets/brakesoff.wav")
-  Crafty.audio.create("start", "assets/start.wav")
-  Crafty.audio.create("cappuccino", "assets/cappuccino.wav")
-  Crafty.audio.create("express", "assets/express.wav")
-  Crafty.audio.create("fiveoclock", "assets/fiveoclock.wav")
+  Crafty.audio.create("start", "assets/start.mp3")
+  Crafty.audio.create("cappuccino", "assets/cappuccino.mp3")
+  Crafty.audio.create("express", "assets/express.mp3")
+  Crafty.audio.create("fiveoclock", "assets/fiveoclock.mp3")
   Crafty.audio.create("startlevel", "assets/startlevel.wav")
   Crafty.audio.create("endlevel", "assets/endlevel.wav")
   createjs.Sound.registerSound
-    src: "assets/express.wav"
+    src: "assets/express.mp3"
     id: "express"
   createjs.Sound.registerSound
-    src: "assets/cappuccino.wav"
+    src: "assets/cappuccino.mp3"
     id: "cappuccino"
   createjs.Sound.registerSound
-    src: "assets/fiveoclock.wav"
+    src: "assets/fiveoclock.mp3"
     id: "fiveoclock"
   createjs.Sound.registerSound
-    src: "assets/start.wav"
+    src: "assets/start.mp3"
     id: "start"
   Crafty.load(['img/ul.png', 'img/ullight.png', 'img/wordart.png', 'img/keys.png', 'img/mapselect.png'], () ->
     Crafty.sprite(28, 'img/ul.png',
