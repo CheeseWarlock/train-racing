@@ -47,8 +47,8 @@ Crafty.scene('Title', () ->
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 310,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Start Vs. AI").attr('idx',1)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 340,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Instructions").attr('idx',2)
   Crafty.e('2D, Canvas, SelectableText').attr({x: 230, y: 370,w: 200, z: 50}).textFont({size: '17px', family: 'Aller'}).textColor('#5CC64C').text("Options").attr('idx',3)
-  Crafty.e('TitleText').attr({y: 528}).text('Game: <a href="https://twitter.com/CheeseWarlock">@CheeseWarlock</a> - 
-      Music: <a href="https://twitter.com/FuzzyProxy">@FuzzyProxy</a> (<a href="https://soundcloud.com/fuzzy-proxy/sets/morning-commute-official-soundtrack">Album</a>)')
+  Crafty.e('TitleText').attr({y: 528}).text('Game: <a href="https://twitter.com/CheeseWarlock" target="_blank">@CheeseWarlock</a> - 
+      Music: <a href="https://twitter.com/FuzzyProxy" target="_blank">@FuzzyProxy</a> (<a href="https://soundcloud.com/fuzzy-proxy/sets/morning-commute-official-soundtrack" target="_blank">Album</a>)')
 )
 
 Crafty.scene('Loading', () ->
