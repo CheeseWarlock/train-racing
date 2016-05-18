@@ -419,7 +419,7 @@ window.BGMManager =
       @songIndex = -1
     @stop()
     if !Crafty.audio.muted
-      @songIndex = (++@songIndex %% 3)
+      @songIndex = (++@songIndex % 3)
       @currentSong = @_play()
   stop: () ->
     if (@currentSong)
